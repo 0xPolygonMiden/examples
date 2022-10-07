@@ -43,7 +43,10 @@ SUBCOMMANDS:
     conditional    If provided value is 0, outputs 15; if provided value is 1, outputs 8
     fib            Compute a Fibonacci sequence of the specified length
     help           Prints this message or the help of the given subcommand(s)
+<<<<<<< HEAD
     merkle         Computes a root of a randomly generated Merkle branch of the specified depth
+=======
+>>>>>>> 783e4a8 (Initial commit)
     range          Determines how many of the randomly generated values are less than 2^63
 ```
 

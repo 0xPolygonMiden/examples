@@ -1,7 +1,5 @@
-use crate::Example;
+use super::*;
 use log::debug;
-use assembly::Assembler;
-use vm_core::{Felt, FieldElement, Program, ProgramInputs, StarkField};
 
 // EXAMPLE BUILDER
 // ================================================================================================
@@ -17,7 +15,7 @@ pub fn get_example(n: usize) -> Example {
 
     Example {
         program,
-        inputs: ProgramInputs::from_public(&[1, 0]),
+        inputs: ProgramInputs::from_stack_inputs(&[1, 0]).unwrap(),
         pub_inputs: vec![1, 0],
         expected_result,
         num_outputs: 1,
@@ -32,17 +30,19 @@ fn generate_fibonacci_program(n: usize) -> Program {
     // the third operation removes the top item from the stack
     // the last operation pops top 2 stack items, adds them, and pushes
     // the result back onto the stack
-    let program = format!(
-        "
+    let assembler = Assembler::new(true);
+
+    let source = format!("
     begin 
         repeat.{}
             swap dup.2 drop add
         end
-    end",
-        n - 1
-    );
+    end", n);
+    
+    let program = assembler.compile(&source).unwrap();
 
-    assembly::compile(&program).unwrap()
+    return program;
+
 }
 
 /// Computes the `n`-th term of Fibonacci sequence

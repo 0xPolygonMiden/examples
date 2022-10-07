@@ -25,8 +25,6 @@ fn main() {
         ExampleType::Comparison { value } => examples::comparison::get_example(value),
         ExampleType::Conditional { value } => examples::conditional::get_example(value),
         #[cfg(feature = "std")]
-        ExampleType::Merkle { tree_depth } => examples::merkle::get_example(tree_depth),
-        #[cfg(feature = "std")]
         ExampleType::Range { num_values } => examples::range::get_example(num_values),
     };
 
@@ -43,7 +41,7 @@ fn main() {
     // execute the program and generate the proof of execution
     #[cfg(feature = "std")]
     let now = Instant::now();
-    let (outputs, proof) = miden::execute(&program, &inputs, num_outputs, &proof_options).unwrap();
+    let (outputs, proof) = miden::prove(&program, &inputs, num_outputs, &proof_options).unwrap();
     debug!("--------------------------------");
     #[cfg(feature = "std")]
     debug!(
@@ -70,7 +68,7 @@ fn main() {
     // results in the expected output
     let proof = StarkProof::from_bytes(&proof_bytes).unwrap();
     let now = Instant::now();
-    match miden::verify(*program.hash(), &pub_inputs, &outputs, proof) {
+    match miden::verify(program.hash(), &pub_inputs, &outputs, proof) {
         Ok(_) => debug!("Execution verified in {} ms", now.elapsed().as_millis()),
         Err(msg) => debug!("Failed to verify execution: {}", msg),
     }
