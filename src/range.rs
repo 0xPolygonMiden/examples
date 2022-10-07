@@ -1,7 +1,5 @@
-use crate::Example;
+use super::*;
 use log::debug;
-use assembly::Assembler;
-use miden::{Program, ProgramInputs};
 use rand_utils::rand_vector;
 
 // EXAMPLE BUILDER
@@ -21,7 +19,7 @@ pub fn get_example(num_values: usize) -> Example {
 
     Example {
         program,
-        inputs: ProgramInputs::new(&[0], &values, &[]),
+        inputs: ProgramInputs::new(&[0], &values, vec![]).unwrap(),
         pub_inputs: vec![0],
         expected_result,
         num_outputs: 1,
@@ -29,10 +27,10 @@ pub fn get_example(num_values: usize) -> Example {
 }
 
 /// Generates a random sequence of 64-bit values.
-fn generate_values(n: usize) -> Vec<u128> {
+fn generate_values(n: usize) -> Vec<u64> {
     rand_vector::<u64>(n)
         .into_iter()
-        .map(|v| v as u128)
+        .map(|v| v as u64)
         .collect()
 }
 
@@ -50,11 +48,15 @@ fn generate_range_check_program(n: usize) -> Program {
     }
     program.push_str("end");
 
-    assembly::compile(&program).unwrap()
+    let assembler = Assembler::new(true);
+    
+    let program = assembler.compile(&program).unwrap();
+
+    return program;
 }
 
 /// Counts the number of values smaller than 63-bits in size.
-fn count_63_bit_values(values: &[u128]) -> u128 {
+fn count_63_bit_values(values: &[u64]) -> u64 {
     let p63 = 1 << 63;
 
     let mut result = 0;

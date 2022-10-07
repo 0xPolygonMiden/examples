@@ -1,14 +1,12 @@
-use crate::Example;
+use super::*;
 use log::debug;
-use assembly::Assembler;
-use vm_core::{Felt, FieldElement, ProgramInputs, StarkField};
 
 // EXAMPLE BUILDER
 // ================================================================================================
 
-pub fn get_example(start_value: usize) -> Example {
+pub fn get_example(start_value: u64) -> Example {
     // convert starting value of the sequence into a field element
-    let start_value = Felt::new(start_value as u128);
+    let start_value = Felt::new(start_value);
 
     // determine the expected result
     let expected_result = compute_collatz_steps(start_value).as_int();
@@ -16,7 +14,8 @@ pub fn get_example(start_value: usize) -> Example {
     // construct the program which executes an unbounded loop to compute a Collatz sequence
     // which starts with the provided value; the output of the program is the number of steps
     // needed to reach the end of the sequence
-    let program = assembly::compile(
+    let assembler = Assembler::new(true);
+    let program = assembler.compile(
         "
     begin
         pad read dup push.1 ne
@@ -41,7 +40,8 @@ pub fn get_example(start_value: usize) -> Example {
 
     Example {
         program,
-        inputs: ProgramInputs::new(&[], &[start_value.as_int()], &[]),
+        inputs: ProgramInputs::new(&[], &[start_value.as_int()], vec![]).unwrap(),
+        //inputs: ProgramInputs::new(&[], &[start_value.as_int()], &[]),
         pub_inputs: vec![],
         expected_result: vec![expected_result],
         num_outputs: 1,

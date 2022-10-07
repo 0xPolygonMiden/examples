@@ -1,12 +1,11 @@
-use miden::{Program, ProgramInputs, ProofOptions};
+use math::{fields::f64::BaseElement as Felt, FieldElement, StarkField};
+use miden::{Assembler, Program, ProgramInputs, ProofOptions};
 use structopt::StructOpt;
 
 pub mod collatz;
 pub mod comparison;
 pub mod conditional;
 pub mod fibonacci;
-#[cfg(feature = "std")]
-pub mod merkle;
 #[cfg(feature = "std")]
 pub mod range;
 
@@ -16,9 +15,9 @@ pub mod range;
 pub struct Example {
     pub program: Program,
     pub inputs: ProgramInputs,
-    pub pub_inputs: Vec<u128>,
+    pub pub_inputs: Vec<u64>,
     pub num_outputs: usize,
-    pub expected_result: Vec<u128>,
+    pub expected_result: Vec<u64>,
 }
 
 // EXAMPLE OPTIONS
@@ -58,7 +57,7 @@ pub enum ExampleType {
     Collatz {
         /// Starting value of the Collatz sequence
         #[structopt(short = "n", default_value = "511")]
-        start_value: usize,
+        start_value: u64,
     },
     /// If provided value is less than 9, multiplies it by 9; otherwise add 9 to it
     Comparison {
@@ -71,13 +70,6 @@ pub enum ExampleType {
         /// Value to compare to 9
         #[structopt(short = "n", default_value = "1")]
         value: usize,
-    },
-    /// Computes a root of a randomly generated Merkle branch of the specified depth
-    #[cfg(feature = "std")]
-    Merkle {
-        /// Depth of the Merkle tree
-        #[structopt(short = "n", default_value = "20")]
-        tree_depth: usize,
     },
     /// Determines how many of the randomly generated values are less than 2^63
     #[cfg(feature = "std")]
@@ -111,7 +103,7 @@ pub fn test_example(example: Example, fail: bool) {
         256,
     );
 
-    let (mut outputs, proof) = miden::execute(&program, &inputs, num_outputs, &options).unwrap();
+    let (mut outputs, proof) = miden::prove(&program, &inputs, num_outputs, &options).unwrap();
 
     assert_eq!(
         expected_result, outputs,
@@ -120,8 +112,8 @@ pub fn test_example(example: Example, fail: bool) {
 
     if fail {
         outputs[0] = outputs[0] + 1;
-        assert!(miden::verify(*program.hash(), &pub_inputs, &outputs, proof).is_err())
+        assert!(miden::verify(program.hash(), &pub_inputs, &outputs, proof).is_err())
     } else {
-        assert!(miden::verify(*program.hash(), &pub_inputs, &outputs, proof).is_ok());
+        assert!(miden::verify(program.hash(), &pub_inputs, &outputs, proof).is_ok());
     }
 }
