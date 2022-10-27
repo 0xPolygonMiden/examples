@@ -1,0 +1,7 @@
+# Elegant way to calculate the 1000th fibonacci number 
+
+begin
+    repeat.1000
+        swap dup.1 add
+    end
+end

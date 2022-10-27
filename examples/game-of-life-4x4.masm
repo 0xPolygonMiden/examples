@@ -1,0 +1,837 @@
+# GAME OF LIFE - and we can prove it
+# Provide initial configuaration in *.input {"stack_init": ["0" | "1" ] * 16 }
+# Rules:
+# 1. Any live cell with two or three live neighbours survives.
+# 2. Any dead cell with three live neighbours becomes a live cell.
+# 3. All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+
+# We store the initial configuration
+proc.storecellsn.16
+    loc_store.0 drop
+    loc_store.1 drop
+    loc_store.2 drop
+    loc_store.3 drop
+    loc_store.4 drop
+    loc_store.5 drop
+    loc_store.6 drop
+    loc_store.7 drop
+    loc_store.8 drop
+    loc_store.9 drop
+    loc_store.10 drop
+    loc_store.11 drop
+    loc_store.12 drop
+    loc_store.13 drop
+    loc_store.14 drop
+    loc_store.15 drop
+end
+
+# We load the final configuration after each step
+proc.loadcellsnplus1.32
+    loc_load.16
+    loc_load.17
+    loc_load.18
+    loc_load.19
+    loc_load.20
+    loc_load.21
+    loc_load.22
+    loc_load.23
+    loc_load.24
+    loc_load.25
+    loc_load.26
+    loc_load.27
+    loc_load.28
+    loc_load.29
+    loc_load.30
+    loc_load.31
+end
+
+# We clean the stack 
+proc.clearstack
+    repeat.16
+        drop
+    end
+end
+
+# State transition for cell 0
+proc.zero.33
+    # We can assume the cell to be dead unless proven otherwise
+    push.0
+    loc_store.16 drop
+
+    # Neighbours
+    loc_load.1
+    loc_load.4
+    loc_load.5
+
+    # Push cell 0 to the top of the stack 
+    loc_load.0
+
+    # Live or dead?
+    if.true
+    
+        # Cell 0 is alive - Yeah!
+        # Does it have 2 or 3 live neighbours?
+        
+        # Max neighbours of cell are 8 so we need 7 additions to get the sum of the stack
+        # because the value of the cell is already dropped
+        repeat.7
+            add
+        end
+
+        # We want to compare the sum of all neighbours two times, so we copy it one time
+        dup
+
+        # Now we see if the sum of all neighbours is equal to 2
+        push.2
+        eq
+
+        # Equal pushes 1 to the top of the stack if the cell has two neighbours - 0 otherwise
+        if.true
+            # If this is true we store 1 for this cell for the next round - the cell will live Yeah!
+            push.1
+            loc_store.16 drop
+        end
+
+        # now we see if it is equal to 3
+        push.3
+        eq
+
+        # equal pushes 1 to the top of the stack if the cell has three neighbours
+        if.true
+            # if this is true we store 1 for this cell for the next round - the cell will live Yeah!
+            push.1
+            loc_store.16 drop
+        end
+
+    else
+        # The cell is dead but might come alive
+    
+        # Max neighbours of cell are 8 so we need 7 additions to get the sum of the stack
+        # because the value of the cell is already dropped
+        repeat.7
+            add
+        end
+
+        # Now we see if it is equal to 3
+        push.3
+        eq
+
+        # Equal pushes 1 to the top of the stack if the cell has three living neighbours
+        if.true
+            # if this is true we store 1 for this cell for the next round - the cell will live Yeah!
+            push.1
+            loc_store.16
+        end
+    end
+end
+
+# State transition for cell 1
+proc.one.34
+    push.0
+    loc_store.17 drop
+
+    # Load the Neighbours
+    loc_load.0
+    loc_load.2
+    loc_load.4
+    loc_load.5
+    loc_load.6
+
+    # Push cell 1 to the top of the stack 
+    loc_load.1
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.17 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.17 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.17
+        end
+    end
+end
+
+# State transition for cell 2
+proc.two.35
+    push.0
+    loc_store.18 drop
+
+    # Load the Neighbours
+    loc_load.1
+    loc_load.3
+    loc_load.5
+    loc_load.6
+    loc_load.7
+
+    # Push cell 2 to the top of the stack 
+    loc_load.2
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.18 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.18 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.18
+        end
+    end
+end
+
+# State transition for cell 3
+proc.three.36
+    push.0
+    loc_store.19 drop
+
+    # Load the Neighbours
+    loc_load.2
+    loc_load.6
+    loc_load.7
+
+    # Push cell 3 to the top of the stack 
+    loc_load.3
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.19 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.19 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.19
+        end
+    end
+end
+
+# State transition for cell 4
+proc.four.37
+    push.0
+    loc_store.20 drop
+
+    # Load the Neighbours
+    loc_load.0
+    loc_load.1
+    loc_load.5
+    loc_load.8
+    loc_load.9
+
+    # Push cell 4 to the top of the stack 
+    loc_load.4
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.20 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.20 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.20
+        end
+    end
+end
+
+# State transition for cell 5
+proc.five.38
+    push.0
+    loc_store.21 drop
+
+    # Load the Neighbours
+    loc_load.0
+    loc_load.1
+    loc_load.2
+    loc_load.4
+    loc_load.6
+    loc_load.8
+    loc_load.9
+    loc_load.10
+
+    # Push cell 5 to the top of the stack 
+    loc_load.5
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.21 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.21 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.21
+        end
+    end
+end
+
+# State transition for cell 6
+proc.six.39
+    push.0
+    loc_store.22 drop
+
+    # Load the Neighbours
+    loc_load.1
+    loc_load.2
+    loc_load.3
+    loc_load.5
+    loc_load.7
+    loc_load.9
+    loc_load.10
+    loc_load.11
+
+    # Push cell 6 to the top of the stack 
+    loc_load.6
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.22 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.22 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.22
+        end
+    end
+end
+
+# State transition for cell 7
+proc.seven.40
+    push.0
+    loc_store.23 drop
+
+    # Load the Neighbours
+    loc_load.2
+    loc_load.3
+    loc_load.6
+    loc_load.10
+    loc_load.11
+
+    # Push cell 7 to the top of the stack 
+    loc_load.7
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.23 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.23 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.23
+        end
+    end
+end
+
+# State transition for cell 8
+proc.eight.41
+    push.0
+    loc_store.24 drop
+
+    # Load the Neighbours
+    loc_load.4
+    loc_load.5
+    loc_load.9
+    loc_load.12
+    loc_load.13
+
+    # Push cell 8 to the top of the stack 
+    loc_load.8
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.24 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.24 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.24
+        end
+    end
+end
+
+# State transition for cell 9
+proc.nine.42
+    push.0
+    loc_store.25 drop
+
+    # Load the Neighbours
+    loc_load.4
+    loc_load.5
+    loc_load.6
+    loc_load.8
+    loc_load.10
+    loc_load.12
+    loc_load.13
+    loc_load.14
+
+    # Push cell 9 to the top of the stack 
+    loc_load.9
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.25 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.25 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.25
+        end
+    end
+end
+
+# State transition for cell 10
+proc.ten.43
+    push.0
+    loc_store.26 drop
+
+    # Load the Neighbours
+    loc_load.5
+    loc_load.6
+    loc_load.7
+    loc_load.9
+    loc_load.11
+    loc_load.13
+    loc_load.14
+    loc_load.15
+
+    # Push cell 10 to the top of the stack 
+    loc_load.10
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.26 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.26 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.26
+        end
+    end
+end
+
+# State transition for cell 11
+proc.eleven.44
+    push.0
+    loc_store.27 drop
+
+    # Load the Neighbours
+    loc_load.7
+    loc_load.6
+    loc_load.10
+    loc_load.14
+    loc_load.15
+
+    # Push cell 11 to the top of the stack 
+    loc_load.11
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.27 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.27 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.27
+        end
+    end
+end
+
+# State transition for cell 12
+proc.twelve.45
+    push.0
+    loc_store.28 drop
+
+    # Load the Neighbours
+    loc_load.8
+    loc_load.9
+    loc_load.13
+
+    # Push cell 12 to the top of the stack 
+    loc_load.12
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.28 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.28 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.28
+        end
+    end
+end
+
+# State transition for cell 13
+proc.thirteen.46
+    push.0
+    loc_store.29 drop
+
+    # Load the Neighbours
+    loc_load.8
+    loc_load.9
+    loc_load.10
+    loc_load.12
+    loc_load.14
+
+    # Push cell 13 to the top of the stack 
+    loc_load.13
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.29 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.29 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.29
+        end
+    end
+end
+
+# State transition for cell 14
+proc.fourteen.47
+    push.0
+    loc_store.30 drop
+
+    # Load the Neighbours
+    loc_load.9
+    loc_load.10
+    loc_load.11
+    loc_load.13
+    loc_load.15
+
+    # Push cell 14 to the top of the stack 
+    loc_load.14
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.30 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.30 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.30
+        end
+    end
+end
+
+# State transition for cell 15
+proc.fifteen.48
+    push.0
+    loc_store.31 drop
+
+    # Load the Neighbours
+    loc_load.10
+    loc_load.11
+    loc_load.14
+
+    # Push cell 15 to the top of the stack 
+    loc_load.15
+
+    if.true
+        repeat.7
+            add
+        end
+
+        dup
+        push.2 eq
+
+        if.true
+            push.1 loc_store.31 drop
+        end
+
+        push.3 eq
+
+        if.true
+            push.1 loc_store.31 drop
+        end
+
+    else
+        repeat.7
+            add
+        end
+
+        push.3 eq
+        if.true
+            push.1 loc_store.31
+        end
+    end
+end
+
+# Let's play
+begin
+    repeat.1000
+        # We store the initial configuration in local variables and clear the stack 
+        exec.storecellsn
+
+        # For each cell n, we need to compute the state transition and 
+        # store in a seperate variable at index (n+16). Then we clear the stack again
+        exec.zero       exec.clearstack
+        exec.one        exec.clearstack
+        exec.two        exec.clearstack
+        exec.three      exec.clearstack
+        exec.four       exec.clearstack
+        exec.five       exec.clearstack
+        exec.six        exec.clearstack
+        exec.seven      exec.clearstack
+        exec.eight      exec.clearstack
+        exec.nine       exec.clearstack
+        exec.ten        exec.clearstack
+        exec.eleven     exec.clearstack
+        exec.twelve     exec.clearstack
+        exec.thirteen   exec.clearstack
+        exec.fourteen   exec.clearstack
+        exec.fifteen    exec.clearstack
+
+        # We now load the final configuration
+        exec.loadcellsnplus1
+    end
+end
