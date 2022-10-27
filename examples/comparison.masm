@@ -1,0 +1,30 @@
+# A program which checks if the value provided as secret input via the advice tape is
+# less than 9; if it is, the value is multiplied by 9, otherwise, 9 is added
+# to the value; then we check if the value is odd. 
+
+begin
+    # Add the secret input to the top of the stack
+    # and copy it - Stack now is [secret input, secret input, ...]
+    adv_push.1
+    dup
+
+    # Add 9 to the top of the stack, 
+    # we want to compare our secret input with 9
+    push.9
+
+    # Compare stack pos 0 and 1 (9 and secret input)
+    # Pops both items that are compared and puts either 0 or 1 on top
+    lt
+
+    if.true
+        push.9
+        mul
+    else
+        push.9
+        add
+    end
+
+    # Check if final result mod 2 is 0 or 1 (numer is either even or odd)
+    push.2
+    u32checked_mod
+end

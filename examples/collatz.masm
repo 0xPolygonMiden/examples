@@ -1,0 +1,22 @@
+# A program which executes an unbounded loop to compute a Collatz sequence
+# which starts with the provided value; the output of the program is the number of steps
+# needed to reach 1 - the end of the sequence
+
+
+begin
+    push.0 adv_push.1 dup push.1 neq
+    while.true
+        # counter
+        swap push.1 add swap 
+        
+        # actual check
+        dup push.2 u32checked_mod
+        if.true
+            push.3 mul push.1 add
+        else
+            push.2 u32checked_div
+        end
+        dup push.1 neq
+    end
+    swap
+end
