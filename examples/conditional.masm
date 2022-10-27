@@ -1,0 +1,18 @@
+# A program which either adds or multiplies two numbers - 3 and 5
+# based on the value provided via the advice tape as secret input
+
+begin
+    # Add the two numbers to the stack that 
+    # are either to be added or multiplied together 
+    push.3
+    push.5
+
+    # Add the secret input to the stack - is it 1 or 0?
+    adv_push.1
+    
+    if.true
+        add
+    else
+        mul
+    end
+end
