@@ -1,7 +1,5 @@
-use crate::Example;
+use super::*;
 use log::debug;
-use assembly::Assembler;
-use vm_core::{Felt, FieldElement, hasher, Program, ProgramInputs, StarkField};
 use rand_utils::prng_vector;
 
 // EXAMPLE BUILDER
@@ -46,7 +44,9 @@ pub fn get_example(depth: usize) -> Example {
 /// the program first verifies the path using smpath operation, and then verifies
 /// the same path using pmpath operation.
 fn generate_merkle_program(n: usize, index: usize) -> Program {
-    let source = format!(
+    let assembler = Assembler::new(true);
+    let program = assembler.compile(
+    
         "
     begin
         read.ab
@@ -57,11 +57,10 @@ fn generate_merkle_program(n: usize, index: usize) -> Program {
         roll.4 swap swap.2
         pmpath.{}
     end
-    ",
-        n, index, n
-    );
+    "
+    ).unwrap();
 
-    assembly::compile(&source).unwrap()
+    return program;
 }
 
 /// Converts Merkle authentication path for a node at the specified `index` into
@@ -81,7 +80,7 @@ fn generate_program_inputs(path: &[Vec<Felt>; 2], index: usize) -> ProgramInputs
         // push next bit of the position index onto tapes A and B; we use both tapes
         // here so that we can use READ2 instruction when reading inputs from the tapes
         a.push(0);
-        b.push((index & 1) as u128);
+        b.push((index & 1) as u64);
         index >>= 1;
 
         // push the next node onto tapes A and B
@@ -95,7 +94,7 @@ fn generate_program_inputs(path: &[Vec<Felt>; 2], index: usize) -> ProgramInputs
         b.push(path[1][i].as_int());
     }
 
-    ProgramInputs::new(&[], &a, &b)
+    ProgramInputs::new(&[], &a, Vec::from(&b)).unwrap()
 }
 
 /// Pseudo-randomly generates a Merkle authentication path for an imaginary Merkle tree
@@ -129,7 +128,7 @@ fn compute_merkle_root(path: &[Vec<Felt>; 2], index: usize) -> Vec<u128> {
     buf[2] = path[0][1 - r];
     buf[3] = path[1][1 - r];
 
-    v = hasher::digest(&buf);
+    v = vm_core::chiplets::hasher::Digest(&buf);
 
     let mut index = (index + usize::pow(2, (n - 1) as u32)) >> 1;
     for i in 2..n {

@@ -57,7 +57,7 @@ pub enum ExampleType {
     Collatz {
         /// Starting value of the Collatz sequence
         #[structopt(short = "n", default_value = "511")]
-        start_value: u64,
+        start_value: usize,
     },
     /// If provided value is less than 9, multiplies it by 9; otherwise add 9 to it
     Comparison {
@@ -103,15 +103,15 @@ pub fn test_example(example: Example, fail: bool) {
         256,
     );
 
-    let (mut outputs, proof) = miden::prove(&program, &inputs, num_outputs, &options).unwrap();
+    let (mut outputs, proof) = miden::prove(&program, &inputs, &options).unwrap();
 
     assert_eq!(
-        expected_result, outputs,
+        expected_result, outputs.stack_outputs(num_outputs),
         "Program result was computed incorrectly"
     );
 
     if fail {
-        outputs[0] = outputs[0] + 1;
+        outputs.stack_mut()[0] += 1;
         assert!(miden::verify(program.hash(), &pub_inputs, &outputs, proof).is_err())
     } else {
         assert!(miden::verify(program.hash(), &pub_inputs, &outputs, proof).is_ok());

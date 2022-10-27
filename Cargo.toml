@@ -21,13 +21,14 @@ doctest = false
 [features]
 concurrent = ["miden/concurrent", "std"]
 default = ["std"]
-std = ["hex/std", "math/std", "miden/std", "rand-utils"]
+std = ["hex/std", "math/std", "miden/std", "rand-utils", "winter-crypto/std"]
 
 [dependencies]
 env_logger = { version = "0.9", default-features = false }
 hex = { version = "0.4", optional = true }
 log = { version = "0.4", default-features = false }
-miden = { package = "miden", version = "0.2.0", default-features = false }
+miden = { git = "https://github.com/maticnetwork/miden", branch = "next", package = "miden", default-features = false}
 structopt = { version = "0.3", default-features = false }
 math = { package = "winter-math", version = "0.4", default-features = false }
 rand-utils = { package = "winter-rand-utils", version = "0.2", optional = true }
+winter-crypto = { package = "winter-crypto", version = "0.4.1", optional = true }

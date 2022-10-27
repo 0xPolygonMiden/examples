@@ -3,6 +3,7 @@ use log::debug;
 use miden::StarkProof;
 use std::{io::Write, time::Instant};
 use structopt::StructOpt;
+use winter_crypto::Digest;
 
 fn main() {
     // configure logging
@@ -41,17 +42,17 @@ fn main() {
     // execute the program and generate the proof of execution
     #[cfg(feature = "std")]
     let now = Instant::now();
-    let (outputs, proof) = miden::prove(&program, &inputs, num_outputs, &proof_options).unwrap();
+    let (outputs, proof) = miden::prove(&program, &inputs, &proof_options).unwrap();
     debug!("--------------------------------");
     #[cfg(feature = "std")]
     debug!(
         "Executed program with hash {} in {} ms",
-        hex::encode(program.hash()),
+        hex::encode(program.hash().as_bytes()),
         now.elapsed().as_millis()
     );
     debug!("Program output: {:?}", outputs);
     assert_eq!(
-        expected_result, outputs,
+        expected_result, outputs.stack_outputs(num_outputs),
         "Program result was computed incorrectly"
     );
 

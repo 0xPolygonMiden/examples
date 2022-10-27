@@ -4,9 +4,9 @@ use log::debug;
 // EXAMPLE BUILDER
 // ================================================================================================
 
-pub fn get_example(start_value: u64) -> Example {
+pub fn get_example(start_value: usize) -> Example {
     // convert starting value of the sequence into a field element
-    let start_value = Felt::new(start_value);
+    let start_value = Felt::new(start_value as u64);
 
     // determine the expected result
     let expected_result = compute_collatz_steps(start_value).as_int();
@@ -18,15 +18,19 @@ pub fn get_example(start_value: u64) -> Example {
     let program = assembler.compile(
         "
     begin
-        pad read dup push.1 ne
+        push.0 adv_push.1 dup push.1 neq
         while.true
-            swap push.1 add swap dup isodd.128
+            # counter
+            swap push.1 add swap 
+            
+            # actual check
+            dup push.2 u32checked_mod
             if.true
                 push.3 mul push.1 add
             else
-                push.2 div
+                push.2 u32checked_div
             end
-            dup push.1 ne
+            dup push.1 neq
         end
         swap
     end",
@@ -41,7 +45,6 @@ pub fn get_example(start_value: u64) -> Example {
     Example {
         program,
         inputs: ProgramInputs::new(&[], &[start_value.as_int()], vec![]).unwrap(),
-        //inputs: ProgramInputs::new(&[], &[start_value.as_int()], &[]),
         pub_inputs: vec![],
         expected_result: vec![expected_result],
         num_outputs: 1,

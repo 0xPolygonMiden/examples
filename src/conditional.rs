@@ -23,7 +23,7 @@ pub fn get_example(flag: usize) -> Example {
     begin
         push.3
         push.5
-        read
+        adv_push.1        
         if.true
             add
         else
