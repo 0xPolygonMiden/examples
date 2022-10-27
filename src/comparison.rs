@@ -18,17 +18,19 @@ pub fn get_example(value: usize) -> Example {
     
         "
     begin
+        adv_push.1
+        dup
         push.9
-        read
-        dup.2
-        lt.128
+        lt
         if.true
+            push.9
             mul
         else
+            push.9
             add
         end
-        dup
-        isodd.128
+        push.2
+        u32checked_mod
     end",
     )
     .unwrap();
