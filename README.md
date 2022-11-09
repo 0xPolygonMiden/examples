@@ -24,7 +24,7 @@ Where each example can be invoked using a distinct subcommand. To view the list 
 ```
 This will print out something similar to this:
 ```
-Miden 0.1.0
+Miden 0.3.0
 Miden examples
 
 USAGE:
@@ -43,11 +43,7 @@ SUBCOMMANDS:
     conditional    If provided value is 0, outputs 15; if provided value is 1, outputs 8
     fib            Compute a Fibonacci sequence of the specified length
     help           Prints this message or the help of the given subcommand(s)
-<<<<<<< HEAD
-    merkle         Computes a root of a randomly generated Merkle branch of the specified depth
-=======
->>>>>>> 783e4a8 (Initial commit)
-    range          Determines how many of the randomly generated values are less than 2^63
+
 ```
 
 Currently, the only available option for all examples is `-s` for specifying security level for the generated proofs. This can be set to one of two values:

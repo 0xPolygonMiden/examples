@@ -14,7 +14,7 @@ pub fn get_example(start_value: usize) -> Example {
     // construct the program which executes an unbounded loop to compute a Collatz sequence
     // which starts with the provided value; the output of the program is the number of steps
     // needed to reach the end of the sequence
-    let assembler = Assembler::new(true);
+    let assembler = Assembler::new();
     let program = assembler.compile(
         "
     begin
@@ -24,7 +24,7 @@ pub fn get_example(start_value: usize) -> Example {
             swap push.1 add swap 
             
             # actual check
-            dup push.2 u32checked_mod
+            dup push.2 u32checked_mod 
             if.true
                 push.3 mul push.1 add
             else

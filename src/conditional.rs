@@ -17,7 +17,7 @@ pub fn get_example(flag: usize) -> Example {
 
     // construct the program which either adds or multiplies two numbers
     // based on the value provided via secret inputs
-    let assembler = Assembler::new(true);
+    let assembler = Assembler::new();
     let program = assembler.compile(
         "
     begin

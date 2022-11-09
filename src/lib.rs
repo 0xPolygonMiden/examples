@@ -6,8 +6,6 @@ pub mod collatz;
 pub mod comparison;
 pub mod conditional;
 pub mod fibonacci;
-#[cfg(feature = "std")]
-pub mod range;
 
 // EXAMPLE
 // ================================================================================================
@@ -71,13 +69,6 @@ pub enum ExampleType {
         #[structopt(short = "n", default_value = "1")]
         value: usize,
     },
-    /// Determines how many of the randomly generated values are less than 2^63
-    #[cfg(feature = "std")]
-    Range {
-        /// Number of randomly generated 64-bit values
-        #[structopt(short = "n", default_value = "100")]
-        num_values: usize,
-    },
 }
 
 // TESTS
@@ -105,6 +96,7 @@ pub fn test_example(example: Example, fail: bool) {
 
     let (mut outputs, proof) = miden::prove(&program, &inputs, &options).unwrap();
 
+    println!("{:?}", outputs.stack_outputs(num_outputs));
     assert_eq!(
         expected_result, outputs.stack_outputs(num_outputs),
         "Program result was computed incorrectly"

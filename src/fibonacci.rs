@@ -15,8 +15,8 @@ pub fn get_example(n: usize) -> Example {
 
     Example {
         program,
-        inputs: ProgramInputs::from_stack_inputs(&[1, 0]).unwrap(),
-        pub_inputs: vec![1, 0],
+        inputs: ProgramInputs::from_stack_inputs(&[1, 1]).unwrap(),
+        pub_inputs: vec![1, 1],
         expected_result,
         num_outputs: 1,
     }
@@ -30,7 +30,7 @@ fn generate_fibonacci_program(n: usize) -> Program {
     // the third operation removes the top item from the stack
     // the last operation pops top 2 stack items, adds them, and pushes
     // the result back onto the stack
-    let assembler = Assembler::new(true);
+    let assembler = Assembler::new();
 
     let source = format!("
     begin 
@@ -64,12 +64,12 @@ fn compute_fibonacci(n: usize) -> Felt {
 
 #[test]
 fn test_fib_example() {
-    let example = get_example(16);
+    let example = get_example(3);
     super::test_example(example, false);
 }
 
 #[test]
 fn test_fib_example_fail() {
-    let example = get_example(16);
+    let example = get_example(3);
     super::test_example(example, true);
 }

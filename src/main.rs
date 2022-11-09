@@ -3,7 +3,7 @@ use log::debug;
 use miden::StarkProof;
 use std::{io::Write, time::Instant};
 use structopt::StructOpt;
-use winter_crypto::Digest;
+use crypto::Digest;
 
 fn main() {
     // configure logging
@@ -26,7 +26,6 @@ fn main() {
         ExampleType::Comparison { value } => examples::comparison::get_example(value),
         ExampleType::Conditional { value } => examples::conditional::get_example(value),
         #[cfg(feature = "std")]
-        ExampleType::Range { num_values } => examples::range::get_example(num_values),
     };
 
     let Example {

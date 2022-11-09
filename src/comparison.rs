@@ -13,7 +13,7 @@ pub fn get_example(value: usize) -> Example {
     // construct the program which checks if the value provided via secret inputs is
     // less than 9; if it is, the value is multiplied by 9, otherwise, 9 is added
     // to the value; then we check if the value is odd.
-    let assembler = Assembler::new(true);
+    let assembler = Assembler::new();
     let program = assembler.compile(
     
         "
@@ -29,6 +29,7 @@ pub fn get_example(value: usize) -> Example {
             push.9
             add
         end
+        dup
         push.2
         u32checked_mod
     end",
