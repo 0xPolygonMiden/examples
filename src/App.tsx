@@ -4,31 +4,25 @@ import {
   Box,
   Button,
   Container,
-  FormGroup,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   Toolbar,
   Typography,
+  SelectChangeEvent,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { oneDark } from "@codemirror/theme-one-dark";
 import init, { program } from "miden-wasm";
-import "./App.css";
 
-async function getExample(example: string[], inputs: Boolean) {
-  if (inputs) {
-    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
-    return (await response).text();
+async function getExample(example: string) {
+    const inputs = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
+    const masm = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`)
+    return [(await inputs).text(), (await masm).text()];
   }
-  else {
-    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`)
-    return (await response).text();
-  }
-}
 
 function App() {
 
@@ -47,11 +41,12 @@ end`
 
   const [code, setCode] = React.useState(exampleCode);
 
-  const [output, setOutput] = React.useState({
+  const emptyOutput = {
     init: false,
     success: true,
-    text: "",
-  });
+    text: " ",
+  };
+  const [output, setOutput] = React.useState(emptyOutput);
 
   const [numOfOutputs, setNumOfOutputs] = React.useState(1);
 
@@ -66,22 +61,19 @@ end`
   ];
   
  
-  const [example, setExample] = React.useState<string[]>([]);
-  const handleChangeMultiple = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { options } = event.target;
-    const value: string[] = [];
-    for (let i = 0, l = options.length; i < l; i += 1) {
-      if (options[i].selected) {
-        value.push(options[i].value);
-      }
-    }
+  const [example, setExample] = React.useState<string>();
+  const handleSelectChange = async (event: SelectChangeEvent) => {
+    const value = event.target.value;
+    // set the current example to the selected one
     setExample(value)
-    
-    const inputs = await getExample(value, true)
-    setInputs(inputs)
-    
-    const code = await getExample(value, false)
-    setCode(code)
+
+    // retrieve the example data and update the inputs and code
+    const example_code = await getExample(value)
+    setInputs(await example_code[0])
+    setCode(await example_code[1])    
+
+    // reset the output
+    setOutput(emptyOutput)
   }
 
   return (
@@ -94,51 +86,40 @@ end`
         </Toolbar>
       </AppBar>
       <Container maxWidth="xl">
-        <Box sx={{ my: 4 }}>
-          <FormControl variant="outlined" sx={{ width: '100%' }}>
-              <InputLabel shrink htmlFor="select-multiple-native">
-                Select Example
+      <Box sx={{ display: 'flex', flexDirection: 'row', mx: 'auto', my: 4}}>
+          <FormControl variant="outlined" sx={{minWidth: 120}}>
+              <InputLabel id="select-example">
+                Example
               </InputLabel>
               <Select
-                multiple
-                native
                 value={example}
-                // @ts-ignore Typings are not considering `native`
-                onChange={handleChangeMultiple}
-                label="Native"
-                inputProps={{
-                  id: 'select-multiple-native',
-                }}
+                onChange={handleSelectChange}
+                label="Example"
+                labelId='select-example'
               >
                 {examples.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
+                  <MenuItem value={name} key={name}>{name}</MenuItem>
                 ))}
               </Select>
           </FormControl>
-        </Box>
-        <Box sx={{ my: 4 }}>
-          <CodeMirror
-            value={inputs}
-            height="100%"
-            theme={oneDark}
-            onChange={(value) => setInputs(value)}
-          />
-        </Box>
-        <Box sx={{ my: 4 }}>
-          <CodeMirror
-            value={code}
-            height="100%"
-            theme={oneDark}
-            onChange={(value) => setCode(value)}
-          />
-        </Box>
-        
-        <Box sx={{ display: 'flex', flexDirection: 'row', mx: 'auto' }}>
+          <FormControl variant="outlined" sx={{minWidth: 120, mx: 2}}>
+              <InputLabel id="select-outputs">
+                Outputs
+              </InputLabel>
+              <Select
+              value={numOfOutputs}
+              onChange={(e) => setNumOfOutputs(Number(e.target.value))}
+              label="Outputs"
+              labelId='select-outputs'
+            >
+              <MenuItem value={0} key={0}>0</MenuItem>
+              <MenuItem value={1} key={1}>1</MenuItem>
+              <MenuItem value={16} key={16}>16</MenuItem>
+            </Select>
+          </FormControl>
           <Button
             variant="contained"
-            color="success"
+            color="primary"
             onClick={() => {
               init().then(() => {
                 try {
@@ -162,30 +143,41 @@ end`
           >
             Execute
           </Button>
-          <Select
-            value={numOfOutputs}
-            onChange={(e) => setNumOfOutputs(Number(e.target.value))}
-          >
-            <MenuItem value={0}>0</MenuItem>
-            <MenuItem value={1}>1</MenuItem>
-            <MenuItem value={16}>16</MenuItem>
-          </Select>
-          <InputLabel style={{backgroundColor: "#f5f5f5"}}>Outputs</InputLabel>
-          </Box>
-        <Box sx={{ my: 4 }}>
           {output.init ? (
             <Alert
               variant="outlined"
               severity={output.success ? "success" : "error"}
+              sx={{mx: 2}}
             >
               <Typography color="inherit" component="div">
-                <b>{output.text}</b>
+                {output.text}
               </Typography>
             </Alert>
           ) : (
             <></>
           )}
         </Box>
+        <Box sx={{ my: 4 }}>
+        <Typography color="primary" variant="h6">Inputs</Typography>
+          <CodeMirror
+            value={inputs}
+            height="100%"
+            maxHeight="500px"
+            theme={oneDark}
+            onChange={setInputs}
+          />
+        </Box>
+        <Box sx={{ my: 4 }}>
+        <Typography color="primary" variant="h6">Miden Assembly Code</Typography>
+          <CodeMirror
+            value={code}
+            height="100%"
+            theme={oneDark}
+            onChange={setCode}
+            maxHeight="500px"
+          />
+        </Box>
+
       </Container>
     </>
   );

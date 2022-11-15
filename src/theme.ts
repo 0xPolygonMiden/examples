@@ -1,17 +1,17 @@
 import { createTheme } from "@mui/material/styles";
 
-// A custom theme for this app
+// A custom theme with Polygon Miden branding
 const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#0052cc",
+      main: "#7b3fe4",
     },
     secondary: {
-      main: "#edf2ff",
+      main: "#efe2fe",
     },
     background: {
-      default: "#f5f5f5",
+      default: "#fafafa",
     },
   },
 });

@@ -1,56 +1,58 @@
 # Miden Assembly Playground
 
-Playground for example programs for [Miden](https://github.com/maticnetwork/miden) in Miden Assembly.
+Playground for example programs for [Miden](https://github.com/maticnetwork/miden) in Miden assembly.
 
 [Use the playground!](https://0xpolygonmiden.github.io/examples/)
 
-The goal of this playground is for developers to see how easy it is to write and execute code in Miden Assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it here to the list.
+The goal of this playground is for developers to see how easy it is to write and execute code in Miden assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it in the list below. You can simply open a PR with your example adding the `.masm` and `.inputs` files.
 
-Examples are written in Miden Assembly, see [Miden Assembly Docu](https://maticnetwork.github.io/miden/user_docs/assembly/main.html). Miden Assembly programs can have two different inputs. They can have a `stack_init` as public input and the `advice_tape` as secret input. 
+Examples are written in Miden assembly, see [Miden assembly documentation](https://maticnetwork.github.io/miden/user_docs/assembly/main.html). External inputs can be provided to the examples and the Miden VM in two ways as public inputs and via the advice provider, see [here](https://maticnetwork.github.io/miden/intro/overview.html#inputs-and-outputs). Currently, in the playground you can use `stack_init` as public input and the `advice_tape` as secret input. 
 
-Next to running examples you can also write your own program and execute it. The examples can then serve as inspiration. 
+In addition to running existing examples you can also write your own program and execute it. The examples can then serve as inspiration. 
 
-## Simple examples - to see how the code works
+---
+## Available examples
+There are several examples in our repo and we hope we get more in the future. The examples range from simple to complex and aim to show how Miden assembly can be used.
+
+### Simple examples - to see how the code works
 
 - **Comparison**: A program which checks if the value provided as secret input via the advice tape is less than 9; if it is, the value is multiplied by 9, otherwise, 9 is added to the value; then we check if the value is odd.
 
 - **Conditional**: A program which either adds or multiplies two numbers - 3 and 5 - based on the value provided via the advice tape as secret input.
 
-## Math examples - see more complex numerical calculations 
+### Math examples - see more complex numerical calculations 
 
 - **Collatz**: A program which executes an unbounded loop to compute a Collatz sequence which starts with the provided value; the output of the program is the number of steps needed to reach 1 - the end of the sequence.
 
 - **Fibonnacci**: Elegant way to calculate the 1000th fibonacci number. 
 
-## Complex examples - larger complex nested operations
+### Complex examples - larger complex nested operations
 
 - **Game-of-Life**: Implementation of Conway's Game of Life. But we can prove it. The static example runs on a 4x4 cell universe and 1000 generations.
 
-
-
 ---
+## Running the playground locally
 
-We use a fork of https://github.com/timgestson/miden-assembly-playground
+You can also run the playground locally on your machine. 
 
-## Prerequisites
+### Starting site
 
-Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+If you want to run it locally, then make sure you have the [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) installed.
 
-## Starting site
+To run the playground locally in development mode, navigate to the project directory and run:
 
-We recomment using the link above to play with the examples. 
+```
+npm install && npm start
+```
 
-If you want to run it locally, then (in the project directory) run:
-
-`npm install && npm start`
-
-Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 Test rust code:
 
-`cd miden-wasm && wasm-pack test --node`
+```
+cd miden-wasm && wasm-pack test --node
+```
 
-Build production release:
+### Acknowledgement 
 
-`npm run build`
+We use a fork of https://github.com/timgestson/miden-assembly-playground
