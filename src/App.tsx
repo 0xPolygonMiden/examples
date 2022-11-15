@@ -19,6 +19,17 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import init, { program } from "miden-wasm";
 import "./App.css";
 
+async function getExample(example: string[], inputs: Boolean) {
+  if (inputs) {
+    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
+    return (await response).text();
+  }
+  else {
+    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`)
+    return (await response).text();
+  }
+}
+
 function App() {
 
   const [inputs, setInputs] = React.useState(
@@ -27,13 +38,14 @@ function App() {
       "advice_tape": ["0"]
 }`
   );
-  const [code, setCode] = React.useState(
-    `begin
+
+  var exampleCode =`begin
   push.1
   push.2
   add
 end`
-  );
+
+  const [code, setCode] = React.useState(exampleCode);
 
   const [output, setOutput] = React.useState({
     init: false,
@@ -55,7 +67,7 @@ end`
   
  
   const [example, setExample] = React.useState<string[]>([]);
-  const handleChangeMultiple = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChangeMultiple = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { options } = event.target;
     const value: string[] = [];
     for (let i = 0, l = options.length; i < l; i += 1) {
@@ -63,13 +75,14 @@ end`
         value.push(options[i].value);
       }
     }
-    setExample(value);
+    setExample(value)
+    
+    const inputs = await getExample(value, true)
+    setInputs(inputs)
+    
+    const code = await getExample(value, false)
+    setCode(code)
   }
-  
-  // I tried different things, als FSReader ...
-  //setCode(`../examples/${ example }.masm`);
-  //setInputs(fs.readFileSync(`../examples/${ example }.inputs`,'utf8'));
-  
 
   return (
     <>
@@ -80,48 +93,30 @@ end`
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container maxWidth="sm">
+      <Container maxWidth="xl">
         <Box sx={{ my: 4 }}>
-          <FormGroup row={true}>
-            <FormControl variant="outlined" sx={{ m: 1, minWidth: 120, maxWidth: 500 }}>
-                <InputLabel shrink htmlFor="select-multiple-native">
-                  Native
-                </InputLabel>
-                <Select
-                  multiple
-                  native
-                  value={example}
-                  // @ts-ignore Typings are not considering `native`
-                  onChange={handleChangeMultiple}
-                  label="Native"
-                  inputProps={{
-                    id: 'select-multiple-native',
-                  }}
-                >
-                  {examples.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </Select>
-            </FormControl>
-          </FormGroup>
-        </Box>
-        <Box sx={{ my: 4 }}>
-          <Box sx={{ my: 4 }}></Box>
-          <FormGroup row={true}>
-            <FormControl variant="outlined" sx={{ minWidth: 120 }} size="small">
-              <InputLabel style={{backgroundColor: "#f5f5f5"}}>Outputs</InputLabel>
+          <FormControl variant="outlined" sx={{ width: '100%' }}>
+              <InputLabel shrink htmlFor="select-multiple-native">
+                Select Example
+              </InputLabel>
               <Select
-                value={numOfOutputs}
-                onChange={(e) => setNumOfOutputs(Number(e.target.value))}
+                multiple
+                native
+                value={example}
+                // @ts-ignore Typings are not considering `native`
+                onChange={handleChangeMultiple}
+                label="Native"
+                inputProps={{
+                  id: 'select-multiple-native',
+                }}
               >
-                <MenuItem value={0}>0</MenuItem>
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={16}>16</MenuItem>
+                {examples.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
               </Select>
-            </FormControl>
-          </FormGroup>
+          </FormControl>
         </Box>
         <Box sx={{ my: 4 }}>
           <CodeMirror
@@ -139,7 +134,8 @@ end`
             onChange={(value) => setCode(value)}
           />
         </Box>
-        <Box sx={{ my: 4 }}>
+        
+        <Box sx={{ display: 'flex', flexDirection: 'row', mx: 'auto' }}>
           <Button
             variant="contained"
             color="success"
@@ -166,7 +162,16 @@ end`
           >
             Execute
           </Button>
-        </Box>
+          <Select
+            value={numOfOutputs}
+            onChange={(e) => setNumOfOutputs(Number(e.target.value))}
+          >
+            <MenuItem value={0}>0</MenuItem>
+            <MenuItem value={1}>1</MenuItem>
+            <MenuItem value={16}>16</MenuItem>
+          </Select>
+          <InputLabel style={{backgroundColor: "#f5f5f5"}}>Outputs</InputLabel>
+          </Box>
         <Box sx={{ my: 4 }}>
           {output.init ? (
             <Alert

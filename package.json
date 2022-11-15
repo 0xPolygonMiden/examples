@@ -19,7 +19,7 @@
   "scripts": {
     "preinstall": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "npm run build && gh-pages -d build -b main",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "build:wasm": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
