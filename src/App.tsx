@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Container,
-  FormGroup,
   FormControl,
   InputLabel,
   MenuItem,
@@ -19,16 +18,11 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import init, { program } from "miden-wasm";
 import "./App.css";
 
-async function getExample(example: string[], inputs: Boolean) {
-  if (inputs) {
-    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
-    return (await response).text();
+async function getExample(example: string[]) {
+    const inputs = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
+    const masm = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`)
+    return [(await inputs).text(), (await masm).text()];
   }
-  else {
-    const response = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`)
-    return (await response).text();
-  }
-}
 
 function App() {
 
@@ -77,11 +71,10 @@ end`
     }
     setExample(value)
     
-    const inputs = await getExample(value, true)
-    setInputs(inputs)
+    const example_code = await getExample(value)
     
-    const code = await getExample(value, false)
-    setCode(code)
+    setInputs(await example_code[0])
+    setCode(await example_code[1])    
   }
 
   return (

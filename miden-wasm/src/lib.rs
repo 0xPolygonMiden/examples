@@ -16,15 +16,15 @@ fn get_program_inputs(stack_init: &[u64], advice_tape: &[u64]) -> ProgramInputs 
 }
 
 /// Parse stack_init vector of strings to a vector of u64
-fn stack_init(inputs_des: &InputFile) -> Vec<u64> {
-    inputs_des.stack_init
+fn stack_init(inputs: &InputFile) -> Vec<u64> {
+    inputs.stack_init
         .iter()
         .map(|v| v.parse::<u64>().unwrap())
         .collect::<Vec<u64>>()
 }
 
-fn advice_tape(inputs_des: &InputFile) -> Vec<u64> {
-    inputs_des.advice_tape
+fn advice_tape(inputs: &InputFile) -> Vec<u64> {
+    inputs.advice_tape
         .as_ref()
         .unwrap_or(&vec![])
         .iter()
@@ -37,8 +37,6 @@ fn advice_tape(inputs_des: &InputFile) -> Vec<u64> {
 pub fn program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
     console_error_panic_hook::set_once();
     wasm_logger::init(wasm_logger::Config::default());
-    log::info!("adad");
-
 
     let assembler = Assembler::new();
     let program = assembler.compile(&asm).expect("Could not compile source");
@@ -49,18 +47,6 @@ pub fn program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> 
     let stack_init = stack_init(&inputs_des);
     let advice_tape = advice_tape(&inputs_des);
     let inputs = get_program_inputs(&stack_init, &advice_tape); 
-
-    // we might want to prove a program later and not only execute it
-    //let options = ProofOptions::new(
-    //    32,
-    //    8,
-    //    0,
-    //    miden::HashFunction::Blake3_256,
-    //    miden::FieldExtension::None,
-    //    8,
-    //    256,
-    //);
-    //println!{"AdviceTape: {:?}", advice_tape};
 
     let trace = miden::execute(
         &program,

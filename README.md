@@ -1,14 +1,18 @@
 # Miden Assembly Playground
 
-Playground for example programs for [Miden](https://github.com/maticnetwork/miden) in Miden Assembly.
+Playground for example programs for [Miden](https://github.com/maticnetwork/miden) in Miden assembly.
 
 [Use the playground!](https://0xpolygonmiden.github.io/examples/)
 
-The goal of this playground is for developers to see how easy it is to write and execute code in Miden Assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it here to the list.
+The goal of this playground is for developers to see how easy it is to write and execute code in Miden assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it here to the list.
 
-Examples are written in Miden Assembly, see [Miden Assembly Docu](https://maticnetwork.github.io/miden/user_docs/assembly/main.html). Miden Assembly programs can have two different inputs. They can have a `stack_init` as public input and the `advice_tape` as secret input. 
+Examples are written in Miden assembly, see [Miden assembly Documentation](https://maticnetwork.github.io/miden/user_docs/assembly/main.html). Miden assembly programs can have two different inputs. They can have a `stack_init` as public input and the `advice_tape` as secret input. 
 
 Next to running examples you can also write your own program and execute it. The examples can then serve as inspiration. 
+
+---
+# Available examples
+There are several examples in our repo and we hope we get more in the future. The examples range from simple to complex and aim to show the developer how Miden assembly can be used.
 
 ## Simple examples - to see how the code works
 
@@ -26,11 +30,10 @@ Next to running examples you can also write your own program and execute it. The
 
 - **Game-of-Life**: Implementation of Conway's Game of Life. But we can prove it. The static example runs on a 4x4 cell universe and 1000 generations.
 
-
-
 ---
+# Running the playground locally
 
-We use a fork of https://github.com/timgestson/miden-assembly-playground
+You can also run the playground locally on your machine. 
 
 ## Prerequisites
 
@@ -54,3 +57,7 @@ Test rust code:
 Build production release:
 
 `npm run build`
+
+## Acknowledgement 
+
+We use a fork of https://github.com/timgestson/miden-assembly-playground
