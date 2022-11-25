@@ -1,0 +1,55 @@
+{
+  "name": "miden-assembly-examples-playground",
+  "version": "0.1.0",
+  "homepage": "https://github.com/0xPolygonMiden/examples",
+  "private": true,
+  "dependencies": {
+    "@codemirror/theme-one-dark": "^6.1.0",
+    "@mui/icons-material": "^5.6.1",
+    "@types/react": "^18.0.4",
+    "@types/react-dom": "^18.0.0",
+    "@uiw/react-codemirror": "^4.6.0",
+    "list-react-files": "^0.2.0",
+    "miden-wasm": "file:miden-wasm/pkg",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "preinstall": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
+    "predeploy": "npm run build",
+    "deploy": "npm run build && gh-pages -d build -b main",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:wasm": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.6.1",
+    "@types/node": "^18.11.9",
+    "gh-pages": "^3.2.3",
+    "prettier": "2.6.2"
+  }
+}
