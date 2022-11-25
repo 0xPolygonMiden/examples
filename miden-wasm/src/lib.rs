@@ -65,6 +65,7 @@ pub fn program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> 
     
     // TODO: Investigate why proof verification fails when outputCount > 1
     //assert!(miden::verify(*program.hash(), &[], &outputs, proof).is_ok());
+    // tracked in https://github.com/0xPolygonMiden/examples/issues/19
     trace.program_outputs().stack_outputs(output_count as usize).to_vec()
 }
 

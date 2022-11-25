@@ -1,7 +1,7 @@
 {
   "name": "miden-assembly-examples-playground",
   "version": "0.1.0",
-  "homepage": "https://github.com/0xPolygonMiden/examples",
+  "homepage": "https://0xpolygonmiden.github.io/examples/",
   "private": true,
   "dependencies": {
     "@codemirror/theme-one-dark": "^6.1.0",
@@ -14,7 +14,9 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "^5.0.1",
-    "typescript": "^4.6.3"
+    "ts-loader": "^9.4.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.0"
   },
   "scripts": {
     "preinstall": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
@@ -49,7 +51,11 @@
     "@emotion/styled": "^11.8.1",
     "@mui/material": "^5.6.1",
     "@types/node": "^18.11.9",
+    "css-loader": "^6.7.2",
     "gh-pages": "^3.2.3",
-    "prettier": "2.6.2"
+    "prettier": "2.6.2",
+    "style-loader": "^3.3.1",
+    "typescript": "^4.9.3",
+    "webpack": "^5.75.0"
   }
 }
