@@ -57,7 +57,7 @@ end`
     'conditional',
     'fibonacci',
     'game-of-life-4x4',
-    'nPrime',
+    'nprime',
   ];
   
  
