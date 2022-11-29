@@ -27,22 +27,22 @@ end
 
 # We load the final configuration after each step
 proc.loadcellsnplus1.32
-    loc_load.16
-    loc_load.17
-    loc_load.18
-    loc_load.19
-    loc_load.20
-    loc_load.21
-    loc_load.22
-    loc_load.23
-    loc_load.24
-    loc_load.25
-    loc_load.26
-    loc_load.27
-    loc_load.28
-    loc_load.29
-    loc_load.30
     loc_load.31
+    loc_load.30
+    loc_load.29
+    loc_load.28
+    loc_load.27
+    loc_load.26
+    loc_load.25
+    loc_load.24
+    loc_load.23
+    loc_load.22
+    loc_load.21
+    loc_load.20
+    loc_load.19
+    loc_load.18
+    loc_load.17
+    loc_load.16
 end
 
 # We clean the stack 
