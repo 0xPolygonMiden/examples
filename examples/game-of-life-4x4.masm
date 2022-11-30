@@ -7,42 +7,42 @@
 
 # We store the initial configuration
 proc.storecellsn.16
-    loc_store.0 drop
-    loc_store.1 drop
-    loc_store.2 drop
-    loc_store.3 drop
-    loc_store.4 drop
-    loc_store.5 drop
-    loc_store.6 drop
-    loc_store.7 drop
-    loc_store.8 drop
-    loc_store.9 drop
-    loc_store.10 drop
-    loc_store.11 drop
-    loc_store.12 drop
-    loc_store.13 drop
-    loc_store.14 drop
-    loc_store.15 drop
+    loc_store.0 
+    loc_store.1 
+    loc_store.2
+    loc_store.3
+    loc_store.4
+    loc_store.5
+    loc_store.6
+    loc_store.7
+    loc_store.8
+    loc_store.9
+    loc_store.10
+    loc_store.11 
+    loc_store.12 
+    loc_store.13 
+    loc_store.14
+    loc_store.15
 end
 
 # We load the final configuration after each step
 proc.loadcellsnplus1.32
-    loc_load.31
-    loc_load.30
-    loc_load.29
-    loc_load.28
-    loc_load.27
-    loc_load.26
-    loc_load.25
-    loc_load.24
-    loc_load.23
-    loc_load.22
-    loc_load.21
-    loc_load.20
-    loc_load.19
-    loc_load.18
-    loc_load.17
     loc_load.16
+    loc_load.17
+    loc_load.18
+    loc_load.19
+    loc_load.20
+    loc_load.21
+    loc_load.22
+    loc_load.23
+    loc_load.24
+    loc_load.25
+    loc_load.26
+    loc_load.27
+    loc_load.28
+    loc_load.29
+    loc_load.30
+    loc_load.31
 end
 
 # We clean the stack 
@@ -56,7 +56,7 @@ end
 proc.zero.33
     # We can assume the cell to be dead unless proven otherwise
     push.0
-    loc_store.16 drop
+    loc_store.16
 
     # Neighbours
     loc_load.1
@@ -89,7 +89,7 @@ proc.zero.33
         if.true
             # If this is true we store 1 for this cell for the next round - the cell will live Yeah!
             push.1
-            loc_store.16 drop
+            loc_store.16
         end
 
         # now we see if it is equal to 3
@@ -100,7 +100,7 @@ proc.zero.33
         if.true
             # if this is true we store 1 for this cell for the next round - the cell will live Yeah!
             push.1
-            loc_store.16 drop
+            loc_store.16
         end
 
     else
@@ -128,7 +128,7 @@ end
 # State transition for cell 1
 proc.one.34
     push.0
-    loc_store.17 drop
+    loc_store.17
 
     # Load the Neighbours
     loc_load.0
@@ -149,13 +149,13 @@ proc.one.34
         push.2 eq
 
         if.true
-            push.1 loc_store.17 drop
+            push.1 loc_store.17
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.17 drop
+            push.1 loc_store.17
         end
 
     else
@@ -173,7 +173,7 @@ end
 # State transition for cell 2
 proc.two.35
     push.0
-    loc_store.18 drop
+    loc_store.18
 
     # Load the Neighbours
     loc_load.1
@@ -194,13 +194,13 @@ proc.two.35
         push.2 eq
 
         if.true
-            push.1 loc_store.18 drop
+            push.1 loc_store.18
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.18 drop
+            push.1 loc_store.18
         end
 
     else
@@ -218,7 +218,7 @@ end
 # State transition for cell 3
 proc.three.36
     push.0
-    loc_store.19 drop
+    loc_store.19
 
     # Load the Neighbours
     loc_load.2
@@ -237,13 +237,13 @@ proc.three.36
         push.2 eq
 
         if.true
-            push.1 loc_store.19 drop
+            push.1 loc_store.19
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.19 drop
+            push.1 loc_store.19
         end
 
     else
@@ -261,7 +261,7 @@ end
 # State transition for cell 4
 proc.four.37
     push.0
-    loc_store.20 drop
+    loc_store.20
 
     # Load the Neighbours
     loc_load.0
@@ -282,13 +282,13 @@ proc.four.37
         push.2 eq
 
         if.true
-            push.1 loc_store.20 drop
+            push.1 loc_store.20
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.20 drop
+            push.1 loc_store.20
         end
 
     else
@@ -306,7 +306,7 @@ end
 # State transition for cell 5
 proc.five.38
     push.0
-    loc_store.21 drop
+    loc_store.21
 
     # Load the Neighbours
     loc_load.0
@@ -330,13 +330,13 @@ proc.five.38
         push.2 eq
 
         if.true
-            push.1 loc_store.21 drop
+            push.1 loc_store.21
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.21 drop
+            push.1 loc_store.21
         end
 
     else
@@ -354,7 +354,7 @@ end
 # State transition for cell 6
 proc.six.39
     push.0
-    loc_store.22 drop
+    loc_store.22
 
     # Load the Neighbours
     loc_load.1
@@ -378,13 +378,13 @@ proc.six.39
         push.2 eq
 
         if.true
-            push.1 loc_store.22 drop
+            push.1 loc_store.22
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.22 drop
+            push.1 loc_store.22
         end
 
     else
@@ -402,7 +402,7 @@ end
 # State transition for cell 7
 proc.seven.40
     push.0
-    loc_store.23 drop
+    loc_store.23
 
     # Load the Neighbours
     loc_load.2
@@ -423,13 +423,13 @@ proc.seven.40
         push.2 eq
 
         if.true
-            push.1 loc_store.23 drop
+            push.1 loc_store.23
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.23 drop
+            push.1 loc_store.23
         end
 
     else
@@ -447,7 +447,7 @@ end
 # State transition for cell 8
 proc.eight.41
     push.0
-    loc_store.24 drop
+    loc_store.24
 
     # Load the Neighbours
     loc_load.4
@@ -468,13 +468,13 @@ proc.eight.41
         push.2 eq
 
         if.true
-            push.1 loc_store.24 drop
+            push.1 loc_store.24
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.24 drop
+            push.1 loc_store.24
         end
 
     else
@@ -492,7 +492,7 @@ end
 # State transition for cell 9
 proc.nine.42
     push.0
-    loc_store.25 drop
+    loc_store.25
 
     # Load the Neighbours
     loc_load.4
@@ -516,13 +516,13 @@ proc.nine.42
         push.2 eq
 
         if.true
-            push.1 loc_store.25 drop
+            push.1 loc_store.25
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.25 drop
+            push.1 loc_store.25
         end
 
     else
@@ -540,7 +540,7 @@ end
 # State transition for cell 10
 proc.ten.43
     push.0
-    loc_store.26 drop
+    loc_store.26
 
     # Load the Neighbours
     loc_load.5
@@ -564,13 +564,13 @@ proc.ten.43
         push.2 eq
 
         if.true
-            push.1 loc_store.26 drop
+            push.1 loc_store.26
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.26 drop
+            push.1 loc_store.26
         end
 
     else
@@ -588,7 +588,7 @@ end
 # State transition for cell 11
 proc.eleven.44
     push.0
-    loc_store.27 drop
+    loc_store.27
 
     # Load the Neighbours
     loc_load.7
@@ -609,13 +609,13 @@ proc.eleven.44
         push.2 eq
 
         if.true
-            push.1 loc_store.27 drop
+            push.1 loc_store.27
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.27 drop
+            push.1 loc_store.27
         end
 
     else
@@ -633,7 +633,7 @@ end
 # State transition for cell 12
 proc.twelve.45
     push.0
-    loc_store.28 drop
+    loc_store.28
 
     # Load the Neighbours
     loc_load.8
@@ -652,13 +652,13 @@ proc.twelve.45
         push.2 eq
 
         if.true
-            push.1 loc_store.28 drop
+            push.1 loc_store.28
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.28 drop
+            push.1 loc_store.28
         end
 
     else
@@ -676,7 +676,7 @@ end
 # State transition for cell 13
 proc.thirteen.46
     push.0
-    loc_store.29 drop
+    loc_store.29
 
     # Load the Neighbours
     loc_load.8
@@ -697,13 +697,13 @@ proc.thirteen.46
         push.2 eq
 
         if.true
-            push.1 loc_store.29 drop
+            push.1 loc_store.29
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.29 drop
+            push.1 loc_store.29
         end
 
     else
@@ -721,7 +721,7 @@ end
 # State transition for cell 14
 proc.fourteen.47
     push.0
-    loc_store.30 drop
+    loc_store.30
 
     # Load the Neighbours
     loc_load.9
@@ -742,13 +742,13 @@ proc.fourteen.47
         push.2 eq
 
         if.true
-            push.1 loc_store.30 drop
+            push.1 loc_store.30
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.30 drop
+            push.1 loc_store.30
         end
 
     else
@@ -766,7 +766,7 @@ end
 # State transition for cell 15
 proc.fifteen.48
     push.0
-    loc_store.31 drop
+    loc_store.31
 
     # Load the Neighbours
     loc_load.10
@@ -785,13 +785,13 @@ proc.fifteen.48
         push.2 eq
 
         if.true
-            push.1 loc_store.31 drop
+            push.1 loc_store.31
         end
 
         push.3 eq
 
         if.true
-            push.1 loc_store.31 drop
+            push.1 loc_store.31
         end
 
     else
@@ -808,7 +808,7 @@ end
 
 # Let's play
 begin
-    repeat.1000
+    repeat.10
         # We store the initial configuration in local variables and clear the stack 
         exec.storecellsn
 
