@@ -1,12 +1,12 @@
 # Miden Assembly Playground
 
-Playground for example programs for [Miden](https://github.com/maticnetwork/miden) in Miden assembly.
+Playground for example programs for the [Miden VM](https://github.com/0xPolygonMiden/miden-vm) in Miden assembly.
 
 [Use the playground!](https://0xpolygonmiden.github.io/examples/)
 
 The goal of this playground is for developers to see how easy it is to write and execute code in Miden assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it in the list below. You can simply open a PR with your example adding the `.masm` and `.inputs` files.
 
-Examples are written in Miden assembly, see [Miden assembly documentation](https://maticnetwork.github.io/miden/user_docs/assembly/main.html). External inputs can be provided to the examples and the Miden VM in two ways as public inputs and via the advice provider, see [here](https://maticnetwork.github.io/miden/intro/overview.html#inputs-and-outputs). Currently, in the playground you can use `stack_init` as public input and the `advice_tape` as secret input. 
+Examples are written in Miden assembly, see [Miden assembly documentation](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/). External inputs can be provided to the examples and the Miden VM in two ways as public inputs and via the advice provider, see [here](https://wiki.polygon.technology/docs/miden/intro/overview/#inputs-and-outputs). Currently, in the playground you can use `stack_init` as public input and the `advice_tape` as secret input. 
 
 In addition to running existing examples you can also write your own program and execute it. The examples can then serve as inspiration. 
 
