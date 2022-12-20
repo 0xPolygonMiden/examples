@@ -1,0 +1,11 @@
+[package]
+name = "miden-benchmarking-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+miden = { version = "0.3"}
+serde = { version = "1", features = ["derive"] } # You only need this if you want app persistence
+serde_json = "1.0.48"
+winter-math = "0.4.2"
