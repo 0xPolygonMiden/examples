@@ -52,13 +52,13 @@ end`
 
   // this should be dyncamically read from ./examples/ - buy my TS knowledge is limited
   const examples = [
+    'aliquot-sum',
     'collatz',
     'comparison',
     'conditional',
     'fibonacci',
     'game-of-life-4x4',
     'nprime',
-    'aliquot-sum',
   ];
   
  
