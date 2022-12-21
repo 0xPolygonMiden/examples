@@ -1,0 +1,47 @@
+# x: input number
+# f: current factor candidate
+# a: aliquot sum
+
+begin                     # [x]
+  push.0 swap             # [x, a]
+  push.0                  # [f, x, a]
+  push.1
+  while.true
+    # increment f
+    add.1                 # [f, x, a]
+
+    # check whether f is a factor of x
+    dup.1 dup.1           # [f, x, f, x, a]
+    u32checked_mod        # [x % f, f, x, a]
+    push.0 u32checked_eq  # [x % f == 0, f, x, a]
+                          # [factor?, f, x, a]
+
+    # multiply by boolean trick to avoid expensive conditional
+    dup.1 mul             # if factor?:
+                          #   [f, f, x, a]
+                          # else:
+                          #   [0, f, x, a]
+
+    movup.3               # if factor?:
+                          #   [a, f, f, x]
+                          # else:
+                          #   [a, 0, f, x]
+
+    add                   # if factor?:
+                          #   [a + f, f, x]
+                          # else:
+                          #   [a, f, x]
+    # now the top of the stack has the new value of a
+
+    movdn.2               # [f, x, a]
+
+    # the largest a factor of a number can be
+    # is half of that number,
+    # so we stop looping through values of f
+    # once we reach x / 2
+    push.2 dup.1          # [x / 2, f, x, a]
+    dup.1                 # [f, x / 2, f, x, a]
+    gt                    # if f > x / 2: break
+  end                     # [f, x, a]
+  drop drop               # [a]
+end

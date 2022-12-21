@@ -58,6 +58,7 @@ end`
     'fibonacci',
     'game-of-life-4x4',
     'nprime',
+    'aliquot-sum',
   ];
   
  
