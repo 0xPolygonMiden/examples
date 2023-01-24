@@ -1,22 +1,14 @@
-import {
-  AppBar,
-  Alert,
-  Box,
-  Button,
-  Container,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Toolbar,
-  Typography,
-  SelectChangeEvent,
-} from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import React from "react";
+import ActionButton from "./components/ActionButton";
+import DropDown from "./components/DropDown";
+import InstructionTable from "./components/InstructionTable";
+import React, { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { eclipse } from "@uiw/codemirror-theme-eclipse";
 import init, { program } from "miden-wasm";
+import MidenLogo from "./components/MidenLogo";
+import Link from "./components/Link";
+
 
 async function getExample(example: string) {
     const inputs = fetch(`https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`)
@@ -26,14 +18,17 @@ async function getExample(example: string) {
 
 function App() {
 
-  const [inputs, setInputs] = React.useState(
-    `{
-      "stack_init": ["0"],
-      "advice_tape": ["0"]
-}`
-  );
+  /**
+  * This sets the inputs to the default values.
+  */  
 
-  var exampleCode =`begin
+  const exampleInput =     `{
+    "stack_init": ["0"],
+    "advice_tape": ["0"]
+}`
+  const [inputs, setInputs] = React.useState(exampleInput);
+
+  const exampleCode =   `begin
   push.1
   push.2
   add
@@ -41,29 +36,25 @@ end`
 
   const [code, setCode] = React.useState(exampleCode);
 
-  const emptyOutput = {
-    init: false,
-    success: true,
-    text: " ",
-  };
+  /**
+  * This sets the output and number of outputs to the default values. 
+  * Set to 16 now, that should change dynamically.
+  */
+
+  const emptyOutput = "\n \n \n \n";
   const [output, setOutput] = React.useState(emptyOutput);
 
-  const [numOfOutputs, setNumOfOutputs] = React.useState(1);
-
-  // this should be dyncamically read from ./examples/ - buy my TS knowledge is limited
-  const examples = [
-    'collatz',
-    'comparison',
-    'conditional',
-    'fibonacci',
-    'game-of-life-4x4',
-    'nprime',
-  ];
+  const [numOfOutputs, setNumOfOutputs] = React.useState(16);
   
- 
+  /**
+  * This handles a change in the selected example.
+  * If a new example is selected using the dropdown, the code and inputs are updated.
+  */  
+
   const [example, setExample] = React.useState<string>();
-  const handleSelectChange = async (event: SelectChangeEvent) => {
-    const value = event.target.value;
+  console.log(example)
+  const handleSelectChange = async (exampleChange: string) => {
+    const value = exampleChange;
     // set the current example to the selected one
     setExample(value)
 
@@ -76,109 +67,95 @@ end`
     setOutput(emptyOutput)
   }
 
+  /**
+  * This runs the program using the MidenVM and displays the output.
+  * It rund the Rust program that is imported above.
+  */ 
+
+  const runProgram = async () => {
+    init().then(() => {
+      try {
+        const resp = program(code, inputs, numOfOutputs);
+        console.log(resp.toString());
+        setOutput(`Miden VM Program Output \nStack = [${resp.toString()}] \nCycles = <need to return cycles> \n`);
+      } catch (error) {
+        setOutput("Error: Check the developer console for details.");
+      }
+        })};
+  
+  /**
+  * We need to add the following:
+  * Prove, Verify, and Debug as functions that can be called.
+  */ 
+
   return (
     <>
-      <AppBar position="static">
-        <Toolbar variant="dense">
-          <Typography variant="h6" color="inherit" component="div">
-            Playground for Miden Examples in Miden Assembly
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Container maxWidth="xl">
-      <Box sx={{ display: 'flex', flexDirection: 'row', mx: 'auto', my: 4}}>
-          <FormControl variant="outlined" sx={{minWidth: 120}}>
-              <InputLabel id="select-example">
-                Example
-              </InputLabel>
-              <Select
-                value={example}
-                onChange={handleSelectChange}
-                label="Example"
-                labelId='select-example'
-              >
-                {examples.map((name) => (
-                  <MenuItem value={name} key={name}>{name}</MenuItem>
-                ))}
-              </Select>
-          </FormControl>
-          <FormControl variant="outlined" sx={{minWidth: 120, mx: 2}}>
-              <InputLabel id="select-outputs">
-                Outputs
-              </InputLabel>
-              <Select
-              value={numOfOutputs}
-              onChange={(e) => setNumOfOutputs(Number(e.target.value))}
-              label="Outputs"
-              labelId='select-outputs'
-            >
-              <MenuItem value={0} key={0}>0</MenuItem>
-              <MenuItem value={1} key={1}>1</MenuItem>
-              <MenuItem value={16} key={16}>16</MenuItem>
-            </Select>
-          </FormControl>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              init().then(() => {
-                try {
-                  let resp = program(code, inputs, numOfOutputs);
-                  console.log(resp);
-                  setOutput({
-                    init: true,
-                    success: true,
-                    text: resp.join(" "),
-                  });
-                } catch (error) {
-                  setOutput({
-                    init: true,
-                    success: false,
-                    text: "Error: Check the developer console for details.",
-                  });
-                }
-              });
-            }}
-            endIcon={<SendIcon />}
-          >
-            Execute
-          </Button>
-          {output.init ? (
-            <Alert
-              variant="outlined"
-              severity={output.success ? "success" : "error"}
-              sx={{mx: 2}}
-            >
-              <Typography color="inherit" component="div">
-                {output.text}
-              </Typography>
-            </Alert>
-          ) : (
-            <></>
-          )}
-        </Box>
-        <Box sx={{ my: 4 }}>
-        <Typography color="primary" variant="h6">Inputs</Typography>
-          <CodeMirror
-            value={inputs}
-            height="100%"
-            maxHeight="200px"
-            theme={oneDark}
-            onChange={setInputs}
-          />
-        </Box>
-        <Box sx={{ my: 4 }}>
-        <Typography color="primary" variant="h6">Miden Assembly Code</Typography>
-          <CodeMirror
-            value={code}
-            height="100%"
-            theme={oneDark}
-            onChange={setCode}
-            maxHeight="500px"
-          />
-        </Box>
+        <div className="flex items-center justify-between flex-wrap bg-blue-700 p-6">
+          <div className="flex items-center flex-shrink-0 text-white mr-6">
+              <MidenLogo />
+              <span className="font-semibold text-xl tracking-tight">Playground for Miden Examples in Miden Assembly
+              </span>
+          </div>
+          <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
+            <div className="text-sm lg:flex-grow">
+              <Link label="Docs" address="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main" />
+              <Link label="Examples" address="https://github.com/0xPolygonMiden/examples#available-examples" />
+              <Link label="Homepage" address="https://polygon.technology/solutions/polygon-miden/" />
+            </div>
+          </div>
+        </div>
 
-      </Container>
+        <div className="ml-2 mr-2 pt-3 h-30 grid grid-cols-5 gap-4 content-center">
+            
+            <DropDown onExampleValueChange={handleSelectChange}/>
+            <ActionButton label="Run" onClick={runProgram} />
+            <ActionButton label="Debug" /> 
+            <ActionButton label="Prove" />
+            <ActionButton label="Verify" />
+
+        </div>
+        <div className="box-border pt-6">
+          <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
+            <div className="box-border">
+              <h1 className="heading">Inputs</h1>
+              <CodeMirror
+                  value={inputs}
+                  height="100%"
+                  maxHeight="80px"
+                  theme={oneDark}
+                  onChange={setInputs}
+                />
+            </div>
+            <div className="box-border">
+              <h1 className="heading">Outputs</h1>
+              <CodeMirror
+                  value={output}
+                  height="100%"
+                  maxHeight="80px"
+                  theme={eclipse}
+                  onChange={setOutput}
+                />
+            </div>
+          </div>
+        </div>  
+        <div className="box-border pt-6">
+          <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
+            <div className="box-border">
+              <h1 className="heading">Miden Assembly Code</h1>
+              <CodeMirror
+                  value={code}
+                  height="100%"
+                  theme={oneDark}
+                  onChange={setCode}
+                  maxHeight="500px"
+                />
+            </div>
+            <div className="box-border">
+              <h1 className="heading">Instructions Set</h1>
+              <InstructionTable />
+            </div>
+          </div>
+        </div>  
     </>
   );
 }
