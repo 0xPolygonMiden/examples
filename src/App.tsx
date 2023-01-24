@@ -1,7 +1,7 @@
 import ActionButton from "./components/ActionButton";
 import DropDown from "./components/DropDown";
 import InstructionTable from "./components/InstructionTable";
-import React, { useState } from "react";
+import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { eclipse } from "@uiw/codemirror-theme-eclipse";
@@ -44,7 +44,12 @@ end`
   const emptyOutput = "\n \n \n \n";
   const [output, setOutput] = React.useState(emptyOutput);
 
-  const [numOfOutputs, setNumOfOutputs] = React.useState(16);
+  /**
+  * This handles the number of outputs that are returned to the user.
+  * It is not optimal to fix that to a certain number, but for 
+  * the sake of simplicity we do it for now.
+  */ 
+  const numOfOutputs = 16;
   
   /**
   * This handles a change in the selected example.
