@@ -20,12 +20,13 @@ jobs:
 
       - name: Install and Build 🔧
         run: |
+          cd playground
           npm install
-          npm run preinstall
+          npm run build:miden
           npm run build
           npx webpack
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: build
+          publish_dir: ./playground/build/
