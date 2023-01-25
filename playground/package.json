@@ -20,7 +20,7 @@
     "webpack-cli": "^5.0.0"
   },
   "scripts": {
-    "preinstall": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
+    "build:miden": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
     "predeploy": "npm run build",
     "deploy": "npm run build && gh-pages -d build -b main",
     "start": "react-scripts start",
