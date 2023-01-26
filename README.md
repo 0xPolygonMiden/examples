@@ -41,10 +41,10 @@ You can also run the playground locally on your machine.
 
 If you want to run it locally, then make sure you have the [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) installed.
 
-To run the playground locally in development mode, navigate to the project directory and run:
+To run the playground locally in development mode, navigate to the project directory `playground` and run:
 
 ```
-npm install && npm start
+npm run build:miden && npm install && npm run start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
