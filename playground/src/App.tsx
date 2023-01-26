@@ -5,7 +5,7 @@ import React from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { eclipse } from "@uiw/codemirror-theme-eclipse";
-import init, { program } from "miden-wasm";
+import init, { run_program, prove_program } from "miden-wasm";
 import MidenLogo from "./components/MidenLogo";
 import Link from "./components/Link";
 
@@ -74,23 +74,47 @@ end`
 
   /**
   * This runs the program using the MidenVM and displays the output.
-  * It rund the Rust program that is imported above.
+  * It runs the Rust program that is imported above.
   */ 
 
   const runProgram = async () => {
     init().then(() => {
       try {
-        const resp = program(code, inputs, numOfOutputs);
+        const resp = run_program(code, inputs, numOfOutputs);
         console.log(resp.toString());
-        setOutput(`Miden VM Program Output \nStack = [${resp.toString()}] \nCycles = <need to return cycles> \n`);
+        setOutput(`Miden VM Program Output
+Stack = [${resp.toString()}]
+Cycles = <available with Miden VM v0.4>`);
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
         })};
   
+
+  /**
+  * This proves the program using the MidenVM and displays the output.
+  * It runs the Rust program that is imported above.
+  */ 
+
+    const proveProgram = async () => {
+      init().then(() => {
+        try {
+          const resp = prove_program(code, inputs, numOfOutputs);
+          console.log(resp.toString());
+          const stack_output = resp.slice(0, numOfOutputs);
+          const overflow_addrs = resp.slice(numOfOutputs, resp.length);
+          setOutput(`Miden VM Program Output
+Stack = [${stack_output.toString()}]
+Overflow Address = [${overflow_addrs.toString()}]
+Cycles = <available with Miden VM v0.4>`);
+        } catch (error) {
+          setOutput("Error: Check the developer console for details.");
+        }
+          })};
+    
   /**
   * We need to add the following:
-  * Prove, Verify, and Debug as functions that can be called.
+  * Verify, and Debug as functions that can be called.
   */ 
 
   return (
@@ -115,7 +139,7 @@ end`
             <DropDown onExampleValueChange={handleSelectChange}/>
             <ActionButton label="Run" onClick={runProgram} />
             <ActionButton label="Debug" /> 
-            <ActionButton label="Prove" />
+            <ActionButton label="Prove" onClick={proveProgram} />
             <ActionButton label="Verify" />
 
         </div>

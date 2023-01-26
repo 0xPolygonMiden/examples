@@ -1,4 +1,4 @@
-use miden::{Assembler, ProgramInputs};
+use miden::{Assembler, ProgramInputs, ProofOptions};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_test::*;
 extern crate console_error_panic_hook;
@@ -36,7 +36,7 @@ fn get_advice_tape(inputs: &InputFile) -> Vec<u64> {
 
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
-pub fn program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
+pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
     console_error_panic_hook::set_once();
     wasm_logger::init(wasm_logger::Config::default());
 
@@ -63,16 +63,62 @@ pub fn program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> 
     )
     .map_err(|err| format!("Failed to generate exection trace = {:?}, and advice_tape = {:?}", err, advice_tape)).unwrap();
     
-    // TODO: Investigate why proof verification fails when outputCount > 1
-    //assert!(miden::verify(*program.hash(), &[], &outputs, proof).is_ok());
-    // tracked in https://github.com/0xPolygonMiden/examples/issues/19
     trace.program_outputs().stack_outputs(output_count as usize).to_vec()
 }
 
-/// Basic test for the program
+/// Proves the program with the given inputs
+#[wasm_bindgen]
+pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
+    console_error_panic_hook::set_once();
+    wasm_logger::init(wasm_logger::Config::default());
+
+    let assembler = Assembler::new();
+    let program = assembler.compile(&asm).expect("Could not compile source");
+    
+    let mut stack_init = <Vec<u64>>::new();
+    let mut advice_tape = <Vec<u64>>::new();
+
+    // TODO: We must catch all cases of inputs. Input can be not a valid json,
+    // input can be empty, stack_init can be empty, advice_tape can be empty. And all combinations.
+    if inputs_frontend.trim().is_empty() == false {
+        let inputs_des: InputFile = serde_json::from_str(&inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize input data - {}", err)).unwrap();
+        
+        stack_init = get_stack_init(&inputs_des);
+        advice_tape = get_advice_tape(&inputs_des);
+    } 
+
+    let inputs = get_program_inputs(&stack_init, &advice_tape); 
+
+    // default (96 bits of security)
+    let proof_options = ProofOptions::with_96_bit_security();
+
+    let (output, _proof) = miden::prove(
+        &program,
+        &inputs,
+        &proof_options,
+    )
+    .map_err(|err| format!("Failed to generate exection trace = {:?}, and advice_tape = {:?}", err, advice_tape)).unwrap();
+    
+    // We convert the outputs into one Vector because we can't return tuples in wasm-bindgen.
+    // So the first n elements are the stack_outputs and the last n elements are the overflow_addrs.
+    // TODO: We can somehow refactor to return structures in wasm-bindgen. But I didn't find a way yet.
+    // There might be a way to return the ProgramOutputs struct even.
+    let mut stack_outputs = output.stack_outputs(output_count as usize).to_vec();
+    let mut overflow_addrs = output.overflow_addrs().to_vec();
+    stack_outputs.append(&mut overflow_addrs);
+    
+    // TODO: We must return trace_info as well, but we can not handle that yet in Miden v0.3.
+    // TODO: We must return the proof as well. But we can not handle that yet in the frontend.
+
+    stack_outputs
+
+}
+
+/// Basic tests for the program
 #[wasm_bindgen_test]
-fn run_program() {
-    let output = program(
+fn test_run_program() {
+    let output = run_program(
         "begin
             push.1 push.2 add
         end",
@@ -80,4 +126,21 @@ fn run_program() {
         1,
     );
     assert_eq!(output[0], 3)
+}
+
+#[wasm_bindgen_test]
+fn test_prove_program() {
+    let output = prove_program(
+        "begin
+            push.1 push.2 add
+        end",
+        "",
+        16,
+    );
+    // this is the result of the stack output, 3
+    assert_eq!(output[0], 3);
+
+    // for the proof we have [0, 1] as overflow_addrs
+    assert_eq!(output[16], 0);
+    assert_eq!(output[17], 1);
 }
