@@ -20,11 +20,15 @@
 # output:
 # [4862]
 
+proc.dup1dup1
+    dup.1
+    dup.1
+end
+
 # Check if the counter is less than the maximum
-proc.check_continue
+proc.check_continue_gt
     # [i, max]
-    dup.1
-    dup.1
+    exec.dup1dup1
     gt
     # [ i < max , i, max ]
 end
@@ -74,7 +78,7 @@ proc.catalan_i
         push.0
         # [ j, k/2, running_total, k, i, ... ]
         # Calculate sum until penultimate summand
-        exec.check_continue
+        exec.check_continue_gt
         while.true
             dup
             dup.4
@@ -88,7 +92,7 @@ proc.catalan_i
             # [ j, k/2, new running_total, k, i, ... ]
             # Update counter and check for termination
             add.1
-            exec.check_continue
+            exec.check_continue_gt
         end
         # [ k/2, k/2, running_total, k, i, ... ]
         # Check if k is odd ( = i is even )
@@ -122,28 +126,35 @@ proc.catalan_i
     # stack : [ ... ], mem : [ C_0, C_1, ..., C_i ]
 end
 
+# Check if the counter is less than or equal to the maximum
+proc.check_continue_gte
+    # [i, max]
+    exec.dup1dup1
+    gte
+    # [ i <= max , i, max ]
+end
+
 begin
-    # [n]
-    # validate n+1 as u32 (we need the counter to be able to reach n+1)
-    add.1
+    # [ n ]
+    # Validate n as u32 to ensure we can do u32 division,
+    # and that we're not accessing memory out of bounds
     u32assert
 
-    # counters and max are now guaranteed to be u32, so use u32 ops for them
+    # counters and max are now guaranteed to be u32
     # initialize counter i
     push.0
 
-    # [0, n+1]
-    exec.check_continue
+    # [ 0, n ]
+    exec.check_continue_gte
     while.true
-        # [ i, n+1 ]
+        # [ i, n ]
         dup
         exec.catalan_i
-        # [ i, n+1 ]
+        # [ i, n ]
         add.1
-        exec.check_continue
+        exec.check_continue_gte
     end    
-    # [ n+1, n+1 ]
+    # [ n, n ]
     drop
-    sub.1
     mem_load
 end
