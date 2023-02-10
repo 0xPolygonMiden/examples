@@ -25,7 +25,7 @@ proc.check_continue
     # [i, max]
     dup.1
     dup.1
-    u32unchecked_gt
+    gt
     # [ i < max , i, max ]
 end
 
@@ -34,7 +34,7 @@ proc.fetch_and_multiply
     # stack : [ i, j, ... ], mem : [ C_0, C_1, ..., C_i ]
     # Fetch C_(i-j)
     dup.1
-    u32wrapping_sub
+    sub
     mem_load
     # Fetch C_j
     swap
@@ -50,7 +50,7 @@ proc.catalan_i
     # stack : [ i, ... ], mem : [ C_0, C_1, ..., C_(i-1) ]
     dup
     push.0
-    u32checked_eq
+    eq
     if.true
         # Base case: C_0 = 1
         # [ 0, ... ]
@@ -59,13 +59,15 @@ proc.catalan_i
         # Induction case: C_i = C_(k+1)
         # [ i, ... ]
         dup
-        u32wrapping_sub.1
+        sub.1
         # [ k, i, ... ]
         # Initialize running total
         push.0
         # [ running_total, k, i, ... ]
         # Initialize maximum for counter (k/2)
         dup.1
+        # Need to use u32 division to truncate properly
+        # Safe to use unchecked, since k < i <= n+1, and n+1 has been asserted as u32
         u32unchecked_div.2
         # [ k/2, running_total, k, i, ... ]
         # Initialize counter
@@ -85,7 +87,7 @@ proc.catalan_i
             movdn.2
             # [ j, k/2, new running_total, k, i, ... ]
             # Update counter and check for termination
-            u32wrapping_add.1
+            add.1
             exec.check_continue
         end
         # [ k/2, k/2, running_total, k, i, ... ]
@@ -93,8 +95,8 @@ proc.catalan_i
         dup.3
         dup.1
         # [ k/2, k, k/2, k/2, running_total, k, i, ... ]
-        u32wrapping_sub
-        u32checked_eq
+        sub
+        eq
         if.true
             # k is even ( = i is odd )
             # [ k/2, running_total, k, i, ... ]
@@ -137,11 +139,11 @@ begin
         dup
         exec.catalan_i
         # [ i, n+1 ]
-        u32wrapping_add.1
+        add.1
         exec.check_continue
     end    
     # [ n+1, n+1 ]
     drop
-    u32wrapping_sub.1
+    sub.1
     mem_load
 end
