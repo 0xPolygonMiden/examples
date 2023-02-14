@@ -3,7 +3,7 @@ name: Deploy Miden Assembly Playground
 on:
   push:
     branches:
-      - main
+      - dominik_adding_a_sass_loader_for_katex
 
 jobs:
   build:

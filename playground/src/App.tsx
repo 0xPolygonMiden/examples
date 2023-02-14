@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar";
 import CodingEnvironment from "./pages/CodingEnvironment";
 import InstructionTable from "./pages/InstructionTable";
 
+
 function App() {
 
   return (

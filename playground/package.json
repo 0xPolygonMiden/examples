@@ -62,7 +62,11 @@
     "@types/react-table": "^7.7.14",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
+    "katex": "^0.13.11",
+    "resolve-url-loader": "^4.0.0",
     "css-loader": "^6.7.2",
+    "sass": "1.32.11",
+    "sass-loader": "^12.4.0",
     "eslint": "^8.32.0",
     "gh-pages": "^3.2.3",
     "prettier": "2.6.2",
@@ -70,7 +74,9 @@
     "styled-components": "^5.3.6",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.9.4",
-    "webpack": "^5.75.0"
+    "webpack": "^5.75.0",
+    "mini-css-extract-plugin": "2.1.0",
+    "normalize.css": "8.0.1"
   },
   "description": "Playground for example programs for the [Miden VM](https://github.com/0xPolygonMiden/miden-vm) in Miden assembly.",
   "main": "webpack.config.js",
