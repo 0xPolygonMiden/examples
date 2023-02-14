@@ -6,8 +6,6 @@
   "dependencies": {
     "@codemirror/theme-one-dark": "^6.1.0",
     "@headlessui/react": "^1.7.7",
-    "@tailwindcss/typography": "^0.5.9",
-    "@tailwindcss/forms": "^0.5.3",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.0",
     "@uiw/codemirror-theme-eclipse": "^4.19.6",
@@ -16,13 +14,7 @@
     "miden-wasm": "file:miden-wasm/pkg",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "react-markdown": "^8.0.5",
-    "react-router-dom": "^6.8.1",
     "react-scripts": "^5.0.1",
-    "react-table": "^7.8.0",
-    "rehype-katex": "^6.0.2",
-    "remark-gfm": "^3.0.1",
-    "remark-math": "^5.1.1",
     "ts-loader": "^9.4.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0"
@@ -58,8 +50,8 @@
   "devDependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@mui/material": "^5.6.1",
     "@types/node": "^18.11.9",
-    "@types/react-table": "^7.7.14",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
     "css-loader": "^6.7.2",
@@ -67,7 +59,6 @@
     "gh-pages": "^3.2.3",
     "prettier": "2.6.2",
     "style-loader": "^3.3.1",
-    "styled-components": "^5.3.6",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.9.4",
     "webpack": "^5.75.0"
