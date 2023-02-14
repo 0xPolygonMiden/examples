@@ -53,7 +53,7 @@ end`
   * If a new example is selected using the dropdown, the code and inputs are updated.
   */  
 
-  const [example, setExample] = React.useState<string>();
+  const [, setExample] = React.useState<string>();
   const handleSelectChange = async (exampleChange: string) => {
     const value = exampleChange;
     // set the current example to the selected one
