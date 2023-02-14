@@ -1,22 +1,22 @@
 # Computes the nth Catalan number using dynamic programming.
 # (See https://www.geeksforgeeks.org/program-nth-catalan-number/)
-# 
+#
 # Definition:
 #     C_0 = 1
 #     C_(n+1) = C_0 * C_n + C_1 * C_(n-1) + ... + C_n * C_0
 #             =  2 * C_0 * C_n + 2 * C_1 * C_(n-1) + ... + 2 * C_(n/2) * C_(n/2+1) (if n+1 is even)
 #             or 2 * C_0 * C_n + 2 * C_1 * C_(n-1) + ... + C_(n/2)^2               (if n+1 is odd)
-# 
+#
 # Input: The stack should contain a single element n.
 # Output: A stack with a single element which is the nth Catalan number C_n.
-# 
+#
 # C_i for 0 <= i <= n will be stored in memory at address i.
-# 
+#
 # example:
-# 
+#
 # input:
 # [9]
-# 
+#
 # output:
 # [4862]
 
