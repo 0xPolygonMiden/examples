@@ -20,17 +20,13 @@
 # output:
 # [4862]
 
-proc.dup1dup1
-    dup.1
-    dup.1
-end
-
 # Check if the counter is less than the maximum
-proc.check_continue_gt
+proc.check_continue_neq
     # [i, max]
-    exec.dup1dup1
-    gt
-    # [ i < max , i, max ]
+    dup.1
+    dup.1
+    neq
+    # [ i != max , i, max ]
 end
 
 # Fetch precomputed C_j and C_(i-j), and multiply them
@@ -78,7 +74,7 @@ proc.catalan_i
         push.0
         # [ j, k/2, running_total, k, i, ... ]
         # Calculate sum until penultimate summand
-        exec.check_continue_gt
+        exec.check_continue_neq
         while.true
             dup
             dup.4
@@ -92,7 +88,7 @@ proc.catalan_i
             # [ j, k/2, new running_total, k, i, ... ]
             # Update counter and check for termination
             add.1
-            exec.check_continue_gt
+            exec.check_continue_neq
         end
         # [ k/2, k/2, running_total, k, i, ... ]
         # Check if k is odd ( = i is even )
@@ -126,35 +122,30 @@ proc.catalan_i
     # stack : [ ... ], mem : [ C_0, C_1, ..., C_i ]
 end
 
-# Check if the counter is less than or equal to the maximum
-proc.check_continue_gte
-    # [i, max]
-    exec.dup1dup1
-    gte
-    # [ i <= max , i, max ]
-end
-
 begin
     # [ n ]
-    # Validate n as u32 to ensure we can do u32 division,
-    # and that we're not accessing memory out of bounds
+    # Validate n as u32. This ensures that the counter
+    # (which is always less than n+1) can be used for u32 division
+    # on the counter and to access memory without going out of bounds 
     u32assert
+    add.1
 
-    # counters and max are now guaranteed to be u32
+    # counters are now guaranteed to be u32
     # initialize counter i
     push.0
 
-    # [ 0, n ]
-    exec.check_continue_gte
+    # [ 0, n + 1 ]
+    exec.check_continue_neq
     while.true
-        # [ i, n ]
+        # [ i, n + 1 ]
         dup
         exec.catalan_i
-        # [ i, n ]
+        # [ i, n + 1 ]
         add.1
-        exec.check_continue_gte
+        exec.check_continue_neq
     end    
-    # [ n, n ]
+    # [ n + 1, n + 1 ]
     drop
+    sub.1
     mem_load
 end
