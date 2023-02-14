@@ -1,26 +1,26 @@
 # Computes the nth Catalan number using dynamic programming.
 # (See https://www.geeksforgeeks.org/program-nth-catalan-number/)
-#
+# 
 # Definition:
 #     C_0 = 1
 #     C_(n+1) = C_0 * C_n + C_1 * C_(n-1) + ... + C_n * C_0
 #             =  2 * C_0 * C_n + 2 * C_1 * C_(n-1) + ... + 2 * C_(n/2) * C_(n/2+1) (if n+1 is even)
 #             or 2 * C_0 * C_n + 2 * C_1 * C_(n-1) + ... + C_(n/2)^2               (if n+1 is odd)
-#
+# 
 # Input: The stack should contain a single element n.
 # Output: A stack with a single element which is the nth Catalan number C_n.
-#
+# 
 # C_i for 0 <= i <= n will be stored in memory at address i.
-#
+# 
 # example:
-#
+# 
 # input:
 # [9]
-#
+# 
 # output:
 # [4862]
 
-# Check if the counter is less than the maximum
+#! Check if the counter is less than the maximum
 proc.check_continue_neq
     # [i, max]
     dup.1
@@ -29,7 +29,7 @@ proc.check_continue_neq
     # [ i != max , i, max ]
 end
 
-# Fetch precomputed C_j and C_(i-j), and multiply them
+#! Fetch precomputed C_j and C_(i-j), and multiply them
 proc.fetch_and_multiply
     # stack : [ i, j, ... ], mem : [ C_0, C_1, ..., C_i ]
     # Fetch C_(i-j)
@@ -44,8 +44,8 @@ proc.fetch_and_multiply
     # [ C_j * C_(i-j), ... ]
 end
 
-# Calculate C_i.
-# Assumes that all C_j for j < i have already been calculated and stored in memory
+#! Calculate C_i.
+#! Assumes that all C_j for j < i have already been calculated and stored in memory
 proc.catalan_i
     # stack : [ i, ... ], mem : [ C_0, C_1, ..., C_(i-1) ]
     dup
