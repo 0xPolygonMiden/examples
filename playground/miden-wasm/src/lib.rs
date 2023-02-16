@@ -7,7 +7,7 @@ extern crate console_error_panic_hook;
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct InputFile {
-    pub stack_init: Vec<String>,
+    pub stack_init: Option<Vec<String>>,
     pub advice_tape: Option<Vec<String>>,
 }
 
@@ -19,6 +19,8 @@ fn get_program_inputs(stack_init: &[u64], advice_tape: &[u64]) -> ProgramInputs 
 /// Parse stack_init vector of strings to a vector of u64
 fn get_stack_init(inputs: &InputFile) -> Vec<u64> {
     inputs.stack_init
+        .as_ref()
+        .unwrap_or(&vec![])
         .iter()
         .map(|v| v.parse::<u64>().unwrap())
         .collect::<Vec<u64>>()
@@ -46,7 +48,6 @@ pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u
     let mut stack_init = <Vec<u64>>::new();
     let mut advice_tape = <Vec<u64>>::new();
 
-    // TODO: We must catch all cases of inputs. But maybe in the frontend already.
     if inputs_frontend.trim().is_empty() == false {
         let inputs_des: InputFile = serde_json::from_str(&inputs_frontend)
         .map_err(|err| format!("Failed to deserialize input data - {}", err)).unwrap();
