@@ -1,7 +1,7 @@
 type LinkProps = {
-    label: string,
-    address: string,
-}
+  label: string;
+  address: string;
+};
 
 /**
  * This component renders a button with the specified label and calls the specified function when clicked.
@@ -10,9 +10,14 @@ type LinkProps = {
  * @returns a button whose text is the specified label and which calls the specified function when clicked
  */
 const Link = ({ label, address }: LinkProps): JSX.Element => {
-    return <a href={address} className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4">
-    {label}
-  </a>
-}
+  return (
+    <a
+      href={address}
+      className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
+    >
+      {label}
+    </a>
+  );
+};
 
 export default Link;

@@ -1,23 +1,23 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
-  entry: './src/index.tsx',
+  entry: "./src/index.tsx",
   module: {
     rules: [
       {
         test: /\.json$/,
-        use: 'json-loader',
+        use: "json-loader",
       },
       {
         test: /\.(js)x?$/,
         exclude: /node_modules/,
-        use: 'babel-loader',
+        use: "babel-loader",
       },
       {
         test: /\.(ts)x?$/,
         exclude: /node_modules|\.d\.ts$/, // this line as well
         use: {
-          loader: 'ts-loader',
+          loader: "ts-loader",
           options: {
             compilerOptions: {
               noEmit: false, // this option will solve the issue
@@ -27,15 +27,15 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use:['style-loader', 'css-loader', 'sass-loader'],
+        use: ["style-loader", "css-loader", "sass-loader"],
       },
     ],
   },
   resolve: {
-    extensions: ['.css', '.tsx', '.ts', '.js'],
+    extensions: [".css", ".tsx", ".ts", ".js"],
   },
   output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: "bundle.js",
+    path: path.resolve(__dirname, "dist"),
   },
 };

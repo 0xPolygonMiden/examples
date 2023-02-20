@@ -1,23 +1,23 @@
-import { Fragment } from 'react';
-import ReactMarkdown from 'react-markdown';
-import gfm from 'remark-gfm';
-import math from 'remark-math';
-import katex from 'rehype-katex'
-import { assemblerInstructions } from '../data/instructions';
+import { Fragment } from "react";
+import ReactMarkdown from "react-markdown";
+import gfm from "remark-gfm";
+import math from "remark-math";
+import katex from "rehype-katex";
+import { assemblerInstructions } from "../data/instructions";
 
-import 'katex/dist/katex.min.css'
+import "katex/dist/katex.min.css";
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
-/** TODO: 
- * Search button does not work yet 
+/** TODO:
+ * Search button does not work yet
  * Expand button does not work yet - either remove or implement
  * Decide on a table layout and pagination
- * Table loads slowly - consider loading only the first 10 rows and then loading more as the user scrolls 
+ * Table loads slowly - consider loading only the first 10 rows and then loading more as the user scrolls
  * or use react table (https://react-table.tanstack.com/docs/overview)`
-*/
+ */
 export default function InstructionTable() {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -25,8 +25,16 @@ export default function InstructionTable() {
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Instructions</h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all Miden assembly instructions. If you want to learn more about Miden Assembly and the Miden VM you can read the 
-            <a href='https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/' className="text-blue-600 hover:text-blue-800"> Miden Assembly documentation</a>.
+            A list of all Miden assembly instructions. If you want to learn more
+            about Miden Assembly and the Miden VM you can read the
+            <a
+              href="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              {" "}
+              Miden Assembly documentation
+            </a>
+            .
           </p>
         </div>
       </div>
@@ -37,19 +45,34 @@ export default function InstructionTable() {
               <table className="min-w-full">
                 <thead className="bg-white">
                   <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    <th
+                      scope="col"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    >
                       Instruction
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Stack Input
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Stack Output
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Cycles
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
                       Description
                     </th>
                   </tr>
@@ -66,20 +89,60 @@ export default function InstructionTable() {
                           {instructionClass.class}
                         </th>
                       </tr>
-                      {instructionClass.instructions.map((instruction, instructionIdx) => (
-                        <tr
-                          key={instruction.instruction}
-                          className={classNames(instructionIdx === 0 ? 'border-gray-300' : 'border-gray-200', 'border-t')}
-                        >
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          <ReactMarkdown remarkPlugins={[math]} rehypePlugins={[katex]}>{instruction.instruction}</ReactMarkdown>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><ReactMarkdown remarkPlugins={[math, gfm]} rehypePlugins={[katex]}>{instruction.stackInput}</ReactMarkdown></td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><ReactMarkdown remarkPlugins={[math, gfm]} rehypePlugins={[katex]}>{instruction.stackOutput}</ReactMarkdown></td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><ReactMarkdown remarkPlugins={[math, gfm]} rehypePlugins={[katex]}>{instruction.cycles}</ReactMarkdown></td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><ReactMarkdown remarkPlugins={[math, gfm]} rehypePlugins={[katex]}>{instruction.notes}</ReactMarkdown></td>
-                        </tr>
-                      ))}
+                      {instructionClass.instructions.map(
+                        (instruction, instructionIdx) => (
+                          <tr
+                            key={instruction.instruction}
+                            className={classNames(
+                              instructionIdx === 0
+                                ? "border-gray-300"
+                                : "border-gray-200",
+                              "border-t"
+                            )}
+                          >
+                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                              <ReactMarkdown
+                                remarkPlugins={[math]}
+                                rehypePlugins={[katex]}
+                              >
+                                {instruction.instruction}
+                              </ReactMarkdown>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <ReactMarkdown
+                                remarkPlugins={[math, gfm]}
+                                rehypePlugins={[katex]}
+                              >
+                                {instruction.stackInput}
+                              </ReactMarkdown>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <ReactMarkdown
+                                remarkPlugins={[math, gfm]}
+                                rehypePlugins={[katex]}
+                              >
+                                {instruction.stackOutput}
+                              </ReactMarkdown>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <ReactMarkdown
+                                remarkPlugins={[math, gfm]}
+                                rehypePlugins={[katex]}
+                              >
+                                {instruction.cycles}
+                              </ReactMarkdown>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <ReactMarkdown
+                                remarkPlugins={[math, gfm]}
+                                rehypePlugins={[katex]}
+                              >
+                                {instruction.notes}
+                              </ReactMarkdown>
+                            </td>
+                          </tr>
+                        )
+                      )}
                     </Fragment>
                   ))}
                 </tbody>
@@ -89,5 +152,5 @@ export default function InstructionTable() {
         </div>
       </div>
     </div>
-  )
+  );
 }
