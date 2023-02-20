@@ -1,19 +1,3 @@
-//import type {Config} from 'jest';
-//import {defaults} from 'jest-config';
-
-//const config: Config = {
-//  verbose: true,
-//  moduleFileExtensions: [...defaults.moduleFileExtensions, 'mts'],
-//  coverageDirectory: "coverage",
-//  clearMocks: true,
-//  collectCoverage: true,
-//};
-
-//export default config;
-
-
-
-
 module.exports = {
   testMatch: [
     "**/__tests__/**/*.+(ts|tsx|js)",

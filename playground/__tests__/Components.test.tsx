@@ -8,8 +8,8 @@ import Link from "../src/components/Link";
 import NavBar from "../src/components/NavBar";
 
 /** Testing the ActionButton Component */
-describe("Rendering Components ", () => {
-  it("should display the ActionButton", async () => {
+describe("ActionButton component", () => {
+  it("should display the ActionButton when it is rendered", async () => {
     render(<ActionButton label="test button"/>);
     expect(
       screen.getByRole('button', { name: /test button/i }),
@@ -18,8 +18,8 @@ describe("Rendering Components ", () => {
 });
 
 /** Testing the Dropdown Component */
-describe("Rendering Components ", () => {
-  it("should call onChange at the Dropdown", async () => {
+describe("Dropdown Component", () => {
+  it("should change the selected example when clicked", async () => {
     const { getByRole, getAllByRole, getByTestId } = render(<DropDown />)
 
     fireEvent.mouseDown(getByRole('button'));
@@ -34,8 +34,8 @@ describe("Rendering Components ", () => {
 });
 
 /** Testing the Link Component */
-describe("Rendering Components ", () => {
-  it("should display a link", async () => {
+describe("Link Component", () => {
+  it("should have the correct link address when rendered", async () => {
     
     render(<Link label="test" address='http://xyz.de'/>);
 
@@ -47,8 +47,8 @@ describe("Rendering Components ", () => {
 });
 
 /** Testing the NavBar Component */
-describe("Rendering Components ", () => {
-  it("should display the Navigation bar", async () => {
+describe("NavBar Component", () => {
+  it("should contain the correct logo, text, and links when rendered", async () => {
     const { getByTestId } = render(
       <Router> 
         <NavBar />
