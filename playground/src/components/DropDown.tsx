@@ -18,11 +18,11 @@ type DropDownProps = {
   onExampleValueChange?: (newType: string) => void;
 };
 
-export default function DropDown({ onExampleValueChange }: DropDownProps) {
+export default function DropDown({ onExampleValueChange }: DropDownProps): JSX.Element {
   const [selected, setSelected] = useState(examples[1]);
 
   return (
-    <Listbox
+    <Listbox 
       value={selected}
       onChange={(value) => {
         onExampleValueChange?.(value);
@@ -31,7 +31,7 @@ export default function DropDown({ onExampleValueChange }: DropDownProps) {
     >
       {({ open }) => (
         <>
-          <div className="relative mt-1">
+          <div className="relative mt-1" role="listbox" data-testid="listbox">
             <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
               <span className="block truncate">{selected}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -39,13 +39,13 @@ export default function DropDown({ onExampleValueChange }: DropDownProps) {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
                   className="w-6 h-6"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
                   />
                 </svg>
@@ -59,7 +59,7 @@ export default function DropDown({ onExampleValueChange }: DropDownProps) {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" role="options">
                 {examples.map((examples) => (
                   <Listbox.Option
                     key={examples}
@@ -70,6 +70,7 @@ export default function DropDown({ onExampleValueChange }: DropDownProps) {
                       )
                     }
                     value={examples}
+                    data-testid="select-option"
                   >
                     {({ selected, active }) => (
                       <>
@@ -93,13 +94,13 @@ export default function DropDown({ onExampleValueChange }: DropDownProps) {
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"
                               viewBox="0 0 24 24"
-                              stroke-width="1.5"
+                              strokeWidth="1.5"
                               stroke="currentColor"
                               className="w-6 h-6"
                             >
                               <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                                 d="M4.5 12.75l6 6 9-13.5"
                               />
                             </svg>

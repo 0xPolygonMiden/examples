@@ -1,8 +1,5 @@
 use miden::{Assembler, ProgramInputs, ProofOptions};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_test::*;
-extern crate console_error_panic_hook;
-
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -39,8 +36,6 @@ fn get_advice_tape(inputs: &InputFile) -> Vec<u64> {
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
 pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
-    console_error_panic_hook::set_once();
-    wasm_logger::init(wasm_logger::Config::default());
 
     let assembler = Assembler::new();
     let program = assembler.compile(&asm).expect("Could not compile source");
@@ -70,8 +65,6 @@ pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u
 /// Proves the program with the given inputs
 #[wasm_bindgen]
 pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
-    console_error_panic_hook::set_once();
-    wasm_logger::init(wasm_logger::Config::default());
 
     let assembler = Assembler::new();
     let program = assembler.compile(&asm).expect("Could not compile source");
@@ -116,8 +109,9 @@ pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec
 
 }
 
-/// Basic tests for the program
-#[wasm_bindgen_test]
+/// Basic tests for the Rust part
+/// Tests are run with `cargo test`
+#[test]
 fn test_run_program() {
     let output = run_program(
         "begin
@@ -129,7 +123,7 @@ fn test_run_program() {
     assert_eq!(output[0], 3)
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn test_prove_program() {
     let output = prove_program(
         "begin

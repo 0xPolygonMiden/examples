@@ -7,7 +7,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import init, { run_program, prove_program } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 
-async function getExample(example: string) {
+export async function getExample(example: string) {
   const inputs = fetch(
     `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
   );
@@ -17,7 +17,7 @@ async function getExample(example: string) {
   return [(await inputs).text(), (await masm).text()];
 }
 
-function CodingEnvironment() {
+function CodingEnvironment(): JSX.Element {
   /**
    * Helper function to check if input contains only numbers.
    */
