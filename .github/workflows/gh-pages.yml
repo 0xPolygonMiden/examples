@@ -21,8 +21,8 @@ jobs:
       - name: Install and Build 🔧
         run: |
           cd playground
-          npm install
           npm run build:miden
+          npm install
           npm run build
           npx webpack
       - name: Deploy to GitHub Pages
