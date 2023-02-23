@@ -38,6 +38,7 @@
     "build:wasm": "cd miden-wasm && wasm-pack build --target web --out-dir pkg",
     "test": "jest && cd miden-wasm && cargo test",
     "test:watch": "jest --watch",
+    "webpack": "npx webpack",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -80,6 +81,7 @@
     "jest": "^29.4.3",
     "jest-environment-jsdom": "^29.4.3",
     "katex": "^0.13.11",
+    "pre-commit": "^1.2.2",
     "prettier": "2.6.2",
     "sass": "1.32.11",
     "sass-loader": "^12.4.0",
@@ -104,5 +106,9 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/0xPolygonMiden/examples/issues"
-  }
+  },
+  "pre-commit": [
+    "test",
+    "webpack"
+  ]
 }
