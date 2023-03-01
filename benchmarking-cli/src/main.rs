@@ -1,6 +1,7 @@
 use clap::Parser;
-use miden::{Assembler, ProgramInputs, ProofOptions};
-use winter_math::StarkField;
+use miden_vm::{
+    AdviceInputs, Assembler, Kernel, MemAdviceProvider, ProgramInfo, ProofOptions, StackInputs,
+};
 use std::fs;
 use std::time::Instant;
 
@@ -10,30 +11,31 @@ pub struct InputFile {
     pub advice_tape: Option<Vec<String>>,
 }
 
-// Creates a `ProgramInputs` struct for Miden VM from the specified inputs.
-// ToDo: we should allow other types of advice inputs as well. We'll want to make the same update to the playground as well.
-fn get_program_inputs(stack_init: &[u64], advice_tape: &[u64]) -> ProgramInputs {
-    ProgramInputs::new(stack_init, advice_tape, Vec::new()).unwrap()
-}
-
 // Parse stack_init vector of strings to a vector of u64
-fn get_stack_init(inputs: &InputFile) -> Vec<u64> {
-    inputs
-        .stack_init
+fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvider, String> {
+    let tape = advice_input_file
+        .advice_tape
+        .as_ref()
+        .map(Vec::as_slice)
+        .unwrap_or(&[])
         .iter()
-        .map(|v| v.parse::<u64>().unwrap())
-        .collect::<Vec<u64>>()
+        .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+    let advice_inputs = AdviceInputs::default()
+        .with_tape_values(tape)
+        .map_err(|e| e.to_string())?;
+    Ok(MemAdviceProvider::from(advice_inputs))
 }
 
 // Parse advice_tape vector of strings to a vector of u64
-fn get_advice_tape(inputs: &InputFile) -> Vec<u64> {
-    inputs
-        .advice_tape
-        .as_ref()
-        .unwrap_or(&vec![])
+fn parse_stack_inputs(stack_input_file: &InputFile) -> Result<StackInputs, String> {
+    let stack_inputs = stack_input_file
+        .stack_init
         .iter()
-        .map(|v| v.parse::<u64>().unwrap())
-        .collect::<Vec<u64>>()
+        .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    StackInputs::try_from_values(stack_inputs).map_err(|e| e.to_string())
 }
 
 #[derive(Parser)]
@@ -87,26 +89,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let's read the program
     let program_string = fs::read_to_string(format!("../examples/{}.masm", &args.example))?;
 
-    // let's read the input fils
+    // let's read the input files
     let input_string = fs::read_to_string(format!("../examples/{}.inputs", &args.example))
         .map_err(|err| format!("Failed to open input file `{}` - {}", &args.example, err))?;
     let inputs_des: InputFile = serde_json::from_str(&input_string)
         .map_err(|err| format!("Failed to deserialize input data - {}", err))
         .unwrap();
 
-    let stack_init = get_stack_init(&inputs_des);
-    let advice_tape = get_advice_tape(&inputs_des);
-
-    let inputs = get_program_inputs(&stack_init, &advice_tape);
+    let advice_provider = parse_advice_provider(&inputs_des).unwrap();
+    let stack_input = parse_stack_inputs(&inputs_des).unwrap();
 
     // Compilation time
     let now = Instant::now();
-    let assembler = Assembler::new();
+    let assembler = Assembler::default();
     let program = assembler
         .compile(&program_string)
         .expect("Could not compile source");
 
     println! {"Compilation Time (cold): {} ms", now.elapsed().as_millis()}
+
+    let program_hash = program.hash();
+    let kernel = Kernel::default();
+    let program_info = ProgramInfo::new(program_hash, kernel);
 
     let now = Instant::now();
     let _program2 = assembler
@@ -115,18 +119,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println! {"Compilation Time (hot): {} ms", now.elapsed().as_millis()}
 
+    let stack_input_cloned = stack_input.clone();
+    let advice_provider_cloned = advice_provider.clone();
+
     // Execution time
     let now = Instant::now();
-    miden::execute(&program, &inputs)
-        .map_err(|err| {
-            format!(
-                "Failed to generate exection trace = {:?}, and advice_tape = {:?}",
-                err, advice_tape
-            )
-        })
+    let trace = miden_vm::execute(&program, stack_input_cloned, advice_provider_cloned)
+        .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
         .unwrap();
 
-    println! {"Execution Time: {} ms", now.elapsed().as_millis()}
+    println! {"Execution Time: {} steps in {} ms", trace.get_trace_len(), now.elapsed().as_millis()}
 
     // Proving time
     let proof_options = if args.security == "high" {
@@ -135,25 +137,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ProofOptions::with_96_bit_security()
     };
 
+    // let's clone the stack_input and advice_provider
+    // because they are moved into the closure
+    let stack_input_cloned = stack_input.clone();
+    let advice_provider_cloned = advice_provider.clone();
+
     let now = Instant::now();
-    let (output, proof) = miden::prove(&program, &inputs, &proof_options).expect("Proving failed");
+    let (output, proof) = miden_vm::prove(
+        &program,
+        stack_input_cloned,
+        advice_provider_cloned,
+        proof_options,
+    )
+    .expect("Proving failed");
 
     println! {"Proving Time: {} ms", now.elapsed().as_millis()}
 
-    // Verification time
-    let program_input_u64 = inputs
-        .stack_init()
-        .iter()
-        .map(|x| x.as_int())
-        .collect::<Vec<u64>>();
+    // let's clone the stack_input and output
+    // because they are moved into the closure
+    let stack_input_cloned = stack_input.clone();
+    let output_cloned = output.clone();
 
+    // Verification time
     let now = Instant::now();
-    miden::verify(program.hash(), &program_input_u64, &output, proof)
+    miden_vm::verify(program_info, stack_input_cloned, output_cloned, proof)
         .map_err(|err| format!("Program failed verification! - {}", err))?;
+
     println! {"Verification Time: {} ms", now.elapsed().as_millis()}
 
     // We return the stack as defined by the user
-    println! {"Result: {:?}", output.stack_outputs(args.output)};
+    println! {"Result: {:?}", output.stack_truncated(args.output)};
 
     Ok(())
 }
