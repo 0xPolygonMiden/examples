@@ -18,7 +18,7 @@ and then
 OR you run 
 
 ```
-cargo run -- -example fibonacci   
+cargo run -- -e fibonacci   
 ```
 
 You can pass two additional parameters to the CLI `security` and `output`. `security` can be `"high"` for 128-bit security and will default to 96-bit. `output` defines the number of stack outputs the program returns. It defaults to 1. 

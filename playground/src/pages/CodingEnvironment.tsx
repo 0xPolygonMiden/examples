@@ -47,7 +47,7 @@ function CodingEnvironment(): JSX.Element {
 
       return false;
     }
-
+    
     return true;
   }
 
@@ -91,10 +91,12 @@ an advice_tape.`;
 
       return false;
     }
-    Object.keys(jsonInput).forEach((key) => {
-      checkInputField(jsonInput, key);
-    });
 
+    Object.keys(jsonInput).forEach((key) => {
+      if (!checkInputField(jsonInput, key)) {
+        return false;
+      }
+    });
     return true;
   }
 
