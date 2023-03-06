@@ -4,7 +4,7 @@ import { eclipse } from "@uiw/codemirror-theme-eclipse";
 import ActionButton from "../components/ActionButton";
 import DropDown from "../components/DropDown";
 import CodeMirror from "@uiw/react-codemirror";
-import init, { run_program, prove_program } from "miden-wasm";
+import init, { Outputs, run_program, prove_program } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 
 export async function getExample(example: string) {
@@ -17,7 +17,7 @@ export async function getExample(example: string) {
   return [(await inputs).text(), (await masm).text()];
 }
 
-function CodingEnvironment(): JSX.Element {
+function CodingEnvironment(): JSX.Element {  
   /**
    * Helper function to check if input contains only numbers.
    */
@@ -162,11 +162,11 @@ end`;
     init().then(() => {
       try {
         if (checkInputs(inputs)) {
-          const resp = run_program(code, inputs, numOfOutputs);
+          const {stack_output, trace_length}: Outputs = run_program(code, inputs, numOfOutputs);
 
           setOutput(`Miden VM Program Output
-Stack = [${resp.toString()}]
-Cycles = <available with Miden VM v0.4>`);
+Stack = [${stack_output.toString()}]
+Cycles = [${trace_length.toString()}]`);
         }
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
@@ -183,14 +183,22 @@ Cycles = <available with Miden VM v0.4>`);
     init().then(() => {
       try {
         if (checkInputs(inputs)) {
-          const resp = prove_program(code, inputs, numOfOutputs);
-          const stack_output = resp.slice(0, numOfOutputs);
-          const overflow_addrs = resp.slice(numOfOutputs, resp.length);
+          const {stack_output, trace_length, program_info, overflow_addrs, proof}: Outputs = prove_program(code, inputs, numOfOutputs);
 
           setOutput(`Miden VM Program Output
 Stack = [${stack_output.toString()}]
-Overflow Address = [${overflow_addrs.toString()}]
-Cycles = <available with Miden VM v0.4>`);
+Overflow Address = [${ overflow_addrs ? overflow_addrs.toString() : ""}]
+Cycles = [${trace_length.toString()}]`);
+
+  // Store program_info in the session storage to verify the proof 
+          if (program_info) {
+            sessionStorage.setItem("program_info", program_info.toString())  
+            }      
+
+  // Store the proof in the session storage
+        if (proof) {
+          sessionStorage.setItem("proof", proof.toString())  
+          }
         }
       } catch (error) {
         setOutput("Error: Check the developer console for details.");

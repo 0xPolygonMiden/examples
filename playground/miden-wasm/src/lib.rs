@@ -1,7 +1,9 @@
+mod expected_test_proof;
 use miden_vm::math::{Felt, FieldElement};
 use miden_vm::{
     AdviceInputs, Assembler, Kernel, MemAdviceProvider, ProgramInfo, ProofOptions, StackInputs,
 };
+use miden_vm::utils::Serializable;
 use wasm_bindgen::prelude::*;
 extern crate console_error_panic_hook;
 
@@ -10,6 +12,15 @@ extern crate console_error_panic_hook;
 pub struct InputFile {
     pub stack_init: Option<Vec<String>>,
     pub advice_tape: Option<Vec<String>>,
+}
+
+#[wasm_bindgen(getter_with_clone)]
+pub struct Outputs {
+    pub stack_output: Vec<u64>, 
+    pub trace_length: usize,
+    pub program_info: Option<Vec<u8>>,
+    pub overflow_addrs: Option<Vec<u64>>,
+    pub proof: Option<Vec<u8>>,
 }
 
 // Parse stack_init vector of strings to a vector of u64
@@ -44,8 +55,7 @@ fn parse_stack_inputs(stack_input_file: &InputFile) -> Result<StackInputs, Strin
 
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
-pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
-    console_error_panic_hook::set_once();
+pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Outputs {
 
     let assembler = Assembler::default();
     let program = assembler.compile(&asm).expect("Could not compile source");
@@ -66,16 +76,20 @@ pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u
         .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
         .unwrap();
 
-    trace
-        .stack_outputs()
-        .stack_truncated(output_count as usize)
-        .to_vec()
+    let result = Outputs{
+        stack_output: trace.stack_outputs().stack_truncated(output_count as usize).to_vec(), 
+        trace_length: trace.get_trace_len(),
+        program_info: None,
+        overflow_addrs: None,
+        proof: None,
+    };
+
+    result
 }
 
 /// Proves the program with the given inputs
 #[wasm_bindgen]
-pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec<u64> {
-    console_error_panic_hook::set_once();
+pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Outputs {
 
     let assembler = Assembler::default();
     let program = assembler.compile(&asm).expect("Could not compile source");
@@ -97,22 +111,23 @@ pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Vec
     // default (96 bits of security)
     let proof_options = ProofOptions::with_96_bit_security();
 
-    let (output, _proof) = miden_vm::prove(&program, stack_input, advice_provider, proof_options)
+    let (output, proof) = miden_vm::prove(&program, stack_input, advice_provider, proof_options)
         .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
         .unwrap();
 
-    // We convert the outputs into one Vector because we can't return tuples in wasm-bindgen.
-    // So the first n elements are the stack_outputs and the last n elements are the overflow_addrs.
-    // TODO: We can somehow refactor to return structures in wasm-bindgen. But I didn't find a way yet.
-    // There might be a way to return the ProgramOutputs struct even.
-    let mut stack_outputs = output.stack_truncated(output_count as usize).to_vec();
-    let mut overflow_addrs = output.overflow_addrs().to_vec();
-    stack_outputs.append(&mut overflow_addrs);
+    let program_hash = program.hash();
+    let kernel = Kernel::default();
+    let program_info = ProgramInfo::new(program_hash, kernel);
 
-    // TODO: We must return trace_info as well, but we can not handle that yet in Miden v0.3.
-    // TODO: We must return the proof as well. But we can not handle that yet in the frontend.
+    let result = Outputs{
+        stack_output: output.stack_truncated(output_count as usize).to_vec(), 
+        trace_length: proof.stark_proof().trace_length(),
+        program_info: Some(program_info.to_bytes()),
+        overflow_addrs: Some(output.overflow_addrs().to_vec()),
+        proof: Some(proof.to_bytes()),
+    };
 
-    stack_outputs
+    result
 }
 
 /// Basic tests for the Rust part
@@ -126,7 +141,8 @@ fn test_run_program() {
         "",
         1,
     );
-    assert_eq!(output[0], 3)
+    assert_eq!(output.stack_output, vec![3]);
+    assert_eq!(output.trace_length, 1024);
 }
 
 #[test]
@@ -136,12 +152,18 @@ fn test_prove_program() {
             push.1 push.2 add
         end",
         "",
-        16,
+        1,
     );
     // this is the result of the stack output, 3
-    assert_eq!(output[0], 3);
+    assert_eq!(output.stack_output, vec![3]);
 
-    // for the proof we have [0, 1] as overflow_addrs
-    assert_eq!(output[16], 0);
-    assert_eq!(output[17], 1);
+    assert_eq!(output.trace_length, 1024);
+    
+   // for the proof we have [0, 1] as overflow_addrs
+   assert_eq!(output.overflow_addrs.is_some(), true);
+    assert_eq!(output.overflow_addrs, Some(vec![0, 1]));
+
+    // we expect a proof of []
+    assert_eq!(output.proof.is_some(), true);
+    assert_eq!(output.proof, Some(expected_test_proof::EXPECTED_PROOF_BYTES.to_vec()));
 }
