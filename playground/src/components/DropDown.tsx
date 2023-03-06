@@ -18,11 +18,13 @@ type DropDownProps = {
   onExampleValueChange?: (newType: string) => void;
 };
 
-export default function DropDown({ onExampleValueChange }: DropDownProps): JSX.Element {
+export default function DropDown({
+  onExampleValueChange,
+}: DropDownProps): JSX.Element {
   const [selected, setSelected] = useState(examples[1]);
 
   return (
-    <Listbox 
+    <Listbox
       value={selected}
       onChange={(value) => {
         onExampleValueChange?.(value);
@@ -59,7 +61,10 @@ export default function DropDown({ onExampleValueChange }: DropDownProps): JSX.E
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm" role="options">
+              <Listbox.Options
+                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                role="options"
+              >
                 {examples.map((examples) => (
                   <Listbox.Option
                     key={examples}

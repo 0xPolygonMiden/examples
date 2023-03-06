@@ -6,7 +6,10 @@ const NavBar = () => {
   return (
     <>
       <div className="flex items-center justify-between flex-wrap bg-blue-700 p-6">
-        <div className="flex items-center flex-shrink-0 text-white mr-6" data-testid="logo">
+        <div
+          className="flex items-center flex-shrink-0 text-white mr-6"
+          data-testid="logo"
+        >
           <MidenLogo />
           <span className="font-semibold text-xl tracking-tight">
             Playground for Miden Examples in Miden Assembly
@@ -29,7 +32,10 @@ const NavBar = () => {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4 bg-blue-700 p-6 hover:bg-blue-700" data-testid="nav-links">
+      <div
+        className="grid grid-cols-2 gap-4 bg-blue-700 p-6 hover:bg-blue-700"
+        data-testid="nav-links"
+      >
         <NavLink
           className="font-semibold text-xl text-center hover:bg-blue-700"
           to="/examples/"
