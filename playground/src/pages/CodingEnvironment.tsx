@@ -1,56 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { eclipse } from "@uiw/codemirror-theme-eclipse";
 import ActionButton from "../components/ActionButton";
 import DropDown from "../components/DropDown";
 import CodeMirror from "@uiw/react-codemirror";
-import init, { Outputs, run_program, prove_program } from "miden-wasm";
+import init, {
+  Outputs,
+  run_program,
+  prove_program,
+  verify_program,
+} from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
+import { getExample, checkFields } from "../utils/helper_functions";
 
-export async function getExample(example: string) {
-  const inputs = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
-  );
-  const masm = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`
-  );
-  return [(await inputs).text(), (await masm).text()];
-}
-
-function CodingEnvironment(): JSX.Element {  
-  /**
-   * Helper function to check if input contains only numbers.
-   */
-  function checkInputField(jsonField: JSON, key: string) {
-    const jsonInput = jsonField[key as keyof typeof jsonField];
-
-    if (!Array.isArray(jsonInput)) {
-      const errorMessage = `If you use ${key},
-      it must be an array of numbers.`;
-
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (
-      Object.values(jsonInput).length === 0 ||
-      Object.values(jsonInput).some(isNaN)
-    ) {
-      const errorMessage = `If you use ${key}, 
-      it must contain at least one number, 
-      and it can only contain numbers.`;
-
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-    
-    return true;
-  }
-
+function CodingEnvironment(): JSX.Element {
   /**
    * We check the inputs and return true or false. We allow:
    * - an empty input, and
@@ -66,7 +29,7 @@ function CodingEnvironment(): JSX.Element {
 
     try {
       jsonInput = JSON.parse(jsonString);
-    } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
       const errorMessage = `Miden VM Inputs need to be a valid JSON object:
 ${e.message}`;
 
@@ -92,18 +55,80 @@ an advice_tape.`;
       return false;
     }
 
-    Object.keys(jsonInput).forEach((key) => {
-      if (!checkInputField(jsonInput, key)) {
-        return false;
-      }
-    });
+    if (!checkFields(jsonInput)[0]) {
+      const errorMessage = checkFields(jsonInput)[1]
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * We check the outputs and return true or false. We allow:
+   * - a valid JSON object containing stack_output (and overflows if present)
+   * - only numbers as values
+   */
+  function checkOutputs(jsonString: string, proof: Uint8Array) {
+    if (jsonString === "") {
+      const errorMessage = `We need some outputs to verify the program.
+Did you prove the program first?`;
+
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+
+      return false;
+    }
+
+    if (proof.length === 0) {
+      const errorMessage = `The proof is empty.
+Did you prove the program first?`;
+
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+
+      return false;
+    }
+
+    let jsonOutput!: JSON;
+
+    try {
+      jsonOutput = JSON.parse(jsonString);
+    } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
+      const errorMessage = `Miden VM Outputs need to be a valid JSON object:
+${e.message}
+Did you prove the program first?`;
+
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+
+      return false;
+    }
+
+    if (!Object.keys(jsonOutput).includes("stack_output")) {
+      const errorMessage = `We need some outputs to verify the program.
+Did you prove the program first?`;
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+
+      return false;
+    }
+
+    if (!checkFields(jsonOutput)[0]) {
+      const errorMessage = checkFields(jsonOutput)[1]
+      toast.error(errorMessage);
+      setOutput(errorMessage);
+
+      return false;
+    }
+
     return true;
   }
 
   /**
    * This sets the inputs to the default values.
    */
-
   const exampleInput = `{
     "stack_init": ["0"],
     "advice_tape": ["0"]
@@ -119,19 +144,10 @@ end`;
   const [code, setCode] = React.useState(exampleCode);
 
   /**
-   * This sets the output and number of outputs to the default values.
-   * Set to 16 now, that should change dynamically.
+   * This sets the output to the default values.
    */
-
   const emptyOutput = "\n \n \n \n";
-  const [output, setOutput] = React.useState(emptyOutput);
-
-  /**
-   * This handles the number of outputs that are returned to the user.
-   * It is not optimal to fix that to a certain number, but for
-   * the sake of simplicity we do it for now.
-   */
-  const numOfOutputs = 16;
+  const [outputs, setOutput] = React.useState(emptyOutput);
 
   /**
    * This handles a change in the selected example.
@@ -162,11 +178,12 @@ end`;
     init().then(() => {
       try {
         if (checkInputs(inputs)) {
-          const {stack_output, trace_length}: Outputs = run_program(code, inputs, numOfOutputs);
+          const { stack_output, cycles }: Outputs = run_program(code, inputs);
 
-          setOutput(`Miden VM Program Output
-Stack = [${stack_output.toString()}]
-Cycles = [${trace_length.toString()}]`);
+          setOutput(`{
+"stack_output" : [${stack_output.toString()}],
+"cycles" : ${cycles}
+}`);
         }
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
@@ -179,25 +196,26 @@ Cycles = [${trace_length.toString()}]`);
    * It runs the Rust program that is imported above.
    */
 
+  const [proof, setProof] = useState<Uint8Array>(new Uint8Array(0));
+
   const proveProgram = async () => {
     init().then(() => {
       try {
         if (checkInputs(inputs)) {
-          const {stack_output, trace_length, program_info, overflow_addrs, proof}: Outputs = prove_program(code, inputs, numOfOutputs);
+          const { stack_output, cycles, overflow_addrs, proof }: Outputs =
+            prove_program(code, inputs);
 
-          setOutput(`Miden VM Program Output
-Stack = [${stack_output.toString()}]
-Overflow Address = [${ overflow_addrs ? overflow_addrs.toString() : ""}]
-Cycles = [${trace_length.toString()}]`);
+          setOutput(`{
+"stack_output" : [${stack_output.toString()}],
+"overflow_addrs" : [${overflow_addrs ? overflow_addrs.toString() : ""}],
+"cycles" : ${cycles}
+}`);
 
-  // Store program_info in the session storage to verify the proof 
-          if (program_info) {
-            sessionStorage.setItem("program_info", program_info.toString())  
-            }      
-
-  // Store the proof in the session storage
-        if (proof) {
-          sessionStorage.setItem("proof", proof.toString())  
+          // Store the proof if >0 (empty proof is 0)
+          if (proof) {
+            if (proof.length > 0) {
+              setProof(proof);
+            }
           }
         }
       } catch (error) {
@@ -214,9 +232,25 @@ Cycles = [${trace_length.toString()}]`);
       toast.error("Not yet available");
     });
   };
+
+  /**
+   * This verifies the proof that is stored in the session.
+   * It runs the Rust program that is imported above.
+   * It returns true if the proof is valid, and false otherwise.
+   * As inputs we need program_info, stack_input, stack_output, and proof.
+   */
   const verifyProgram = async () => {
     init().then(() => {
-      toast.error("Not yet available");
+      try {
+        if (checkInputs(inputs) && checkOutputs(outputs, proof)) {
+          const result = verify_program(code, inputs, outputs, proof);
+          setOutput(`Verification succeeded with a security level of ${result} bits. \n \n \n`);
+          toast.success("Verification successful");
+        }
+      } catch (error) {
+          setOutput("Error: Check the developer console for details.");
+          toast.error("Verification failed");
+        }
     });
   };
 
@@ -245,7 +279,7 @@ Cycles = [${trace_length.toString()}]`);
           <div className="box-border">
             <h1 className="heading">Outputs</h1>
             <CodeMirror
-              value={output}
+              value={outputs}
               height="100%"
               maxHeight="80px"
               theme={eclipse}
