@@ -11,121 +11,13 @@ import init, {
   verify_program,
 } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
-import { getExample, checkFields } from "../utils/helper_functions";
+import {
+  getExample,
+  checkInputs,
+  checkOutputs,
+} from "../utils/helper_functions";
 
 function CodingEnvironment(): JSX.Element {
-  /**
-   * We check the inputs and return true or false. We allow:
-   * - an empty input, and
-   * - a valid JSON object containing stack_init or advice_tape (or both)
-   * if the values are numbers
-   */
-  function checkInputs(jsonString: string) {
-    if (jsonString === "") {
-      return true;
-    }
-
-    let jsonInput!: JSON;
-
-    try {
-      jsonInput = JSON.parse(jsonString);
-    } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
-      const errorMessage = `Miden VM Inputs need to be a valid JSON object:
-${e.message}`;
-
-      toast.error(errorMessage);
-
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (
-      !Object.keys(jsonInput).includes("stack_init") &&
-      !Object.keys(jsonInput).includes("advice_tape")
-    ) {
-      const errorMessage = `Miden VM Inputs can be empty or 
-we need either a stack_init or 
-an advice_tape.`;
-
-      toast.error(errorMessage);
-
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (!checkFields(jsonInput)[0]) {
-      const errorMessage = checkFields(jsonInput)[1]
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * We check the outputs and return true or false. We allow:
-   * - a valid JSON object containing stack_output (and overflows if present)
-   * - only numbers as values
-   */
-  function checkOutputs(jsonString: string, proof: Uint8Array) {
-    if (jsonString === "") {
-      const errorMessage = `We need some outputs to verify the program.
-Did you prove the program first?`;
-
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (proof.length === 0) {
-      const errorMessage = `The proof is empty.
-Did you prove the program first?`;
-
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    let jsonOutput!: JSON;
-
-    try {
-      jsonOutput = JSON.parse(jsonString);
-    } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
-      const errorMessage = `Miden VM Outputs need to be a valid JSON object:
-${e.message}
-Did you prove the program first?`;
-
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (!Object.keys(jsonOutput).includes("stack_output")) {
-      const errorMessage = `We need some outputs to verify the program.
-Did you prove the program first?`;
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    if (!checkFields(jsonOutput)[0]) {
-      const errorMessage = checkFields(jsonOutput)[1]
-      toast.error(errorMessage);
-      setOutput(errorMessage);
-
-      return false;
-    }
-
-    return true;
-  }
-
   /**
    * This sets the inputs to the default values.
    */
@@ -176,16 +68,19 @@ end`;
 
   const runProgram = async () => {
     init().then(() => {
+      const inputCheck = checkInputs(inputs);
+        if (!inputCheck.isValid) {
+          setOutput(inputCheck.errorMessage);
+          toast.error("Execution failed");
+          return
+        }
       try {
-        if (checkInputs(inputs)) {
           const { stack_output, cycles }: Outputs = run_program(code, inputs);
-
           setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "cycles" : ${cycles}
 }`);
-        }
-      } catch (error) {
+        } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
     });
@@ -195,30 +90,31 @@ end`;
    * This proves the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
    */
-
   const [proof, setProof] = useState<Uint8Array>(new Uint8Array(0));
 
   const proveProgram = async () => {
     init().then(() => {
+      const inputCheck = checkInputs(inputs);
+      if (!inputCheck.isValid) {
+        setOutput(inputCheck.errorMessage);
+        toast.error("Proving failed");
+        return
+      }
       try {
-        if (checkInputs(inputs)) {
           const { stack_output, cycles, overflow_addrs, proof }: Outputs =
             prove_program(code, inputs);
-
           setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "overflow_addrs" : [${overflow_addrs ? overflow_addrs.toString() : ""}],
 "cycles" : ${cycles}
 }`);
-
           // Store the proof if >0 (empty proof is 0)
           if (proof) {
             if (proof.length > 0) {
               setProof(proof);
             }
           }
-        }
-      } catch (error) {
+        } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
     });
@@ -241,16 +137,27 @@ end`;
    */
   const verifyProgram = async () => {
     init().then(() => {
+      const inputCheck = checkInputs(inputs);
+      const outputCheck = checkOutputs(outputs, proof);
+      if (!inputCheck.isValid) {
+        setOutput(inputCheck.errorMessage);
+        toast.error("Verification failed");
+        return
+      } else if (!outputCheck.isValid) {
+        setOutput(outputCheck.errorMessage);
+        toast.error("Verification failed");
+        return
+      }
       try {
-        if (checkInputs(inputs) && checkOutputs(outputs, proof)) {
           const result = verify_program(code, inputs, outputs, proof);
-          setOutput(`Verification succeeded with a security level of ${result} bits. \n \n \n`);
+          setOutput(
+            `Verification succeeded with a security level of ${result} bits. \n \n \n`
+          );
           toast.success("Verification successful");
-        }
-      } catch (error) {
-          setOutput("Error: Check the developer console for details.");
-          toast.error("Verification failed");
-        }
+        } catch (error) {
+        setOutput("Error: Check the developer console for details.");
+        toast.error("Verification failed");
+      }
     });
   };
 

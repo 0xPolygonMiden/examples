@@ -12,24 +12,29 @@ export async function getExample(example: string) {
 }
 
 /**
+ * Helper interface as return object from the checking functions.
+ */
+export interface checkedData {
+  isValid: boolean;
+  errorMessage: string;
+}
+
+/**
  * Helper function to iterate over the inputs and check if they are valid.
  */
-export function checkFields(jsonInput: JSON): [boolean, string] {
-  let returnValue : [boolean, string] = [true, ""];
+export function checkFields(jsonInput: JSON): checkedData {
+  let returnValue: checkedData = { isValid: true, errorMessage: "" };
 
-  for ( const key in jsonInput ) {
+  for (const key in jsonInput) {
     if (key === "cycles") {
       continue;
     }
 
-    if (!checkField(jsonInput, key)[0]) {
-      returnValue = [
-        checkField(jsonInput, key)[0], 
-        checkField(jsonInput, key)[1]
-      ];
+    const checkFieldResult = checkField(jsonInput, key);
+    if (!checkFieldResult.isValid) {
+      returnValue = checkFieldResult;
       break;
     }
-
   }
 
   return returnValue;
@@ -38,14 +43,13 @@ export function checkFields(jsonInput: JSON): [boolean, string] {
 /**
  * Helper function to check if a field contains at least one number and only numbers.
  */
-export function checkField(jsonField: JSON, key: string): [boolean, string] {
-  
+export function checkField(jsonField: JSON, key: string): checkedData {
   const jsonInput = jsonField[key as keyof typeof jsonField];
 
   if (!Array.isArray(jsonInput)) {
     const errorMessage = `${key} must be an array of numbers. \n\n\n`;
 
-    return [false, errorMessage];
+    return { isValid: false, errorMessage: errorMessage };
   }
 
   if (
@@ -55,8 +59,89 @@ export function checkField(jsonField: JSON, key: string): [boolean, string] {
     const errorMessage = `${key} must contain at least one number, 
 and it can only contain numbers. \n\n`;
 
-    return [false, errorMessage];
+    return { isValid: false, errorMessage: errorMessage };
   }
 
-  return [true, ""];
+  return { isValid: true, errorMessage: "" };
+}
+
+/**
+ * We check the inputs and return true or false. We allow:
+ * - an empty input, and
+ * - a valid JSON object containing stack_init or advice_tape (or both)
+ * if the values are numbers
+ */
+export function checkInputs(jsonString: string): checkedData {
+  if (jsonString === "") {
+    return { isValid: true, errorMessage: "" };
+  }
+
+  let jsonInput!: JSON;
+
+  try {
+    jsonInput = JSON.parse(jsonString);
+  } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const errorMessage = `Miden VM Inputs need to be a valid JSON object:
+${e.message}`;
+    return { isValid: false, errorMessage: errorMessage };
+  }
+
+  if (
+    !Object.keys(jsonInput).includes("stack_init") &&
+    !Object.keys(jsonInput).includes("advice_tape")
+  ) {
+    const errorMessage = `Miden VM Inputs can be empty or 
+we need either a stack_init or 
+an advice_tape.`;
+
+    return { isValid: false, errorMessage: errorMessage };
+  }
+  
+  return checkFields(jsonInput)
+}
+
+/**
+ * We check the outputs and return true or false. We allow:
+ * - a valid JSON object containing stack_output (and overflows if present)
+ * - only numbers as values
+ */
+export function checkOutputs(
+  jsonString: string,
+  proof: Uint8Array
+): checkedData {
+  if (jsonString === "") {
+    const errorMessage = `We need some outputs to verify the program.
+Did you prove the program first?`;
+
+    return { isValid: false, errorMessage: errorMessage };
+  }
+
+  if (proof.length === 0) {
+    const errorMessage = `The proof is empty.
+Did you prove the program first?`;
+
+    return { isValid: false, errorMessage: errorMessage };
+  }
+
+  let jsonOutput!: JSON;
+
+  try {
+    jsonOutput = JSON.parse(jsonString);
+  } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
+    const errorMessage = `Miden VM Outputs need to be a valid JSON object:
+${e.message}
+Did you prove the program first?`;
+
+    return { isValid: false, errorMessage: errorMessage };
+  }
+
+  if (!Object.keys(jsonOutput).includes("stack_output")) {
+    const errorMessage = `We need some outputs to verify the program.
+Did you prove the program first?`;
+
+    return { isValid: false, errorMessage: errorMessage };
+  }
+
+  return checkFields(jsonOutput)
 }
