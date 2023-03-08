@@ -1,7 +1,13 @@
-import { fireEvent, render, screen, cleanup, within } from "@testing-library/react";
-import '@testing-library/jest-dom'
+import {
+  fireEvent,
+  render,
+  screen,
+  cleanup,
+  within,
+} from "@testing-library/react";
+import "@testing-library/jest-dom";
 import React from "react";
-import {BrowserRouter as Router} from 'react-router-dom';
+import { BrowserRouter as Router } from "react-router-dom";
 import ActionButton from "../src/components/ActionButton";
 import DropDown from "../src/components/DropDown";
 import Link from "../src/components/Link";
@@ -10,39 +16,36 @@ import NavBar from "../src/components/NavBar";
 /** Testing the ActionButton Component */
 describe("ActionButton component", () => {
   it("should display the ActionButton when it is rendered", async () => {
-    render(<ActionButton label="test button"/>);
-    expect(
-      screen.getByRole('button', { name: /test button/i }),
-    );
+    render(<ActionButton label="test button" />);
+    expect(screen.getByRole("button", { name: /test button/i }));
   });
 });
 
 /** Testing the Dropdown Component */
 describe("Dropdown Component", () => {
   it("should change the selected example when clicked", async () => {
-    const { getByRole, getAllByRole, getByTestId } = render(<DropDown />)
+    const { getByRole, getAllByRole, getByTestId } = render(<DropDown />);
 
-    fireEvent.mouseDown(getByRole('button'));
-    const listbox = within(getByRole('listbox'));
+    fireEvent.mouseDown(getByRole("button"));
+    const listbox = within(getByRole("listbox"));
 
     fireEvent.click(listbox.getByText("comparison"));
-    expect(getByTestId('listbox')).toHaveTextContent('comparison');
+    expect(getByTestId("listbox")).toHaveTextContent("comparison");
 
     fireEvent.click(listbox.getByText("collatz"));
-    expect(getByTestId('listbox')).toHaveTextContent('collatz');
+    expect(getByTestId("listbox")).toHaveTextContent("collatz");
   });
 });
 
 /** Testing the Link Component */
 describe("Link Component", () => {
   it("should have the correct link address when rendered", async () => {
-    
-    render(<Link label="test" address='http://xyz.de'/>);
+    render(<Link label="test" address="http://xyz.de" />);
 
-    expect(
-      screen.getByRole('link', { name: /test/i })
-    ).toHaveAttribute('href', 'http://xyz.de');
-
+    expect(screen.getByRole("link", { name: /test/i })).toHaveAttribute(
+      "href",
+      "http://xyz.de"
+    );
   });
 });
 
@@ -50,17 +53,20 @@ describe("Link Component", () => {
 describe("NavBar Component", () => {
   it("should contain the correct logo, text, and links when rendered", async () => {
     const { getByTestId } = render(
-      <Router> 
+      <Router>
         <NavBar />
-      </Router>); 
+      </Router>
+    );
 
-    expect(getByTestId('logo')).toBeInTheDocument();
-    expect(getByTestId('logo')).toHaveTextContent('Playground for Miden Examples in Miden Assembly');
-   
-    expect(getByTestId('top-links')).toBeInTheDocument();
-    
-    expect(getByTestId('nav-links')).toBeInTheDocument();
-    expect(getByTestId('nav-links')).toHaveTextContent('Playground');
-    expect(getByTestId('nav-links')).toHaveTextContent('Instruction Set');
+    expect(getByTestId("logo")).toBeInTheDocument();
+    expect(getByTestId("logo")).toHaveTextContent(
+      "Playground for Miden Examples in Miden Assembly"
+    );
+
+    expect(getByTestId("top-links")).toBeInTheDocument();
+
+    expect(getByTestId("nav-links")).toBeInTheDocument();
+    expect(getByTestId("nav-links")).toHaveTextContent("Playground");
+    expect(getByTestId("nav-links")).toHaveTextContent("Instruction Set");
   });
 });
