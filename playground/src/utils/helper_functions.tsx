@@ -145,3 +145,24 @@ Did you prove the program first?`;
 
   return checkFields(jsonOutput)
 }
+
+/**
+ * Helper function to format the debug output.
+ */
+export function addNewlineAfterWhitespace(str: string): string {
+  let inSquareBrackets = false;
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '[') {
+      inSquareBrackets = true;
+    } else if (str[i] === ']') {
+      inSquareBrackets = false;
+    }
+    if (!inSquareBrackets && /\s/.test(str[i])) {
+      result += '\n';
+    } else {
+      result += str[i];
+    }
+  }
+  return result;
+}
