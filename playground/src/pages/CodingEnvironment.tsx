@@ -16,6 +16,7 @@ import {
   checkInputs,
   checkOutputs,
 } from "../utils/helper_functions";
+import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
 
 function CodingEnvironment(): JSX.Element {
   /**
