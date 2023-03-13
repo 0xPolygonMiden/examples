@@ -20,32 +20,29 @@ import {
 function CodingEnvironment(): JSX.Element {
   /**
    * This sets the inputs to the default values.
-   */
-  const exampleInput = `{
-    "stack_init": ["0"],
-    "advice_tape": ["0"]
-}`;
+  */
   const [inputs, setInputs] = React.useState(exampleInput);
-
-  const exampleCode = `begin
-  push.1
-  push.2
-  add
-end`;
-
+  
+  /**
+   * This sets the code to the default values.
+  */
   const [code, setCode] = React.useState(exampleCode);
 
   /**
-   * This sets the output to the default values.
+   * This sets the outputs to the default values.
    */
-  const emptyOutput = "\n \n \n \n";
   const [outputs, setOutput] = React.useState(emptyOutput);
 
   /**
-   * This handles a change in the selected example.
-   * If a new example is selected using the dropdown, the code and inputs are updated.
+   * This sets the proof to the default proof.
    */
+  const [proof, setProof] = useState<Uint8Array>(new Uint8Array(0));
 
+  /**
+   * This handles a change in the selected example.
+   * If a new example is selected using the dropdown, the inputs and 
+   * the code are updated.
+   */
   const [, setExample] = React.useState<string>();
   const handleSelectChange = async (exampleChange: string) => {
     const value = exampleChange;
@@ -65,7 +62,6 @@ end`;
    * This runs the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
    */
-
   const runProgram = async () => {
     init().then(() => {
       const inputCheck = checkInputs(inputs);
@@ -90,8 +86,6 @@ end`;
    * This proves the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
    */
-  const [proof, setProof] = useState<Uint8Array>(new Uint8Array(0));
-
   const proveProgram = async () => {
     init().then(() => {
       const inputCheck = checkInputs(inputs);
