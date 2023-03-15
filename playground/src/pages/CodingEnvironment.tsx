@@ -94,10 +94,10 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       try {
-        const { stack_output, cycles }: Outputs = run_program(code, inputs);
+        const { stack_output, trace_len }: Outputs = run_program(code, inputs);
         setOutput(`{
 "stack_output" : [${stack_output.toString()}],
-"cycles" : ${cycles}
+"trace_len" : ${trace_len}
 }`);
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
@@ -119,13 +119,20 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       try {
-        const { stack_output, cycles, overflow_addrs, proof }: Outputs =
+        const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
           prove_program(code, inputs);
-        setOutput(`{
+        const overflow = overflow_addrs ? overflow_addrs.toString() : null ;
+        if (overflow) {
+          setOutput(`{
 "stack_output" : [${stack_output.toString()}],
-"overflow_addrs" : [${overflow_addrs ? overflow_addrs.toString() : ""}],
-"cycles" : ${cycles}
-}`);
+"overflow_addrs" : [${overflow}],
+"trace_len" : ${trace_len}
+}`        );
+        } else {
+          setOutput(`{
+"stack_output" : [${stack_output.toString()}],
+"trace_len" : ${trace_len}
+}`        );  }
         // Store the proof if >0 (empty proof is 0)
         if (proof) {
           if (proof.length > 0) {

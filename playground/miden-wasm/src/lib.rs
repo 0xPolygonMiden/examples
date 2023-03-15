@@ -19,7 +19,7 @@ pub struct InputFile {
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Outputs {
     pub stack_output: Vec<u64>,
-    pub cycles: usize,
+    pub trace_len: Option<usize>,
     pub overflow_addrs: Option<Vec<u64>>,
     pub proof: Option<Vec<u8>>,
 }
@@ -89,7 +89,7 @@ pub fn run_program(asm: &str, inputs_frontend: &str) -> Outputs {
 
     let result = Outputs {
         stack_output: trace.stack_outputs().stack().to_vec(),
-        cycles: trace.get_trace_len(),
+        trace_len: Some(trace.get_trace_len()),
         overflow_addrs: None,
         proof: None,
     };
@@ -128,7 +128,7 @@ pub fn prove_program(asm: &str, inputs_frontend: &str) -> Outputs {
 
     let result = Outputs {
         stack_output: output.stack().to_vec(),
-        cycles: proof.stark_proof().trace_length(),
+        trace_len: Some(proof.stark_proof().trace_length()),
         overflow_addrs: Some(output.overflow_addrs().to_vec()),
         proof: Some(proof.to_bytes()),
     };
@@ -404,7 +404,7 @@ fn test_run_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.cycles, 1024);
+    assert_eq!(output.trace_len, Some(1024));
 }
 
 #[test]
@@ -479,7 +479,7 @@ fn test_prove_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.cycles, 1024);
+    assert_eq!(output.trace_len, Some(1024));
 
     // for the proof we have [0, 1] as overflow_addrs
     assert_eq!(output.overflow_addrs.is_some(), true);
@@ -499,7 +499,7 @@ fn test_parse_output() {
     {
         "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "overflow_addrs": [0, 1],
-        "cycles": 1024
+        "trace_len": 1024
     }"#;
 
     let output: Outputs = parse_str_to_outputs(&output_str).unwrap();
@@ -526,7 +526,7 @@ fn test_verify_program() {
     {
         "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "overflow_addrs": [0, 1],
-        "cycles": 1024
+        "trace_len": 1024
     }"#;
 
     let proof = expected_test_proof::EXPECTED_PROOF_BYTES.to_vec();
