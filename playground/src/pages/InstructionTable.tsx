@@ -20,7 +20,7 @@ function classNames(...classes: string[]) {
  */
 export default function InstructionTable() {
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="px-4 sm:px-6 lg:px-8 pt-3">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Instructions</h1>

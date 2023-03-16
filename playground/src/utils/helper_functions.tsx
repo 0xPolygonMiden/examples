@@ -26,7 +26,7 @@ export function checkFields(jsonInput: JSON): checkedData {
   let returnValue: checkedData = { isValid: true, errorMessage: "" };
 
   for (const key in jsonInput) {
-    if (key === "cycles") {
+    if (key === "trace_len") {
       continue;
     }
 
