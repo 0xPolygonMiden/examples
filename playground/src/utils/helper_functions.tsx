@@ -47,7 +47,7 @@ export function checkField(jsonField: JSON, key: string): checkedData {
   const jsonInput = jsonField[key as keyof typeof jsonField];
 
   if (!Array.isArray(jsonInput)) {
-    const errorMessage = `${key} must be an array of numbers. \n\n\n`;
+    const errorMessage = `${key} must be an array of numbers.`;
 
     return { isValid: false, errorMessage: errorMessage };
   }
@@ -57,7 +57,7 @@ export function checkField(jsonField: JSON, key: string): checkedData {
     Object.values(jsonInput).some(isNaN)
   ) {
     const errorMessage = `${key} must contain at least one number, 
-and it can only contain numbers. \n\n`;
+and it can only contain numbers.`;
 
     return { isValid: false, errorMessage: errorMessage };
   }
@@ -166,3 +166,4 @@ export function addNewlineAfterWhitespace(str: string): string {
   }
   return result;
 }
+
