@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import CodingEnvironment from "./pages/CodingEnvironment";
 import InstructionTable from "./pages/InstructionTable";
@@ -7,19 +7,19 @@ import ExplainerPage from "./pages/Explainer";
 function App() {
   return (
     <>
-      <Router>
+      <HashRouter>
         <NavBar />
         <Routes>
           <Route path="/examples/" element={<CodingEnvironment />} />
           <Route
-            path="/examples/instruction-set/"
+            path="/instruction-set/"
             element={<InstructionTable />}
           />
-          <Route path="/examples/explainer/" element={<ExplainerPage />} />
+          <Route path="/explainer/" element={<ExplainerPage />} />
           <Route path="/" element={<CodingEnvironment />} />
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
-      </Router>
+      </HashRouter>
     </>
   );
 }
