@@ -42,7 +42,7 @@ const NavBar = () => {
         </NavLink>
         <NavLink
           className="font-semibold text-xl text-center hover:bg-blue-700"
-          to="/examples/instruction-set/"
+          to="/instruction-set/"
           style={({ isActive }) => ({
             color: isActive ? "#fff" : "#fff",
             background: isActive ? "#7b3fe4" : "#3b82f6",

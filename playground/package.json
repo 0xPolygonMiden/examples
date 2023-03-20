@@ -1,7 +1,7 @@
 {
   "name": "miden-assembly-examples-playground",
   "version": "0.1.0",
-  "homepage": "https://0xpolygonmiden.github.io/examples/",
+  "homepage": "https://0xpolygonmiden.github.io/examples/#",
   "private": true,
   "dependencies": {
     "@codemirror/theme-one-dark": "^6.1.0",
