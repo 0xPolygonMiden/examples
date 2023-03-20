@@ -153,9 +153,9 @@ export function addNewlineAfterWhitespace(str: string): string {
   let inSquareBrackets = false;
   let result = '';
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === '[') {
+    if (str[i] === '['  || str[i] === '{') {
       inSquareBrackets = true;
-    } else if (str[i] === ']') {
+    } else if (str[i] === ']' || str[i] === '}') {
       inSquareBrackets = false;
     }
     if (!inSquareBrackets && /\s/.test(str[i])) {
