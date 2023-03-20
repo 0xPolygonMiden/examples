@@ -48,7 +48,7 @@ const NavBar = () => {
           Playground
         </NavLink>
         <NavLink
-          className="font-semibold text-xl text-center hover:bg-blue-700"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           to="/instruction-set/"
           style={({ isActive }) => ({
             color: isActive ? "#fff" : "#fff",
