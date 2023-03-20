@@ -121,18 +121,19 @@ export default function CodingEnvironment(): JSX.Element {
       try {
         const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
           prove_program(code, inputs);
-        const overflow = overflow_addrs ? overflow_addrs.toString() : null ;
+        const overflow = overflow_addrs ? overflow_addrs.toString() : null;
         if (overflow) {
           setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "overflow_addrs" : [${overflow}],
 "trace_len" : ${trace_len}
-}`        );
+}`);
         } else {
           setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "trace_len" : ${trace_len}
-}`        );  }
+}`);
+        }
         // Store the proof if >0 (empty proof is 0)
         if (proof) {
           if (proof.length > 0) {
@@ -175,7 +176,7 @@ export default function CodingEnvironment(): JSX.Element {
       if (!debugExecutor) {
         throw new Error("debugExecutor is undefined");
       }
-      if (typeof params !== 'undefined') {
+      if (typeof params !== "undefined") {
         const result = debugExecutor.execute(command, params);
         setOutput(addNewlineAfterWhitespace(result));
       } else {
@@ -210,7 +211,7 @@ export default function CodingEnvironment(): JSX.Element {
       try {
         const result = verify_program(code, inputs, outputs, proof);
         setOutput(
-          `Verification succeeded with a security level of ${result} bits. \n \n \n`
+          `Verification succeeded with a security level of ${result} bits.`
         );
         toast.success("Verification successful");
       } catch (error) {
@@ -260,8 +261,7 @@ export default function CodingEnvironment(): JSX.Element {
             <h1 className="heading">Inputs</h1>
             <CodeMirror
               value={inputs}
-              height="100%"
-              maxHeight="150px"
+              height="150px"
               theme={oneDark}
               onChange={setInputs}
             />
@@ -270,8 +270,7 @@ export default function CodingEnvironment(): JSX.Element {
             <h1 className="heading">Outputs</h1>
             <CodeMirror
               value={outputs}
-              height="100%"
-              maxHeight="150px"
+              height="150px"
               theme={eclipse}
               onChange={setOutput}
             />
@@ -283,10 +282,21 @@ export default function CodingEnvironment(): JSX.Element {
           <h1 className="heading">Miden Assembly Code</h1>
           <CodeMirror
             value={code}
-            height="100%"
+            height="500px"
             theme={oneDark}
             onChange={setCode}
-            maxHeight="1000px"
+            basicSetup={{
+              foldGutter: true,
+              highlightActiveLineGutter: true,
+              dropCursor: true,
+              allowMultipleSelections: false,
+              indentOnInput: false,
+              lineNumbers: true,
+              syntaxHighlighting: true,
+              bracketMatching: true,
+              autocompletion: true,
+              highlightActiveLine: true,
+            }}
           />
         </div>
       </div>

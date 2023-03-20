@@ -10,7 +10,7 @@ import {
 const output_example_incl_errors = `{
     "stack_output": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     "overflows": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    "cycles": 10,
+    "trace_len": 10,
     "empty": [],
     "stack_output_non_number": [1, 2, 3, 4, 5, 6, 7, 8, 9, "a"],
     "stack_output_2" : [3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -21,7 +21,7 @@ const output_example_incl_errors_json = JSON.parse(output_example_incl_errors);
 const output_example_correct = `{
     "stack_output": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     "overflows": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    "cycles": 10
+    "trace_len": 10
     }`;
 
 const output_example_correct_json = JSON.parse(output_example_correct);
@@ -29,10 +29,10 @@ const output_example_correct_json = JSON.parse(output_example_correct);
 /** Testing the checkField function */
 describe("checkField function", () => {
   it("should return false if the field is not an array", async () => {
-    expect(checkField(output_example_incl_errors_json, "cycles")).toStrictEqual(
+    expect(checkField(output_example_incl_errors_json, "trace_len")).toStrictEqual(
       {
         isValid: false,
-        errorMessage: "cycles must be an array of numbers. \n\n\n",
+        errorMessage: "trace_len must be an array of numbers.",
       }
     );
   });
@@ -41,7 +41,7 @@ describe("checkField function", () => {
     expect(checkField(output_example_incl_errors_json, "empty")).toStrictEqual({
       isValid: false,
       errorMessage: `empty must contain at least one number, 
-and it can only contain numbers. \n\n`,
+and it can only contain numbers.`,
     });
   });
 
@@ -51,7 +51,7 @@ and it can only contain numbers. \n\n`,
     ).toStrictEqual({
       isValid: false,
       errorMessage: `stack_output_non_number must contain at least one number, 
-and it can only contain numbers. \n\n`,
+and it can only contain numbers.`,
     });
   });
 
@@ -70,7 +70,7 @@ describe("checkFields function", () => {
       {
         isValid: false,
         errorMessage: `empty must contain at least one number, 
-and it can only contain numbers. \n\n`,
+and it can only contain numbers.`,
       }
     );
   });
