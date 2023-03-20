@@ -14,7 +14,7 @@ function App() {
             path="/instruction-set/"
             element={<InstructionTable />}
           />
-          {/* <Route path="/" element={<CodingEnvironment />} /> */}
+          <Route path="/" element={<CodingEnvironment />} />
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
       </HashRouter>
