@@ -2,7 +2,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import CodingEnvironment from "./pages/CodingEnvironment";
 import InstructionTable from "./pages/InstructionTable";
-import ExplainerPage from "./pages/Explainer";
+import React from "react";
 
 function App() {
   return (
@@ -15,8 +15,7 @@ function App() {
             path="/instruction-set/"
             element={<InstructionTable />}
           />
-          <Route path="/examples/explainer/" element={<ExplainerPage />} />
-          <Route path="/" element={<CodingEnvironment />} />
+          {/* <Route path="/" element={<CodingEnvironment />} /> */}
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
       </HashRouter>
