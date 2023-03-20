@@ -271,7 +271,7 @@ impl DebugExecutor {
             Some(Err(err)) => {
                 println!("Execution error: {err:?}");
                 None
-            },
+            }
             None => {
                 println!("Program execution complete.");
                 None
@@ -283,12 +283,9 @@ impl DebugExecutor {
     fn prev_vm_state(&mut self) -> Option<VmState> {
         match self.vm_state_iter.next_back() {
             Some(prev_vm_state_result) => prev_vm_state_result.ok(),
-            None => {
-                None
-            }
+            None => None,
         }
     }
-    
 
     // ACCESSORS
     // --------------------------------------------------------------------------------------------
@@ -300,17 +297,15 @@ impl DebugExecutor {
 
     /// print all stack items.
     pub fn print_stack(&self) -> String {
-        let mut res = self.vm_state
-        .stack
-        .iter()
-        .enumerate()
-        .fold(
-          String::new(),
-          |mut s, (i, f)| {
-            s.push_str(&format!("[{i}] {f}\n"));
-            s
-        }
-        );
+        let mut res =
+            self.vm_state
+                .stack
+                .iter()
+                .enumerate()
+                .fold(String::new(), |mut s, (i, f)| {
+                    s.push_str(&format!("[{i}] {f}\n"));
+                    s
+                });
         res.pop(); // removes unnecessary line-break
         res
     }
@@ -419,8 +414,13 @@ fn test_debug_program() {
     let output = debug_executor.execute(DebugCommand::PlayAll, None);
 
     // we test if it plays all the way to the end
-    assert_eq!(output, concat!("clk=6, op=Some(End), asmop=None, fmp=1073741824, ", 
-    "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
+            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 
     let mut debug_executor_2 = DebugExecutor::new(
         "begin
@@ -429,41 +429,76 @@ fn test_debug_program() {
         "",
     )
     .unwrap();
-    
-    // we test playing one more cycle
-    let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=1, op=Some(Span), asmop=None, fmp=1073741824, ",
-    "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
-    
-    // we test playing one more cycle
-    let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=2, op=Some(Pad), asmop=None, fmp=1073741824, ", 
-    "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=3, op=Some(Incr), asmop=None, fmp=1073741824, ", 
-    "stack=[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=1, op=Some(Span), asmop=None, fmp=1073741824, ",
+            "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=4, op=Some(Push(BaseElement(8589934590))), asmop=None, ",  
-    "fmp=1073741824, stack=[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=2, op=Some(Pad), asmop=None, fmp=1073741824, ",
+            "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=5, op=Some(Add), asmop=None, fmp=1073741824, ",  
-    "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=3, op=Some(Incr), asmop=None, fmp=1073741824, ",
+            "stack=[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=6, op=Some(End), asmop=None, fmp=1073741824, ",  
-    "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=4, op=Some(Push(BaseElement(8589934590))), asmop=None, ",
+            "fmp=1073741824, stack=[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=5, op=Some(Add), asmop=None, fmp=1073741824, ",
+            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
+            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 
     // it should not play more cycles
     let output = debug_executor_2.execute(DebugCommand::Play, Some(1));
-    assert_eq!(output, concat!("clk=6, op=Some(End), asmop=None, fmp=1073741824, ",  
-    "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"));
+    assert_eq!(
+        output,
+        concat!(
+            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
+            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
+        )
+    );
 }
 
 #[test]
