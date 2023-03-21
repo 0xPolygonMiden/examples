@@ -1,12 +1,13 @@
 use crate::utils_input::Inputs;
-use crate::utils_program::MidenProgram;
+use crate::utils_program::{MidenProgram, DEBUG_ON};
 use miden_vm::{
     math::{Felt, StarkField},
     VmState, VmStateIterator,
 };
 use wasm_bindgen::prelude::*;
 
-// Debugging the program
+// This is the main struct that will be exported to JS
+// It will be used to execute debug commands against the VM
 #[wasm_bindgen]
 pub struct DebugExecutor {
     vm_state_iter: VmStateIterator,
@@ -36,10 +37,10 @@ impl DebugExecutor {
     /// Returns an error if the command cannot be parsed.
     #[wasm_bindgen(constructor)]
     pub fn new(code_frontend: &str, inputs_frontend: &str) -> Result<DebugExecutor, String> {
-        // Parse inputs
+        // Todo: remove this once we have a better way to handle panics in wasm
         console_error_panic_hook::set_once();
 
-        let mut program = MidenProgram::new(code_frontend, true);
+        let mut program = MidenProgram::new(code_frontend, DEBUG_ON);
         program.compile_program().unwrap();
 
         let mut inputs = Inputs::new();
@@ -70,14 +71,12 @@ impl DebugExecutor {
     /// executes a debug command against the vm in it's current state.
     pub fn execute(&mut self, command: DebugCommand, param: Option<u64>) -> String {
         match command {
-            //DebugCommand::PlayAll
             DebugCommand::PlayAll => {
                 while let Some(new_vm_state) = self.next_vm_state() {
                     self.vm_state = new_vm_state;
                 }
                 self.print_vm_state()
             }
-            //DebugCommand::Play(cycles)
             DebugCommand::Play => {
                 for _cycle in 0..param.unwrap() {
                     match self.next_vm_state() {
@@ -89,14 +88,12 @@ impl DebugExecutor {
                 }
                 self.print_vm_state()
             }
-            //DebugCommand::RewindAll
             DebugCommand::RewindAll => {
                 while let Some(new_vm_state) = self.prev_vm_state() {
                     self.vm_state = new_vm_state;
                 }
                 self.print_vm_state()
             }
-            //DebugCommand::Rewind(cycles)
             DebugCommand::Rewind => {
                 for _cycle in 0..param.unwrap() {
                     match self.prev_vm_state() {
@@ -108,15 +105,10 @@ impl DebugExecutor {
                 }
                 self.print_vm_state()
             }
-            //DebugCommand::PrintState
             DebugCommand::PrintState => self.print_vm_state(),
-            //DebugCommand::PrintStack
             DebugCommand::PrintStack => self.print_stack(),
-            //DebugCommand::PrintMem
             DebugCommand::PrintMem => self.print_memory(),
-            //DebugCommand::PrintMemAddress(address)
             DebugCommand::PrintMemAddress => self.print_memory_entry(param.unwrap()),
-            //DebugCommand::Clock
             DebugCommand::Clock => format!("{}", self.vm_state.clk),
         }
     }

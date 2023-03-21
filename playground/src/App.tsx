@@ -10,12 +10,12 @@ function App() {
       <HashRouter>
         <NavBar />
         <Routes>
-          <Route path="/examples/" element={<CodingEnvironment />} />
+          <Route path="/examples" element={<CodingEnvironment />} />
           <Route
-            path="/instruction-set/"
+            path="/instruction-set"
             element={<InstructionTable />}
           />
-          <Route path="/explainer/" element={<ExplainerPage />} />
+          <Route path="/explainer" element={<ExplainerPage />} />
           <Route path="/" element={<CodingEnvironment />} />
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>

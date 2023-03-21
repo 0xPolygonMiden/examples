@@ -3,7 +3,9 @@ use miden_vm::{
     AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs,
 };
 
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+/// The Outputs struct is used to serialize the output of the program.
+/// Via Rust WASM we cannot return arbitrary structs, so we need to serialize it to JSON.
+/// Here we need the Outputs because they can be inputs for the verifier.
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct Outputs {
     pub stack_output: Vec<u64>,
@@ -12,19 +14,21 @@ pub struct Outputs {
     pub proof: Option<Vec<u8>>,
 }
 
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+/// The InputFile is a struct needed for Miden and not yet exposed.
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct InputFile {
     pub stack_init: Option<Vec<String>>,
     pub advice_tape: Option<Vec<String>>,
 }
 
+/// Miden Inputs plus Outputs that are used as inputs for the verifier.
 pub struct Inputs {
     pub stack_inputs: StackInputs,
     pub advice_provider: MemAdviceProvider,
     pub stack_outputs: StackOutputs,
 }
 
+/// We need to implement the default trait for the Inputs struct.
 impl Inputs {
     pub fn new() -> Self {
         Self {
@@ -35,18 +39,14 @@ impl Inputs {
     }
 
     pub fn deserialize_inputs(&mut self, inputs: &str) -> Result<(), String> {
-        match inputs.trim().is_empty() {
-            true => Ok(()),
-            false => {
-                let inputs_des: InputFile =
-                    serde_json::from_str(&inputs).map_err(|e| e.to_string())?;
-
-                self.stack_inputs = self.parse_stack_inputs(&inputs_des).unwrap();
-                self.advice_provider = self.parse_advice_provider(&inputs_des).unwrap();
-
-                Ok(())
-            }
+        if !inputs.trim().is_empty() {
+            let inputs_des: InputFile =
+                serde_json::from_str(&inputs).map_err(|e| e.to_string())?;
+    
+            self.stack_inputs = self.parse_stack_inputs(&inputs_des).unwrap();
+            self.advice_provider = self.parse_advice_provider(&inputs_des).unwrap();
         }
+        Ok(())
     }
 
     // Parse the outputs as str and return a vector of u64
@@ -99,19 +99,23 @@ impl Inputs {
     }
 }
 
-//#[test]
-//fn test_parse_output() {
-//    let output_str: &str = r#"
-//    {
-//        "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-//        "overflow_addrs": [0, 1],
-//        "trace_len": 1024
-//    }"#;
-//
-//    let output: Outputs = parse_str_to_outputs(&output_str).unwrap();
-//    assert_eq!(
-//        output.stack_output,
-//        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-//    );
-//    assert_eq!(output.overflow_addrs, Some(vec![0, 1]));
-//}
+#[test]
+fn test_parse_output() {
+    let output_str: &str = r#"
+    {
+        "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "overflow_addrs": [0, 1],
+        "trace_len": 1024
+    }"#;
+
+    let mut inputs : Inputs = Inputs::new();
+    inputs.deserialize_outputs(output_str).unwrap();
+    
+    let output : StackOutputs = inputs.stack_outputs;
+
+    assert_eq!(
+        output.stack(),
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.overflow_addrs(), vec![0, 1]);
+}

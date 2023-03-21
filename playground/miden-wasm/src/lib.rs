@@ -20,7 +20,7 @@ pub struct Outputs {
 pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
     console_error_panic_hook::set_once();
 
-    let mut program = utils_program::MidenProgram::new(code_frontend, false);
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program.compile_program().unwrap();
 
     let mut inputs = utils_input::Inputs::new();
@@ -49,7 +49,7 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
 pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
     console_error_panic_hook::set_once();
 
-    let mut program = utils_program::MidenProgram::new(code_frontend, false);
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program.compile_program().unwrap();
 
     let mut inputs = utils_input::Inputs::new();
@@ -99,7 +99,7 @@ pub fn verify_program(
     console_error_panic_hook::set_once();
 
     // we need to get the program info from the program
-    let mut program = utils_program::MidenProgram::new(code_frontend, false);
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program.compile_program().unwrap();
 
     let proof = ExecutionProof::from_bytes(&proof)

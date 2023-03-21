@@ -9,6 +9,9 @@ pub struct MidenProgram {
     pub program_info: Option<ProgramInfo>,
 }
 
+pub const DEBUG_OFF: bool = false;
+pub const DEBUG_ON: bool = true;
+
 impl MidenProgram {
     pub fn new(code_as_str: &str, debug: bool) -> Self {
         Self {
