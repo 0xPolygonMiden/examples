@@ -48,7 +48,7 @@ const NavBar = () => {
         </NavLink>
         <NavLink
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          to="/examples/instruction-set/"
+          to="/instruction-set/"
           style={({ isActive }) => ({
             color: isActive ? "#fff" : "#fff",
             background: isActive ? "bg-blue-700" : "bg-blue-500",
@@ -58,7 +58,7 @@ const NavBar = () => {
         </NavLink>
         <NavLink
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          to="/examples/explainer/"
+          to="/explainer/"
           style={({ isActive }) => ({
             color: isActive ? "#fff" : "#fff",
             background: isActive ? "bg-blue-700" : "bg-blue-500",
