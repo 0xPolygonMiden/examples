@@ -1,6 +1,14 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
+<<<<<<< HEAD
 use miden_vm::{math::StarkField, VmState, VmStateIterator, Word};
+=======
+use miden_vm::{
+    AsmOpInfo,
+    math::StarkField,
+    VmState, VmStateIterator, Word
+};
+>>>>>>> fb45f4754 (feat: improve debugging)
 use wasm_bindgen::prelude::*;
 
 // This is the main struct that will be exported to JS
@@ -11,6 +19,7 @@ pub struct DebugExecutor {
     vm_state: VmState,
 }
 
+<<<<<<< HEAD
 // This is how the results will be exported to JS
 #[wasm_bindgen(getter_with_clone)]
 pub struct DebugOutput {
@@ -19,11 +28,24 @@ pub struct DebugOutput {
     pub instruction: Option<String>,
     pub num_of_operations: Option<u8>,
     pub operation_index: Option<u8>,
+=======
+// Debugging Output
+#[wasm_bindgen(getter_with_clone)]
+pub struct DebugOutput {
+    pub clk: u32,
+    pub op: String,
+    pub asmop_op: String,
+    pub asmop_num_cycles: u8,
+    pub asmop_cycle_idx: u8,
+>>>>>>> fb45f4754 (feat: improve debugging)
     pub stack: Vec<u64>,
     pub memory: Vec<u64>,
 }
 
+<<<<<<< HEAD
 // This describes what the user can do with the DebugExecutor
+=======
+>>>>>>> fb45f4754 (feat: improve debugging)
 #[wasm_bindgen]
 pub enum DebugCommand {
     PlayAll,
@@ -143,6 +165,7 @@ impl DebugExecutor {
 
     /// print general VM state information.
     fn vm_state_to_output(&self) -> DebugOutput {
+<<<<<<< HEAD
         let memory: Vec<(u64, [u64; 4])> = self
             .vm_state
             .memory
@@ -160,6 +183,43 @@ impl DebugExecutor {
             memory: transform_2d_to_1d(memory),
         };
 
+=======
+        let mut asmop = AsmOpInfo::new(String::new(), 0, 0);
+        if self.vm_state.asmop.is_some() {
+            asmop = self.vm_state.asmop.clone().unwrap();
+        }
+
+        let memory: Vec<(u64, [u64; 4])> =
+            self.vm_state.memory.iter().map(|x| (x.0, self.word_to_ints(&x.1))).collect();
+
+        let output = DebugOutput {
+            clk: self.vm_state.clk,
+            op: format!{"{:?}", self.vm_state.op},
+            asmop_op: asmop.op().to_string(),
+            asmop_num_cycles: asmop.num_cycles(),
+            asmop_cycle_idx: asmop.cycle_idx(),
+            stack: self.vm_state.stack.iter().map(|x| x.as_int()).collect(),
+            memory: self.transform(memory),
+        };
+        
+        output
+    }
+
+    /// converts a word to a tuple of 4 u64s.
+    /// this is necessary because wasm_bindgen does not support arrays of arrays.
+    fn word_to_ints(&self, word: &Word) -> [u64; 4] {
+        [word[0].as_int(), word[1].as_int(), word[2].as_int(), word[3].as_int()]
+    }
+
+    fn transform(&self, input: Vec<(u64, [u64; 4])>) -> Vec<u64> {
+        let mut output = Vec::new();
+    
+        for (num, arr) in input {
+            output.push(num);
+            output.extend(arr.iter().cloned());
+        }
+    
+>>>>>>> fb45f4754 (feat: improve debugging)
         output
     }
 }
