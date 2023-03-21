@@ -25,3 +25,18 @@ code {
     @apply px-3 py-3.5 text-left text-sm font-semibold text-gray-900;
   }
 }
+
+.popover {
+  background-color: white;
+  width: 500px;
+  padding: 10px;
+	border: 1px solid #ccc;
+  font-size: medium;
+}
+.popover.bottom .arrow::after {border-bottom-color: blueviolet; }
+.popover-content {
+  background-color: white;
+  font-size: 1.2rem;
+  line-break: loose;
+  width: 180px;
+  padding: 10px;}

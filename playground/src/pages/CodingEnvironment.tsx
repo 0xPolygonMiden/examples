@@ -21,6 +21,7 @@ import {
   checkOutputs,
 } from "../utils/helper_functions";
 import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
+import OverlayButton from "../components/OverlayButton";
 
 export default function CodingEnvironment(): JSX.Element {
   /**
@@ -41,7 +42,7 @@ export default function CodingEnvironment(): JSX.Element {
   /**
    * This sets the proof to the default proof.
    */
-  const [proof, setProof] = useState<Uint8Array>(new Uint8Array(0));
+  const [proof, setProof] = useState<Uint8Array | null>(null);
 
   /**
    * Determines when to show the debug menu
@@ -67,6 +68,7 @@ export default function CodingEnvironment(): JSX.Element {
   const [, setExample] = React.useState<string>();
   const handleSelectChange = async (exampleChange: string) => {
     disableDebug();
+    setProof(null);
     const value = exampleChange;
     // set the current example to the selected one
     setExample(value);
@@ -87,6 +89,7 @@ export default function CodingEnvironment(): JSX.Element {
   const runProgram = async () => {
     init().then(() => {
       disableDebug();
+      setProof(null);
       const inputCheck = checkInputs(inputs);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
@@ -94,11 +97,13 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       try {
+        const start = Date.now();
         const { stack_output, trace_len }: Outputs = run_program(code, inputs);
         setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "trace_len" : ${trace_len}
 }`);
+        toast.success(`Execution successful in ${Date.now() - start} ms`);
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
@@ -110,8 +115,10 @@ export default function CodingEnvironment(): JSX.Element {
    * It runs the Rust program that is imported above.
    */
   const proveProgram = async () => {
+    toast.loading("Proving ...", { id: "provingToast" });
     init().then(() => {
       disableDebug();
+      setProof(null);
       const inputCheck = checkInputs(inputs);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
@@ -119,6 +126,7 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       try {
+        const start = Date.now();
         const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
           prove_program(code, inputs);
         const overflow = overflow_addrs ? overflow_addrs.toString() : null;
@@ -134,14 +142,18 @@ export default function CodingEnvironment(): JSX.Element {
 "trace_len" : ${trace_len}
 }`);
         }
-        // Store the proof if >0 (empty proof is 0)
+
+        toast.success(`Proving successful in ${Date.now() - start} ms`, {
+          id: "provingToast",
+        });
+
+        // Store the proof if it exists
         if (proof) {
-          if (proof.length > 0) {
-            setProof(proof);
-          }
+          setProof(proof);
         }
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
+        toast.error("Proving failed");
       }
     });
   };
@@ -197,8 +209,13 @@ export default function CodingEnvironment(): JSX.Element {
   const verifyProgram = async () => {
     init().then(() => {
       disableDebug();
+      if (!proof) {
+        setOutput("There is no proof to verify. \nDid you prove the program?");
+        toast.error("Verification failed");
+        return;
+      }
       const inputCheck = checkInputs(inputs);
-      const outputCheck = checkOutputs(outputs, proof);
+      const outputCheck = checkOutputs(outputs);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
         toast.error("Verification failed");
@@ -209,11 +226,15 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       try {
+        const start = Date.now();
         const result = verify_program(code, inputs, outputs, proof);
-        setOutput(
-          `Verification succeeded with a security level of ${result} bits.`
+        toast.success(
+          "Verification successful in " +
+            (Date.now() - start) +
+            " ms with a security level of " +
+            result +
+            "bits."
         );
-        toast.success("Verification successful");
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
         toast.error("Verification failed");
@@ -223,13 +244,18 @@ export default function CodingEnvironment(): JSX.Element {
 
   return (
     <>
-      <div className="ml-2 mr-2 pt-3 h-30 grid grid-cols-5 gap-4 content-center">
+      <Toaster />
+      <div className="ml-2 mr-2 pt-3 h-30 grid grid-cols-6 gap-4 content-center">
         <DropDown onExampleValueChange={handleSelectChange} />
-        <ActionButton label="Run" onClick={runProgram} />
-        <ActionButton label="Debug" onClick={startDebug} />
-        <ActionButton label="Prove" onClick={proveProgram} />
-        <ActionButton label="Verify" onClick={verifyProgram} />
-        <Toaster />
+        <ActionButton label="Run" onClick={runProgram} disabled={false} />
+        <ActionButton label="Debug" onClick={startDebug} disabled={false} />
+        <ActionButton label="Prove" onClick={proveProgram} disabled={false} />
+        <ActionButton
+          label="Verify"
+          onClick={verifyProgram}
+          disabled={!proof}
+        />
+        <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
       </div>
       {showDebug ? (
         <div className="flex justify-center pt-6">
@@ -267,7 +293,7 @@ export default function CodingEnvironment(): JSX.Element {
             />
           </div>
           <div className="box-border">
-            <h1 className="heading">Outputs</h1>
+            <h1 className="heading">Outputs </h1>
             <CodeMirror
               value={outputs}
               height="150px"

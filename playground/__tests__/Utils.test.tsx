@@ -124,31 +124,22 @@ an advice_tape.`,
 });
 
 /** Testing the checkOutputs function */
-const empty_proof = new Uint8Array(0);
-const proof = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 const correct_json_no_stack_outputs = `{
     "stack": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 }`;
 
 describe("checkOutputs function", () => {
   it("should return false if outputs are empty", async () => {
-    expect(checkOutputs("", proof)).toStrictEqual({
+    expect(checkOutputs("")).toStrictEqual({
       isValid: false,
       errorMessage: `We need some outputs to verify the program.
 Did you prove the program first?`,
     });
   });
 
-  it("should return false if proof is empty", async () => {
-    expect(checkOutputs(output_example_correct, empty_proof)).toStrictEqual({
-      isValid: false,
-      errorMessage: `The proof is empty.
-Did you prove the program first?`,
-    });
-  });
 
   it("should return false if outputs is incorrect JSON", async () => {
-    expect(checkOutputs(incorrect_json, proof)).toStrictEqual({
+    expect(checkOutputs(incorrect_json)).toStrictEqual({
       isValid: false,
       errorMessage: `Miden VM Outputs need to be a valid JSON object:
 Expected property name or '}' in JSON at position 1
@@ -157,7 +148,7 @@ Did you prove the program first?`,
   });
 
   it("should return false if 'stack_outputs' is missing", async () => {
-    expect(checkOutputs(correct_json_no_stack_outputs, proof)).toStrictEqual({
+    expect(checkOutputs(correct_json_no_stack_outputs)).toStrictEqual({
       isValid: false,
       errorMessage: `We need some outputs to verify the program.
 Did you prove the program first?`,
@@ -165,7 +156,7 @@ Did you prove the program first?`,
   });
 
   it("should return true if input is correct", async () => {
-    expect(checkOutputs(output_example_correct, proof)).toStrictEqual({
+    expect(checkOutputs(output_example_correct)).toStrictEqual({
       isValid: true,
       errorMessage: "",
     });

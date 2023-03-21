@@ -108,17 +108,9 @@ an advice_tape.`;
  */
 export function checkOutputs(
   jsonString: string,
-  proof: Uint8Array
 ): checkedData {
   if (jsonString === "") {
     const errorMessage = `We need some outputs to verify the program.
-Did you prove the program first?`;
-
-    return { isValid: false, errorMessage: errorMessage };
-  }
-
-  if (proof.length === 0) {
-    const errorMessage = `The proof is empty.
 Did you prove the program first?`;
 
     return { isValid: false, errorMessage: errorMessage };
@@ -166,4 +158,3 @@ export function addNewlineAfterWhitespace(str: string): string {
   }
   return result;
 }
-
