@@ -40,9 +40,8 @@ impl Inputs {
 
     pub fn deserialize_inputs(&mut self, inputs: &str) -> Result<(), String> {
         if !inputs.trim().is_empty() {
-            let inputs_des: InputFile =
-                serde_json::from_str(&inputs).map_err(|e| e.to_string())?;
-    
+            let inputs_des: InputFile = serde_json::from_str(&inputs).map_err(|e| e.to_string())?;
+
             self.stack_inputs = self.parse_stack_inputs(&inputs_des).unwrap();
             self.advice_provider = self.parse_advice_provider(&inputs_des).unwrap();
         }
@@ -108,10 +107,10 @@ fn test_parse_output() {
         "trace_len": 1024
     }"#;
 
-    let mut inputs : Inputs = Inputs::new();
+    let mut inputs: Inputs = Inputs::new();
     inputs.deserialize_outputs(output_str).unwrap();
-    
-    let output : StackOutputs = inputs.stack_outputs;
+
+    let output: StackOutputs = inputs.stack_outputs;
 
     assert_eq!(
         output.stack(),

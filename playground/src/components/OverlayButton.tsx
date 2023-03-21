@@ -20,7 +20,7 @@ const OverlayButton = ({
       <Popover id="popover-basic">
         <Popover.Header as="h1">
           <div className="flex font-bold text-justify text-xl">
-            Here is your Proof [size (in kb){" "}
+            Here is your proof [size (in kb){" "}
             {proof ? proof.length / 1000 : null}]
           </div>
         </Popover.Header>

@@ -1,9 +1,6 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
-use miden_vm::{
-    math::{Felt, StarkField},
-    VmState, VmStateIterator,
-};
+use miden_vm::{math::StarkField, VmState, VmStateIterator, Word};
 use wasm_bindgen::prelude::*;
 
 // This is the main struct that will be exported to JS
@@ -14,6 +11,19 @@ pub struct DebugExecutor {
     vm_state: VmState,
 }
 
+// This is how the results will be exported to JS
+#[wasm_bindgen(getter_with_clone)]
+pub struct DebugOutput {
+    pub clk: u32,
+    pub op: Option<String>,
+    pub instruction: Option<String>,
+    pub num_of_operations: Option<u8>,
+    pub operation_index: Option<u8>,
+    pub stack: Vec<u64>,
+    pub memory: Vec<u64>,
+}
+
+// This describes what the user can do with the DebugExecutor
 #[wasm_bindgen]
 pub enum DebugCommand {
     PlayAll,
@@ -21,10 +31,6 @@ pub enum DebugCommand {
     RewindAll,
     Rewind,
     PrintState,
-    PrintStack,
-    PrintMem,
-    PrintMemAddress,
-    Clock,
 }
 
 #[wasm_bindgen]
@@ -69,13 +75,13 @@ impl DebugExecutor {
     // --------------------------------------------------------------------------------------------
 
     /// executes a debug command against the vm in it's current state.
-    pub fn execute(&mut self, command: DebugCommand, param: Option<u64>) -> String {
+    pub fn execute(&mut self, command: DebugCommand, param: Option<u64>) -> DebugOutput {
         match command {
             DebugCommand::PlayAll => {
                 while let Some(new_vm_state) = self.next_vm_state() {
                     self.vm_state = new_vm_state;
                 }
-                self.print_vm_state()
+                self.vm_state_to_output()
             }
             DebugCommand::Play => {
                 for _cycle in 0..param.unwrap() {
@@ -86,13 +92,13 @@ impl DebugExecutor {
                         None => break,
                     }
                 }
-                self.print_vm_state()
+                self.vm_state_to_output()
             }
             DebugCommand::RewindAll => {
                 while let Some(new_vm_state) = self.prev_vm_state() {
                     self.vm_state = new_vm_state;
                 }
-                self.print_vm_state()
+                self.vm_state_to_output()
             }
             DebugCommand::Rewind => {
                 for _cycle in 0..param.unwrap() {
@@ -103,13 +109,9 @@ impl DebugExecutor {
                         None => break,
                     }
                 }
-                self.print_vm_state()
+                self.vm_state_to_output()
             }
-            DebugCommand::PrintState => self.print_vm_state(),
-            DebugCommand::PrintStack => self.print_stack(),
-            DebugCommand::PrintMem => self.print_memory(),
-            DebugCommand::PrintMemAddress => self.print_memory_entry(param.unwrap()),
-            DebugCommand::Clock => format!("{}", self.vm_state.clk),
+            DebugCommand::PrintState => self.vm_state_to_output(),
         }
     }
 
@@ -140,57 +142,49 @@ impl DebugExecutor {
     // --------------------------------------------------------------------------------------------
 
     /// print general VM state information.
-    pub fn print_vm_state(&self) -> String {
-        format!("{}", self.vm_state)
-    }
-
-    /// print all stack items.
-    pub fn print_stack(&self) -> String {
-        let mut res =
-            self.vm_state
-                .stack
-                .iter()
-                .enumerate()
-                .fold(String::new(), |mut s, (i, f)| {
-                    s.push_str(&format!("[{i}] {f}\n"));
-                    s
-                });
-        res.pop(); // removes unnecessary line-break
-        res
-    }
-
-    /// print all memory entries.
-    pub fn print_memory(&self) -> String {
-        let mem_result = String::new();
-        for (address, mem) in self.vm_state.memory.iter() {
-            format!("{}{}", mem_result, Self::print_memory_data(address, mem));
-        }
-        return mem_result;
-    }
-
-    /// print specified memory entry.
-    pub fn print_memory_entry(&self, address: u64) -> String {
-        let entry = self
+    fn vm_state_to_output(&self) -> DebugOutput {
+        let memory: Vec<(u64, [u64; 4])> = self
             .vm_state
             .memory
             .iter()
-            .find_map(|(addr, mem)| match address == *addr {
-                true => Some(mem),
-                false => None,
-            });
+            .map(|x| (x.0, word_to_ints(&x.1)))
+            .collect();
 
-        match entry {
-            Some(mem) => Self::print_memory_data(&address, mem),
-            None => format!("memory at address '{address}' not found"),
-        }
+        let output = DebugOutput {
+            clk: self.vm_state.clk,
+            op: self.vm_state.op.map(|v| format!("{:?}", v)),
+            instruction: self.vm_state.asmop.clone().map(|v| format!("{:?}", v.op())),
+            num_of_operations: self.vm_state.asmop.clone().map(|v| v.num_cycles()),
+            operation_index: self.vm_state.asmop.clone().map(|v| v.cycle_idx()),
+            stack: self.vm_state.stack.iter().map(|x| x.as_int()).collect(),
+            memory: transform_2d_to_1d(memory),
+        };
+
+        output
+    }
+}
+
+// Helper functions
+
+/// This converts a word to a tuple of 4 u64s.
+fn word_to_ints(word: &Word) -> [u64; 4] {
+    [
+        word[0].as_int(),
+        word[1].as_int(),
+        word[2].as_int(),
+        word[3].as_int(),
+    ]
+}
+
+/// This converts the memory tuple Vec<(u64, [u64; 4])> to a single Vec<u64>.
+/// This is necessary because wasm_bindgen does not support arrays of arrays.
+fn transform_2d_to_1d(input: Vec<(u64, [u64; 4])>) -> Vec<u64> {
+    let mut output = Vec::new();
+
+    for (num, arr) in input {
+        output.push(num);
+        output.extend(arr.iter().cloned());
     }
 
-    // HELPERS
-    // --------------------------------------------------------------------------------------------
-
-    /// print memory data.
-    fn print_memory_data(address: &u64, memory: &[Felt]) -> String {
-        let mem_int = memory.iter().map(|&x| x.as_int()).collect::<Vec<_>>();
-        return format!("{address} {mem_int:?}");
-    }
+    output
 }

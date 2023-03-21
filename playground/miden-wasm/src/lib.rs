@@ -171,13 +171,16 @@ fn test_debug_program() {
     let output = debug_executor.execute(utils_debug::DebugCommand::PlayAll, None);
 
     // we test if it plays all the way to the end
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
     assert_eq!(
-        output,
-        concat!(
-            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
-            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     let mut debug_executor_2 = utils_debug::DebugExecutor::new(
         "begin
@@ -189,81 +192,94 @@ fn test_debug_program() {
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 1);
+    assert_eq!(output.op, Some("Span".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
     assert_eq!(
-        output,
-        concat!(
-            "clk=1, op=Some(Span), asmop=None, fmp=1073741824, ",
-            "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 2);
+    assert_eq!(output.op, Some("Pad".to_string()));
+    assert_eq!(output.instruction, Some("\"push.1\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(2));
+    assert_eq!(output.operation_index, Some(1));
     assert_eq!(
-        output,
-        concat!(
-            "clk=2, op=Some(Pad), ",
-            "asmop=Some(AsmOpInfo { op: \"push.1\", num_cycles: 2, cycle_idx: 1 }), ",
-            "fmp=1073741824, ",
-            "stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 3);
+    assert_eq!(output.op, Some("Incr".to_string()));
+    assert_eq!(output.instruction, Some("\"push.1\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(2));
+    assert_eq!(output.operation_index, Some(2));
     assert_eq!(
-        output,
-        concat!(
-            "clk=3, op=Some(Incr), ",
-            "asmop=Some(AsmOpInfo { op: \"push.1\", num_cycles: 2, cycle_idx: 2 }), ", 
-            "fmp=1073741824, ",
-            "stack=[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 4);
+    assert_eq!(output.op, Some("Push(BaseElement(8589934590))".to_string()));
+    assert_eq!(output.instruction, Some("\"push.2\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(1));
+    assert_eq!(output.operation_index, Some(1));
     assert_eq!(
-        output,
-        concat!(
-            "clk=4, op=Some(Push(BaseElement(8589934590))), ", 
-            "asmop=Some(AsmOpInfo { op: \"push.2\", num_cycles: 1, cycle_idx: 1 }), ",
-            "fmp=1073741824, ",
-            "stack=[2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 5);
+    assert_eq!(output.op, Some("Add".to_string()));
+    assert_eq!(output.instruction, Some("\"add\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(1));
+    assert_eq!(output.operation_index, Some(1));
     assert_eq!(
-        output,
-        concat!(
-            "clk=5, op=Some(Add), ",
-            "asmop=Some(AsmOpInfo { op: \"add\", num_cycles: 1, cycle_idx: 1 }), ", 
-            "fmp=1073741824, stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], ", 
-            "memory=[]"
-        )
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
     assert_eq!(
-        output,
-        concat!(
-            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
-            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 
     // it should not play more cycles
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
     assert_eq!(
-        output,
-        concat!(
-            "clk=6, op=Some(End), asmop=None, fmp=1073741824, ",
-            "stack=[3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], memory=[]"
-        )
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
+    assert_eq!(output.memory, Vec::<u64>::new());
 }
 
 #[test]

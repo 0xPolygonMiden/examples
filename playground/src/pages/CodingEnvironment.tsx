@@ -8,6 +8,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import init, {
   DebugCommand,
   DebugExecutor,
+  DebugOutput,
   Outputs,
   run_program,
   prove_program,
@@ -15,10 +16,10 @@ import init, {
 } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 import {
-  addNewlineAfterWhitespace,
   getExample,
   checkInputs,
   checkOutputs,
+  formatDebuggerOutput,
 } from "../utils/helper_functions";
 import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
 import OverlayButton from "../components/OverlayButton";
@@ -129,7 +130,7 @@ export default function CodingEnvironment(): JSX.Element {
         const start = Date.now();
         const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
           prove_program(code, inputs);
-          const overflow = overflow_addrs ? overflow_addrs.toString() : null;
+        const overflow = overflow_addrs ? overflow_addrs.toString() : null;
         if (overflow) {
           setOutput(`{
 "stack_output" : [${stack_output.toString()}],
@@ -174,6 +175,7 @@ export default function CodingEnvironment(): JSX.Element {
       try {
         setShowDebug(true);
         setDebugExecutor(new DebugExecutor(code, inputs));
+        setOutput("Debugging session started");
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
@@ -189,11 +191,11 @@ export default function CodingEnvironment(): JSX.Element {
         throw new Error("debugExecutor is undefined");
       }
       if (typeof params !== "undefined") {
-        const result = debugExecutor.execute(command, params);
-        setOutput(addNewlineAfterWhitespace(result));
+        const debugOutput: DebugOutput = debugExecutor.execute(command, params);
+        setOutput(formatDebuggerOutput(debugOutput));
       } else {
-        const result = debugExecutor.execute(command);
-        setOutput(addNewlineAfterWhitespace(result));
+        const debugOutput: DebugOutput = debugExecutor.execute(command);
+        setOutput(formatDebuggerOutput(debugOutput));
       }
     } catch (error) {
       setOutput("Error: Check the developer console for details.");
@@ -242,37 +244,6 @@ export default function CodingEnvironment(): JSX.Element {
     });
   };
 
-  /**
-   * Shows the proof that is stored in the session.
-  */
-  const showProof = async () => {
-    if (!proof) {
-      setOutput("There is no proof to show. \nDid you prove the program?");
-      toast.error("Showing proof failed");
-      return;
-    }
-    toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? 'animate-enter' : 'animate-leave'
-        } max-w-full w-full bg-white shadow-lg rounded-lg flex ring-1 ring-black ring-opacity-5 overflow-hidden`}
-      >
-        <div className="flex-1 w-0 p-4 break-normal overflow-hidden">
-          <h1 className="text-lg font-medium text-gray-900"> This is your proof as Uint8Array </h1>
-          {proof.toString()}
-        </div>
-        <div className="flex border-l border-gray-200">
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    ))
-  }
-
   return (
     <>
       <Toaster />
@@ -288,30 +259,6 @@ export default function CodingEnvironment(): JSX.Element {
         />
         <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
       </div>
-      {showDebug ? (
-        <div className="flex justify-center pt-6">
-          <DebugButton
-            icon="PPrevious"
-            onClick={() => executeDebug(DebugCommand.RewindAll)}
-          />
-          <DebugButton
-            icon="Previous"
-            onClick={() => executeDebug(DebugCommand.Rewind, BigInt(1))}
-          />
-          <DebugButton
-            icon="Stack"
-            onClick={() => executeDebug(DebugCommand.PrintState)}
-          />
-          <DebugButton
-            icon="Forward"
-            onClick={() => executeDebug(DebugCommand.Play, BigInt(1))}
-          />
-          <DebugButton
-            icon="FForward"
-            onClick={() => executeDebug(DebugCommand.PlayAll)}
-          />
-        </div>
-      ) : null}
       <div className="box-border pt-6">
         <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
           <div className="box-border">
@@ -331,6 +278,38 @@ export default function CodingEnvironment(): JSX.Element {
               theme={eclipse}
               onChange={setOutput}
             />
+            {showDebug ? (
+              <div className="flex pt-0 gap-x-1">
+                <DebugButton
+                  icon="Start"
+                  onClick={() => executeDebug(DebugCommand.RewindAll)}
+                />
+                <DebugButton
+                  icon="PPrevious"
+                  onClick={() => executeDebug(DebugCommand.Rewind, BigInt(100))}
+                />
+                <DebugButton
+                  icon="Previous"
+                  onClick={() => executeDebug(DebugCommand.Rewind, BigInt(1))}
+                />
+                <DebugButton
+                  icon="Stack"
+                  onClick={() => executeDebug(DebugCommand.PrintState)}
+                />
+                <DebugButton
+                  icon="Forward"
+                  onClick={() => executeDebug(DebugCommand.Play, BigInt(1))}
+                />
+                <DebugButton
+                  icon="FForward"
+                  onClick={() => executeDebug(DebugCommand.Play, BigInt(100))}
+                />
+                <DebugButton
+                  icon="End"
+                  onClick={() => executeDebug(DebugCommand.PlayAll)}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -357,13 +336,6 @@ export default function CodingEnvironment(): JSX.Element {
           />
         </div>
       </div>
-      { proof ? 
-        <div className="flex">
-          <div className="absolute bottom-2 right-2 z-40">
-            <ActionButton label="Show Proof" onClick={showProof} />
-          </div>
-        </div>
-      : null }
     </>
   );
 }
