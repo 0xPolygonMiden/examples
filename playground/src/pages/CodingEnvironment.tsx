@@ -73,7 +73,12 @@ export default function CodingEnvironment(): JSX.Element {
     const value = exampleChange;
     // set the current example to the selected one
     setExample(value);
-
+    if (value === "example") {
+      setInputs(exampleInput);
+      setCode(exampleCode);
+      setOutput(emptyOutput);
+      return;
+    }
     // retrieve the example data and update the inputs and code
     const example_code = await getExample(value);
     setInputs(await example_code[0]);

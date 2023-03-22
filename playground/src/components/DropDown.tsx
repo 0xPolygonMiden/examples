@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 
 const examples = [
+  "example",
   "collatz",
   "comparison",
   "conditional",
@@ -21,7 +22,7 @@ type DropDownProps = {
 export default function DropDown({
   onExampleValueChange,
 }: DropDownProps): JSX.Element {
-  const [selected, setSelected] = useState(examples[1]);
+  const [selected, setSelected] = useState(examples[0]);
 
   return (
     <Listbox
