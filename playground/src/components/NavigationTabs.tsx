@@ -45,7 +45,7 @@ const NavigationTabs = () => {
         <select
           id="tabs"
           name="tabs"
-          className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+          className="block w-full rounded-md border-gray-300 focus:border-violet-600 focus:ring-violet-600 text-transform: uppercase"
           defaultValue={tabs.find((tab) => tab.current)?.name}
           onChange={handleChangeMobile}
         >
@@ -62,9 +62,9 @@ const NavigationTabs = () => {
                 key={tab.name}
                 className={classNames(
                   tab.name == activeTab
-                    ? 'border-indigo-500 text-indigo-600 hover:cursor-pointer'
-                    : 'border-transparent text-gray-500 hover:cursor-pointer hover:border-gray-300 hover:text-gray-700',
-                  'w-1/3 border-b-2 py-4 px-1 text-center text-sm font-medium'
+                    ? 'border-violet-600 text-violet-700 hover:cursor-pointer text-transform: uppercase'
+                    : 'border-transparent text-gray-500 hover:cursor-pointer hover:border-gray-300 hover:text-gray-700 ',
+                  'w-1/3 border-b-2 py-4 px-1 text-center text-sm font-medium text-transform: uppercase'
                 )}
                 aria-current={tab.name == activeTab ? 'page' : undefined}
                 onClick={() => handleChange(tab)}

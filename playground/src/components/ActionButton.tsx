@@ -13,7 +13,7 @@ type ActionButtonProps = {
 const ActionButton = ({ label, onClick, disabled }: ActionButtonProps): JSX.Element => {
   return (
     <button
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-25"
+      className="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded disabled:opacity-25 text-transform: capitalize"
       onClick={onClick}
       disabled={disabled}
     >

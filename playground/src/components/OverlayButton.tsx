@@ -1,3 +1,4 @@
+import ActionButton from "./ActionButton";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 
@@ -28,10 +29,10 @@ const OverlayButton = ({
           <div className="flex font-extralight text-gray-900 text-sm">
             {proof
               ? Array.from(proof)
-                  .map((b) => b.toString(16).padStart(2, "0"))
-                  .join("")
-                  .slice(0, 3000)
-                  .replace(/(.{50})/g, "$&\n") + "..."
+                .map((b) => b.toString(16).padStart(2, "0"))
+                .join("")
+                .slice(0, 3000)
+                .replace(/(.{50})/g, "$&\n") + "..."
               : "No proof available"}
           </div>
         </Popover.Body>
@@ -39,7 +40,7 @@ const OverlayButton = ({
     }
   >
     <button
-      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-25"
+      className="bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded disabled:opacity-25 text-transform: capitalize"
       disabled={disabled}
     >
       {label}

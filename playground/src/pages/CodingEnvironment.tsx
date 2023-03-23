@@ -237,10 +237,10 @@ export default function CodingEnvironment(): JSX.Element {
         const result = verify_program(code, inputs, outputs, proof);
         toast.success(
           "Verification successful in " +
-            (Date.now() - start) +
-            " ms with a security level of " +
-            result +
-            "bits."
+          (Date.now() - start) +
+          " ms with a security level of " +
+          result +
+          "bits."
         );
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
@@ -267,7 +267,7 @@ export default function CodingEnvironment(): JSX.Element {
       <div className="box-border pt-6">
         <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
           <div className="box-border">
-            <h1 className="heading">Inputs</h1>
+            <h2 className="heading">Inputs</h2>
             <CodeMirror
               value={inputs}
               height="150px"
@@ -276,7 +276,7 @@ export default function CodingEnvironment(): JSX.Element {
             />
           </div>
           <div className="box-border">
-            <h1 className="heading">Outputs </h1>
+            <h2 className="heading">Outputs</h2>
             <CodeMirror
               value={outputs}
               height="150px"
@@ -320,7 +320,7 @@ export default function CodingEnvironment(): JSX.Element {
       </div>
       <div className="box-border pt-6 ml-2 mr-2">
         <div className="box-border">
-          <h1 className="heading">Miden Assembly Code</h1>
+          <h2 className="heading">Miden Assembly Code</h2>
           <CodeMirror
             value={code}
             height="500px"
