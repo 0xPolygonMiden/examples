@@ -1,6 +1,6 @@
 use clap::Parser;
 use miden_vm::{
-    AdviceInputs, Assembler, Kernel, MemAdviceProvider, ProgramInfo, ProofOptions, StackInputs, VmState,
+    AdviceInputs, Assembler, Kernel, MemAdviceProvider, ProgramInfo, ProofOptions, StackInputs,
 };
 use std::fs;
 use std::time::Instant;

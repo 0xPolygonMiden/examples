@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import type { DebugOutput } from "miden-wasm";
-=======
-import type {DebugOutput} from "miden-wasm";
->>>>>>> fb45f4754 (feat: improve debugging)
 
 /**
  * Helper function to get the example from the examples repo.
@@ -148,25 +144,16 @@ Did you prove the program first?`;
 
 export function nextPowerOf2(x: number): number {
   let power = 1;
-<<<<<<< HEAD
   while (power < x) {
     power <<= 1;
   }
   return Math.max(power, 1024);
 }
-=======
-    while (power < x) {
-      power <<= 1;
-    }
-  return Math.max(power, 1024);
-} 
->>>>>>> fb45f4754 (feat: improve debugging)
 
 /**
  * Helper function to format the Debugger output.
  */
 export function formatDebuggerOutput(debugOutput: DebugOutput): string {
-<<<<<<< HEAD
   const output = `Clock: ${debugOutput.clk}
 Stack: [${debugOutput.stack.toString()}]
 Assembly Instruction: ${debugOutput.instruction ? debugOutput.instruction : ""}
@@ -181,31 +168,6 @@ Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
 `;
 
   return output;
-}
-
-/**
- * Helper function to format the Memory in the Debug Output.
- */
-export function formatMemory(memory: BigUint64Array): string {
-  let output = "";
-  for (let i = 0; i < memory.length; i += 5) {
-    const memorySlice = memory.slice(i, i + 5);
-    output += `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}] \n                    `;
-  }
-  return output;
-=======
-  const output = 
-`"clk" : ${debugOutput.clk}
-"stack" : [${debugOutput.stack.toString()}]
-"miden operation" : ${debugOutput.op}
-"assembly operation" : ${debugOutput.asmop_op}
-"assembly num of cycles" : ${debugOutput.asmop_num_cycles === 0 ? "" : debugOutput.asmop_num_cycles}
-"assembly cycle index" : ${debugOutput.asmop_cycle_idx === 0 ? "" : debugOutput.asmop_cycle_idx}
-"memory" : ${formatMemory(debugOutput.memory)}
-`;
-  
-  return output
->>>>>>> fb45f4754 (feat: improve debugging)
 }
 
 /**
