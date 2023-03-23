@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
+import Header from "./components/Header";
+import NavigationTabs from "./components/NavigationTabs";
 import CodingEnvironment from "./pages/CodingEnvironment";
 import InstructionTable from "./pages/InstructionTable";
 import ExplainerPage from "./pages/Explainer";
@@ -8,7 +9,8 @@ function App() {
   return (
     <>
       <HashRouter>
-        <NavBar />
+        <Header />
+        <NavigationTabs />
         <Routes>
           <Route path="/" element={<CodingEnvironment />} />
           <Route path="/examples" element={<CodingEnvironment />} />
