@@ -30,10 +30,10 @@ describe("Dropdown Component", () => {
     fireEvent.mouseDown(getByRole('button'));
     const listbox = within(getByRole('listbox'));
 
-    fireEvent.click(listbox.getByText("example"));
+    fireEvent.click(listbox.getByText('example'));
     expect(getByTestId('listbox')).toHaveTextContent('example');
 
-    fireEvent.click(listbox.getByText("collatz"));
+    fireEvent.click(listbox.getByText('collatz'));
     expect(getByTestId('listbox')).toHaveTextContent('collatz');
   });
 });

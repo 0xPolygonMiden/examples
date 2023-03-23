@@ -58,7 +58,7 @@ export function checkField(jsonField: JSON, key: string): checkedData {
     Object.values(jsonInput).length === 0 ||
     Object.values(jsonInput).some(isNaN)
   ) {
-    const errorMessage = `${key} must contain at least one number, 
+    const errorMessage = `${key} must contain at least one number,
 and it can only contain numbers.`;
 
     return { isValid: false, errorMessage: errorMessage };
@@ -93,8 +93,8 @@ ${e.message}`;
     !Object.keys(jsonInput).includes("stack_init") &&
     !Object.keys(jsonInput).includes("advice_tape")
   ) {
-    const errorMessage = `Miden VM Inputs can be empty or 
-we need either a stack_init or 
+    const errorMessage = `Miden VM Inputs can be empty or
+we need either a stack_init or
 an advice_tape.`;
 
     return { isValid: false, errorMessage: errorMessage };
@@ -179,4 +179,5 @@ export function formatMemory(memory: BigUint64Array): string {
     const memorySlice = memory.slice(i, i + 5);
     output += `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}] \n           `;
   }
-  return output;}
+  return output;
+}

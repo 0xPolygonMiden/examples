@@ -203,7 +203,7 @@ export default function CodingEnvironment(): JSX.Element {
         setOutput(formatDebuggerOutput(debugOutput));
       }
     } catch (error) {
-      setOutput("Error: Check the developer AA console for details.");
+      setOutput("Error: Check the developer console for details.");
     }
   };
 
