@@ -39,7 +39,7 @@ describe("checkField function", () => {
   it("should return false if the field is empty", async () => {
     expect(checkField(output_example_incl_errors_json, "empty")).toStrictEqual({
       isValid: false,
-      errorMessage: `empty must contain at least one number, 
+      errorMessage: `empty must contain at least one number,
 and it can only contain numbers.`,
     });
   });
@@ -49,7 +49,7 @@ and it can only contain numbers.`,
       checkField(output_example_incl_errors_json, "stack_output_non_number")
     ).toStrictEqual({
       isValid: false,
-      errorMessage: `stack_output_non_number must contain at least one number, 
+      errorMessage: `stack_output_non_number must contain at least one number,
 and it can only contain numbers.`,
     });
   });
@@ -68,7 +68,7 @@ describe("checkFields function", () => {
       /** expect that the loop breaks at the first incorrect Field (cycles should be skipped) */
       {
         isValid: false,
-        errorMessage: `empty must contain at least one number, 
+        errorMessage: `empty must contain at least one number,
 and it can only contain numbers.`,
       }
     );
@@ -108,8 +108,8 @@ Expected property name or '}' in JSON at position 1`,
   it("should return false if neither 'stack_init' nor 'advice_tape' is there", async () => {
     expect(checkInputs(correct_json_no_stack_or_advice)).toStrictEqual({
       isValid: false,
-      errorMessage: `Miden VM Inputs can be empty or 
-we need either a stack_init or 
+      errorMessage: `Miden VM Inputs can be empty or
+we need either a stack_init or
 an advice_tape.`,
     });
   });

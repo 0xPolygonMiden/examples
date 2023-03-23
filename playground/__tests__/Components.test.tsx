@@ -4,6 +4,7 @@ import {
   screen,
   cleanup,
   within,
+  act,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import React from "react";
@@ -24,16 +25,16 @@ describe("ActionButton component", () => {
 /** Testing the Dropdown Component */
 describe("Dropdown Component", () => {
   it("should change the selected example when clicked", async () => {
-    const { getByRole, getAllByRole, getByTestId } = render(<DropDown />);
+    const { getByRole, getByTestId } = render(<DropDown />);
 
-    fireEvent.mouseDown(getByRole("button"));
-    const listbox = within(getByRole("listbox"));
+    fireEvent.mouseDown(getByRole('button'));
+    const listbox = within(getByRole('listbox'));
 
-    fireEvent.click(listbox.getByText("comparison"));
-    expect(getByTestId("listbox")).toHaveTextContent("comparison");
+    fireEvent.click(listbox.getByText('example'));
+    expect(getByTestId('listbox')).toHaveTextContent('example');
 
-    fireEvent.click(listbox.getByText("collatz"));
-    expect(getByTestId("listbox")).toHaveTextContent("collatz");
+    fireEvent.click(listbox.getByText('collatz'));
+    expect(getByTestId('listbox')).toHaveTextContent('collatz');
   });
 });
 
