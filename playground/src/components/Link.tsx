@@ -12,8 +12,9 @@ type LinkProps = {
 const Link = ({ label, address }: LinkProps): JSX.Element => {
   return (
     <a
+      target="_blank"
       href={address}
-      className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
+      className="block mt-4 lg:inline-block lg:mt-0 text-white hover:underline mr-4"
     >
       {label}
     </a>
