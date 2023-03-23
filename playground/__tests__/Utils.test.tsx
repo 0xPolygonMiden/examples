@@ -1,6 +1,5 @@
 import "@testing-library/jest-dom";
 import {
-  addNewlineAfterWhitespace,
   checkFields,
   checkField,
   checkInputs,
@@ -160,21 +159,5 @@ Did you prove the program first?`,
       isValid: true,
       errorMessage: "",
     });
-  });
-});
-
-/** Testing the addNewlineAfterWhitespace function */
-
-const testStr = 'This is a [test string] with some\nwhitespace.';
-describe("addNewlineAfterWhitespace function", () => {
-  it("should do what it is told", async () => {
-    expect(addNewlineAfterWhitespace(testStr)).toStrictEqual(`This
-is
-a
-[test string]
-with
-some
-whitespace.`
-    );
   });
 });

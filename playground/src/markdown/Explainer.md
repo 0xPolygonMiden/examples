@@ -76,28 +76,32 @@ You can create a program and run it. There will be no proof generated which is m
 You can step through the program and see the current VM state displayed in the Output section. 
 
 ```
-clk=0,
-op=None,
-asmop=None,
-fmp=1073741824,
-stack=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-memory=[]
+Clock: 2001
+Stack: [1,0,4,23,1,0,2,0,23,8,50,19,17,13,11,7,5,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+Assembly Instruction: "gt"
+Number of Operations: 18
+Rel. Operation Index: 11
+VM Operation: And
+Memory (Addr, Mem): [0]: [2, 0, 0, 0] 
+                    [1]: [3, 0, 0, 0] 
 ```
 
-* clk is the current (clock) cycle 
-* op is the current assembler operation 
-* asmop shows shows more info on the operation
-* fmp shows the free memory pointer (fmp), which is initially set to 2^30
-* stack shows the current state ot the stack
-* memory shows (address, mem) pairs if used
+* Clock is the current (clock) cycle
+* Stack shows the current state ot the stack
+* VM Operation is the current miden vm operation (every Operation takes 1 cycle)
+* Assembly Instruction: current Miden assembly instruction.
+* Number of Operations: number of operations per instruction.
+* Rel. Operation Index: current operation count.
+* VM Operation: current Miden VM operation, every operation takes 1 cycle.
+	
+Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xpolygonmiden.github.io/miden-vm/design/programs.html)
 
 Remember: Miden programs lenghts are expressed in cycles. The Miden VM will round the cycles always to the next power of 2 and has a minimum at 2^10.
 
 ### Prove a program
-This is what makes the Miden VM interesting. Here you can run your program and create a proof for it. The proof is stored in memory in the backend. 
+This is what makes the Miden VM interesting. Here you can run your program and create a proof for it. The proof is stored in memory in the backend. You can take a look at the proof by clicking "Show Proof".
 
-You need to prove before you can verify. 
+You need to prove before you can verify.
 
 ### Verify a program
 Ok, here you can verify that the given `stack_init` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.
-

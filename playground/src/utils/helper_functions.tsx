@@ -1,3 +1,5 @@
+import type { DebugOutput } from "miden-wasm";
+
 /**
  * Helper function to get the example from the examples repo.
  */
@@ -97,8 +99,8 @@ an advice_tape.`;
 
     return { isValid: false, errorMessage: errorMessage };
   }
-  
-  return checkFields(jsonInput)
+
+  return checkFields(jsonInput);
 }
 
 /**
@@ -106,9 +108,7 @@ an advice_tape.`;
  * - a valid JSON object containing stack_output (and overflows if present)
  * - only numbers as values
  */
-export function checkOutputs(
-  jsonString: string,
-): checkedData {
+export function checkOutputs(jsonString: string): checkedData {
   if (jsonString === "") {
     const errorMessage = `We need some outputs to verify the program.
 Did you prove the program first?`;
@@ -135,26 +135,49 @@ Did you prove the program first?`;
     return { isValid: false, errorMessage: errorMessage };
   }
 
-  return checkFields(jsonOutput)
+  return checkFields(jsonOutput);
 }
 
 /**
- * Helper function to format the debug output.
+ * Helper function to get next power of 2.
  */
-export function addNewlineAfterWhitespace(str: string): string {
-  let inSquareBrackets = false;
-  let result = '';
-  for (let i = 0; i < str.length; i++) {
-    if (str[i] === '['  || str[i] === '{') {
-      inSquareBrackets = true;
-    } else if (str[i] === ']' || str[i] === '}') {
-      inSquareBrackets = false;
-    }
-    if (!inSquareBrackets && /\s/.test(str[i])) {
-      result += '\n';
-    } else {
-      result += str[i];
-    }
+
+export function nextPowerOf2(x: number): number {
+  let power = 1;
+  while (power < x) {
+    power <<= 1;
   }
-  return result;
+  return Math.max(power, 1024);
+}
+
+/**
+ * Helper function to format the Debugger output.
+ */
+export function formatDebuggerOutput(debugOutput: DebugOutput): string {
+  const output = `Clock: ${debugOutput.clk}
+Stack: [${debugOutput.stack.toString()}]
+Assembly Instruction: ${debugOutput.instruction ? debugOutput.instruction : ""}
+Number of Operations: ${
+    debugOutput.num_of_operations ? debugOutput.num_of_operations : ""
+  }
+Rel. Operation Index: ${
+    debugOutput.operation_index ? debugOutput.operation_index : ""
+  }
+VM Operation: ${debugOutput.op ? debugOutput.op : ""}
+Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
+`;
+
+  return output;
+}
+
+/**
+ * Helper function to format the Memory in the Debug Output.
+ */
+export function formatMemory(memory: BigUint64Array): string {
+  let output = "";
+  for (let i = 0; i < memory.length; i += 5) {
+    const memorySlice = memory.slice(i, i + 5);
+    output += `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}] \n                    `;
+  }
+  return output;
 }
