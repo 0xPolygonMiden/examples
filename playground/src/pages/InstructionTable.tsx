@@ -22,7 +22,7 @@ export default function InstructionTable() {
     <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-20">
       <div className="flex grid-col-2 justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold text-transform: uppercase">Instructions</h1>
+          <h1 className="text-base font-semibold text-transform: uppercase">Instructions</h1>
           <div className="mt-1 sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <p className="text-sm text-gray-700">

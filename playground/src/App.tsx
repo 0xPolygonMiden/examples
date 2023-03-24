@@ -7,7 +7,7 @@ import ExplainerPage from "./pages/Explainer";
 
 function App() {
   return (
-    <>
+    <main className="bg-gray-100">
       <HashRouter>
         <Header />
         <NavigationTabs />
@@ -22,7 +22,7 @@ function App() {
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
       </HashRouter>
-    </>
+    </main>
   );
 }
 

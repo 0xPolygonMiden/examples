@@ -37,7 +37,7 @@ const NavigationTabs = () => {
   };
 
   return (
-    <div>
+    <div className="bg-white">
       <div className="sm:hidden">
         <label htmlFor="tabs" className="sr-only">
           Select a tab
