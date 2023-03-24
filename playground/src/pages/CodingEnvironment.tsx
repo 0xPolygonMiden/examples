@@ -6,6 +6,7 @@ import DropDown from "../components/DropDown";
 import MidenInputs from "../components/CodingEnvironment/MidenInputs";
 import MidenOutputs from "../components/CodingEnvironment/MidenOutputs";
 import MidenEditor from "../components/CodingEnvironment/MidenCode";
+import ProofModal from "../components/CodingEnvironment/ProofModal";
 import init, {
   DebugExecutor,
   Outputs,
@@ -20,9 +21,11 @@ import {
   checkOutputs,
 } from "../utils/helper_functions";
 import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
-import OverlayButton from "../components/OverlayButton";
 
 export default function CodingEnvironment(): JSX.Element {
+
+  const [isProcessing, setIsProcessing] = useState(false);
+
   /**
    * This sets the inputs to the default values.
    */
@@ -47,6 +50,10 @@ export default function CodingEnvironment(): JSX.Element {
    * Determines when to show the debug menu
    */
   const [showDebug, setShowDebug] = useState(false);
+
+
+  /** Manages the display of the proof */
+  const [proofModalOpen, setProofModalOpen] = useState(false);
 
   /**
    * This sets the debugExecutor such that we can store it for a session.
@@ -91,8 +98,9 @@ export default function CodingEnvironment(): JSX.Element {
    * It runs the Rust program that is imported above.
    */
   const runProgram = async () => {
+    setIsProcessing(true);
+    disableDebug();
     init().then(() => {
-      disableDebug();
       setProof(null);
       const inputCheck = checkInputs(inputs);
       if (!inputCheck.isValid) {
@@ -111,7 +119,7 @@ export default function CodingEnvironment(): JSX.Element {
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
       }
-    });
+    }).finally(() => setIsProcessing(false));
   };
 
   /**
@@ -119,9 +127,10 @@ export default function CodingEnvironment(): JSX.Element {
    * It runs the Rust program that is imported above.
    */
   const proveProgram = async () => {
+    setIsProcessing(true);
+    disableDebug();
     toast.loading("Proving ...", { id: "provingToast" });
     init().then(() => {
-      disableDebug();
       setProof(null);
       const inputCheck = checkInputs(inputs);
       if (!inputCheck.isValid) {
@@ -159,7 +168,7 @@ export default function CodingEnvironment(): JSX.Element {
         setOutput("Error: Check the developer console for details.");
         toast.error("Proving failed");
       }
-    });
+    }).finally(() => setIsProcessing(false));
   };
 
   /**
@@ -192,8 +201,8 @@ export default function CodingEnvironment(): JSX.Element {
    * As inputs we need program_info, stack_input, stack_output, and proof.
    */
   const verifyProgram = async () => {
+    disableDebug();
     init().then(() => {
-      disableDebug();
       if (!proof) {
         setOutput("There is no proof to verify. \nDid you prove the program?");
         toast.error("Verification failed");
@@ -232,15 +241,21 @@ export default function CodingEnvironment(): JSX.Element {
       <Toaster />
       <div className="bg-gray-100 sticky top-0 z-10 px-4 sm:px-6 lg:px-8 py-6 grid lg:grid-cols-6 sm:grid-cols-3 grid-cols-2 gap-4 content-center">
         <DropDown onExampleValueChange={handleSelectChange} />
-        <ActionButton label="Run" onClick={runProgram} disabled={false} />
-        <ActionButton label="Debug" onClick={startDebug} disabled={false} />
-        <ActionButton label="Prove" onClick={proveProgram} disabled={false} />
+        <ActionButton label="Run" onClick={runProgram} disabled={isProcessing} />
+        <ActionButton label="Debug" onClick={startDebug} disabled={isProcessing} />
+        <ActionButton label="Prove" onClick={proveProgram} disabled={isProcessing} />
         <ActionButton
           label="Verify"
           onClick={verifyProgram}
-          disabled={!proof}
+          disabled={isProcessing || !proof}
         />
-        <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
+        <ActionButton
+          label="Show Proof"
+          onClick={() => setProofModalOpen(true)}
+          disabled={isProcessing || !proof}
+        />
+        <ProofModal proof={proof} open={proofModalOpen} setOpen={setProofModalOpen} />
+        {/* <OverlayButton label="Show Proof" disabled={!proof} proof={proof} /> */}
       </div>
       <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

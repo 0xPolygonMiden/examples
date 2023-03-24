@@ -1,5 +1,7 @@
+import { ReactCodeMirrorProps } from "@uiw/react-codemirror";
 import {
     DebugCommand,
+    DebugExecutor,
     DebugOutput,
 } from "miden-wasm";
 import DebugButton from "../DebugButtons";
@@ -9,11 +11,16 @@ import {
 import Editor from "./Editor";
 import EditorLabel from "./EditorLabel";
 
-const MidenOutputs = ({ showDebug, debugExecutor, ...props }: any): JSX.Element => {
+type MidenOutputsProps = {
+    showDebug: boolean;
+    debugExecutor: DebugExecutor | null;
+    value: string;
+    onChange: (value: string) => void;
+    theme: ReactCodeMirrorProps["theme"];
+};
 
-    /**
-     * This executes a command in the debug menu.
-     */
+const MidenOutputs = ({ showDebug, debugExecutor, ...props }: MidenOutputsProps): JSX.Element => {
+    /** This executes a command in the debug menu. */
     const executeDebug = async (command: DebugCommand, params?: bigint) => {
         try {
             if (!debugExecutor) {

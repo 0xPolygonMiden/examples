@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { useNavigate } from 'react-router-dom';
 
 type TabType = {
@@ -14,7 +14,7 @@ const tabs: TabType[] = [
   { name: 'Help', href: '/explainer', current: false },
 ]
 
-function classNames(...classes: any[]) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
@@ -28,7 +28,7 @@ const NavigationTabs = () => {
     navigate(tab.href);
   };
 
-  const handleChangeMobile = (e: any) => {
+  const handleChangeMobile = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
     const name = e.target.value;
     setActiveTab(name);
