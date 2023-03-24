@@ -15,7 +15,7 @@ export default function ProofModal({ proof, open, setOpen }: ProofModalProps) {
     const proofToString = () => {
         if (proof) {
             return Array.from(proof)
-                .map((b: any) => b.toString(16).padStart(2, "0"))
+                .map((b) => b.toString(16).padStart(2, "0"))
                 .join("")
         } else {
             return "No proof available"
