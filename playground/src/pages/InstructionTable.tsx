@@ -20,7 +20,7 @@ export default function InstructionTable() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-20">
-      <div className="flex grid-col-2 justify-between items-center">
+      <div className="flex justify-between flex-col gap-2 sm:flex-row sm:gap-6 sm:items-center">
         <div>
           <h1 className="text-base font-semibold text-transform: uppercase">Instructions</h1>
           <div className="mt-1 sm:flex sm:items-center">
@@ -50,7 +50,7 @@ export default function InstructionTable() {
             id="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+            className="border-gray-300 focus:ring-violet-500 focus:border-violet-500 block w-auto pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
             placeholder="Search instructions"
           />
         </div>
@@ -60,35 +60,35 @@ export default function InstructionTable() {
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full">
-                <thead className="bg-white sticky top-0 z-10">
+                <thead className="bg-violet-600 sticky top-0 z-10 text-white">
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6"
                     >
                       Instruction
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      className="px-3 py-3.5 text-left text-sm font-semibold "
                     >
                       Stack Input
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      className="px-3 py-3.5 text-left text-sm font-semibold"
                     >
                       Stack Output
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      className="px-3 py-3.5 text-left text-sm font-semibold"
                     >
                       Cycles
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      className="px-3 py-3.5 text-left text-sm font-semibold"
                     >
                       Description
                     </th>
