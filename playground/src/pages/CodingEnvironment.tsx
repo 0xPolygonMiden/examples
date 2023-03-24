@@ -3,12 +3,11 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { eclipse } from "@uiw/codemirror-theme-eclipse";
 import ActionButton from "../components/ActionButton";
 import DropDown from "../components/DropDown";
-import DebugButton from "../components/DebugButtons";
-import CodeMirror from "@uiw/react-codemirror";
+import MidenInputs from "../components/CodingEnvironment/MidenInputs";
+import MidenOutputs from "../components/CodingEnvironment/MidenOutputs";
+import MidenEditor from "../components/CodingEnvironment/MidenCode";
 import init, {
-  DebugCommand,
   DebugExecutor,
-  DebugOutput,
   Outputs,
   run_program,
   prove_program,
@@ -19,7 +18,6 @@ import {
   getExample,
   checkInputs,
   checkOutputs,
-  formatDebuggerOutput,
 } from "../utils/helper_functions";
 import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
 import OverlayButton from "../components/OverlayButton";
@@ -36,9 +34,9 @@ export default function CodingEnvironment(): JSX.Element {
   const [code, setCode] = React.useState(exampleCode);
 
   /**
-   * This sets the outputs to the default values.
+   * This sets the output to the default values.
    */
-  const [outputs, setOutput] = React.useState(emptyOutput);
+  const [output, setOutput] = React.useState(emptyOutput);
 
   /**
    * This sets the proof to the default proof.
@@ -188,26 +186,6 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   /**
-   * This executes a command in the debug menu.
-   */
-  const executeDebug = async (command: DebugCommand, params?: bigint) => {
-    try {
-      if (!debugExecutor) {
-        throw new Error("debugExecutor is undefined");
-      }
-      if (typeof params !== "undefined") {
-        const debugOutput: DebugOutput = debugExecutor.execute(command, params);
-        setOutput(formatDebuggerOutput(debugOutput));
-      } else {
-        const debugOutput: DebugOutput = debugExecutor.execute(command);
-        setOutput(formatDebuggerOutput(debugOutput));
-      }
-    } catch (error) {
-      setOutput("Error: Check the developer console for details.");
-    }
-  };
-
-  /**
    * This verifies the proof that is stored in the session.
    * It runs the Rust program that is imported above.
    * It returns true if the proof is valid, and false otherwise.
@@ -222,7 +200,7 @@ export default function CodingEnvironment(): JSX.Element {
         return;
       }
       const inputCheck = checkInputs(inputs);
-      const outputCheck = checkOutputs(outputs);
+      const outputCheck = checkOutputs(output);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
         toast.error("Verification failed");
@@ -234,13 +212,13 @@ export default function CodingEnvironment(): JSX.Element {
       }
       try {
         const start = Date.now();
-        const result = verify_program(code, inputs, outputs, proof);
+        const result = verify_program(code, inputs, output, proof);
         toast.success(
           "Verification successful in " +
-            (Date.now() - start) +
-            " ms with a security level of " +
-            result +
-            "bits."
+          (Date.now() - start) +
+          " ms with a security level of " +
+          result +
+          "bits."
         );
       } catch (error) {
         setOutput("Error: Check the developer console for details.");
@@ -250,9 +228,9 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   return (
-    <>
+    <div className="pb-4">
       <Toaster />
-      <div className="ml-2 mr-2 pt-3 h-30 grid grid-cols-6 gap-4 content-center">
+      <div className="bg-gray-100 sticky top-0 z-10 px-4 sm:px-6 lg:px-8 py-6 grid lg:grid-cols-6 sm:grid-cols-3 grid-cols-2 gap-4 content-center">
         <DropDown onExampleValueChange={handleSelectChange} />
         <ActionButton label="Run" onClick={runProgram} disabled={false} />
         <ActionButton label="Debug" onClick={startDebug} disabled={false} />
@@ -264,83 +242,15 @@ export default function CodingEnvironment(): JSX.Element {
         />
         <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
       </div>
-      <div className="box-border pt-6">
-        <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
-          <div className="box-border">
-            <h1 className="heading">Inputs</h1>
-            <CodeMirror
-              value={inputs}
-              height="150px"
-              theme={oneDark}
-              onChange={setInputs}
-            />
-          </div>
-          <div className="box-border">
-            <h1 className="heading">Outputs </h1>
-            <CodeMirror
-              value={outputs}
-              height="150px"
-              theme={eclipse}
-              onChange={setOutput}
-            />
-            {showDebug ? (
-              <div className="flex pt-0 gap-x-1">
-                <DebugButton
-                  icon="Start"
-                  onClick={() => executeDebug(DebugCommand.RewindAll)}
-                />
-                <DebugButton
-                  icon="PPrevious"
-                  onClick={() => executeDebug(DebugCommand.Rewind, BigInt(100))}
-                />
-                <DebugButton
-                  icon="Previous"
-                  onClick={() => executeDebug(DebugCommand.Rewind, BigInt(1))}
-                />
-                <DebugButton
-                  icon="Stack"
-                  onClick={() => executeDebug(DebugCommand.PrintState)}
-                />
-                <DebugButton
-                  icon="Forward"
-                  onClick={() => executeDebug(DebugCommand.Play, BigInt(1))}
-                />
-                <DebugButton
-                  icon="FForward"
-                  onClick={() => executeDebug(DebugCommand.Play, BigInt(100))}
-                />
-                <DebugButton
-                  icon="End"
-                  onClick={() => executeDebug(DebugCommand.PlayAll)}
-                />
-              </div>
-            ) : null}
-          </div>
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <MidenInputs value={inputs} onChange={setInputs} theme={oneDark} />
+          <MidenOutputs value={output} onChange={setOutput} theme={eclipse} showDebug={showDebug} debugExecutor={debugExecutor} />
         </div>
       </div>
-      <div className="box-border pt-6 ml-2 mr-2">
-        <div className="box-border">
-          <h1 className="heading">Miden Assembly Code</h1>
-          <CodeMirror
-            value={code}
-            height="500px"
-            theme={oneDark}
-            onChange={setCode}
-            basicSetup={{
-              foldGutter: true,
-              highlightActiveLineGutter: true,
-              dropCursor: true,
-              allowMultipleSelections: false,
-              indentOnInput: false,
-              lineNumbers: true,
-              syntaxHighlighting: true,
-              bracketMatching: true,
-              autocompletion: true,
-              highlightActiveLine: true,
-            }}
-          />
-        </div>
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
+        <MidenEditor value={code} onChange={setCode} theme={oneDark} />
       </div>
-    </>
+    </div>
   );
 }
