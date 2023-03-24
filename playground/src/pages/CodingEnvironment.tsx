@@ -6,6 +6,7 @@ import DropDown from "../components/DropDown";
 import MidenInputs from "../components/CodingEnvironment/MidenInputs";
 import MidenOutputs from "../components/CodingEnvironment/MidenOutputs";
 import MidenEditor from "../components/CodingEnvironment/MidenCode";
+import ProofModal from "../components/CodingEnvironment/ProofModal";
 import init, {
   DebugExecutor,
   Outputs,
@@ -20,7 +21,6 @@ import {
   checkOutputs,
 } from "../utils/helper_functions";
 import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
-import OverlayButton from "../components/OverlayButton";
 
 export default function CodingEnvironment(): JSX.Element {
   /**
@@ -47,6 +47,10 @@ export default function CodingEnvironment(): JSX.Element {
    * Determines when to show the debug menu
    */
   const [showDebug, setShowDebug] = useState(false);
+
+
+  /** Manages the display of the proof */
+  const [proofModalOpen, setProofModalOpen] = useState(false);
 
   /**
    * This sets the debugExecutor such that we can store it for a session.
@@ -240,7 +244,13 @@ export default function CodingEnvironment(): JSX.Element {
           onClick={verifyProgram}
           disabled={!proof}
         />
-        <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
+        <ActionButton
+          label="Show Proof"
+          onClick={() => setProofModalOpen(true)}
+          disabled={!proof}
+        />
+        <ProofModal proof={proof} open={proofModalOpen} setOpen={setProofModalOpen} />
+        {/* <OverlayButton label="Show Proof" disabled={!proof} proof={proof} /> */}
       </div>
       <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
