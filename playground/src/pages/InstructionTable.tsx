@@ -19,38 +19,40 @@ export default function InstructionTable() {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-<div className="px-4 sm:px-6 lg:px-8 pt-6">
-  <div className="flex grid-col-2 justify-between">
-    <h1 className="text-xl font-semibold text-blue">Instructions</h1>
-    <div className="mt-4">
-      <label htmlFor="search" className="sr-only">
-        Search
-      </label>
-      <input
-        type="text"
-        name="search"
-        id="search"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-        placeholder="Search instructions"
-      />
-    </div>
-  </div>
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all Miden assembly instructions. If you want to learn more
-            about Miden Assembly and the Miden VM you can read the
-            <a
-              href="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/"
-              className="text-blue-600 hover:text-blue-800"
-            >
-              {" "}
-              Miden Assembly documentation
-            </a>
-            .
-          </p>
+    <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-20">
+      <div className="flex grid-col-2 justify-between items-center">
+        <div>
+          <h1 className="text-xl font-semibold text-transform: uppercase">Instructions</h1>
+          <div className="mt-1 sm:flex sm:items-center">
+            <div className="sm:flex-auto">
+              <p className="text-sm text-gray-700">
+                A list of all Miden assembly instructions. If you want to learn more
+                about Miden Assembly and the Miden VM you can read the
+                <a
+                  href="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/"
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  {" "}
+                  Miden Assembly documentation
+                </a>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label htmlFor="search" className="sr-only">
+            Search
+          </label>
+          <input
+            type="text"
+            name="search"
+            id="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+            placeholder="Search instructions"
+          />
         </div>
       </div>
       <div className="mt-8 flex flex-col">
@@ -100,74 +102,74 @@ export default function InstructionTable() {
                       )
                     )
                     .map((instructionClass) => (
-                    <Fragment key={instructionClass.class}>
-                      <tr className="border-t border-gray-200">
-                        <th
-                          colSpan={6}
-                          scope="colgroup"
-                          className="bg-gray-50 px-4 py-2 text-left text-sm font-semibold text-black sm:px-6"
-                        >
-                          {instructionClass.class}
-                        </th>
-                      </tr>
-                      {instructionClass.instructions
-                        .filter(instruction => instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase()))
-                        .map(
-                        (instruction, instructionIdx) => (
-                          <tr
-                            key={instruction.instruction}
-                            className={classNames(
-                              instructionIdx === 0
-                                ? "border-gray-300"
-                                : "border-gray-200",
-                              "border-t"
-                            )}
+                      <Fragment key={instructionClass.class}>
+                        <tr className="border-t border-gray-200">
+                          <th
+                            colSpan={6}
+                            scope="colgroup"
+                            className="bg-gray-50 px-4 py-2 text-left text-sm font-semibold text-black sm:px-6"
                           >
-                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                              <ReactMarkdown
-                                remarkPlugins={[math]}
-                                rehypePlugins={[katex]}
+                            {instructionClass.class}
+                          </th>
+                        </tr>
+                        {instructionClass.instructions
+                          .filter(instruction => instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase()))
+                          .map(
+                            (instruction, instructionIdx) => (
+                              <tr
+                                key={instruction.instruction}
+                                className={classNames(
+                                  instructionIdx === 0
+                                    ? "border-gray-300"
+                                    : "border-gray-200",
+                                  "border-t"
+                                )}
                               >
-                                {instruction.instruction}
-                              </ReactMarkdown>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                              <ReactMarkdown
-                                remarkPlugins={[math, gfm]}
-                                rehypePlugins={[katex]}
-                              >
-                                {instruction.stackInput}
-                              </ReactMarkdown>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                              <ReactMarkdown
-                                remarkPlugins={[math, gfm]}
-                                rehypePlugins={[katex]}
-                              >
-                                {instruction.stackOutput}
-                              </ReactMarkdown>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                              <ReactMarkdown
-                                remarkPlugins={[math, gfm]}
-                                rehypePlugins={[katex]}
-                              >
-                                {instruction.cycles}
-                              </ReactMarkdown>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                              <ReactMarkdown
-                                remarkPlugins={[math, gfm]}
-                                rehypePlugins={[katex]}
-                              >
-                                {instruction.notes}
-                              </ReactMarkdown>
-                            </td>
-                          </tr>
-                        )
-                      )}
-                    </Fragment>
-                  ))}
+                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                                  <ReactMarkdown
+                                    remarkPlugins={[math]}
+                                    rehypePlugins={[katex]}
+                                  >
+                                    {instruction.instruction}
+                                  </ReactMarkdown>
+                                </td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                  <ReactMarkdown
+                                    remarkPlugins={[math, gfm]}
+                                    rehypePlugins={[katex]}
+                                  >
+                                    {instruction.stackInput}
+                                  </ReactMarkdown>
+                                </td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                  <ReactMarkdown
+                                    remarkPlugins={[math, gfm]}
+                                    rehypePlugins={[katex]}
+                                  >
+                                    {instruction.stackOutput}
+                                  </ReactMarkdown>
+                                </td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                  <ReactMarkdown
+                                    remarkPlugins={[math, gfm]}
+                                    rehypePlugins={[katex]}
+                                  >
+                                    {instruction.cycles}
+                                  </ReactMarkdown>
+                                </td>
+                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                  <ReactMarkdown
+                                    remarkPlugins={[math, gfm]}
+                                    rehypePlugins={[katex]}
+                                  >
+                                    {instruction.notes}
+                                  </ReactMarkdown>
+                                </td>
+                              </tr>
+                            )
+                          )}
+                      </Fragment>
+                    ))}
                 </tbody>
               </table>
             </div>

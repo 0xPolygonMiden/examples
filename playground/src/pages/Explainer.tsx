@@ -16,9 +16,9 @@ export default function ExplainerPage(): JSX.Element {
   });
 
   return (
-    <div className="flex content-center justify-center pt-3">
-     <article className="prose">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{explainer}</ReactMarkdown>  
+    <div className="flex justify-center pt-6 pb-20">
+      <article className="prose">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{explainer}</ReactMarkdown>
       </article>
     </div>
   );

@@ -252,7 +252,7 @@ export default function CodingEnvironment(): JSX.Element {
   return (
     <>
       <Toaster />
-      <div className="ml-2 mr-2 pt-3 h-30 grid grid-cols-6 gap-4 content-center">
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 grid lg:grid-cols-6 sm:grid-cols-3 grid-cols-2 gap-4 content-center">
         <DropDown onExampleValueChange={handleSelectChange} />
         <ActionButton label="Run" onClick={runProgram} disabled={false} />
         <ActionButton label="Debug" onClick={startDebug} disabled={false} />
@@ -264,24 +264,30 @@ export default function CodingEnvironment(): JSX.Element {
         />
         <OverlayButton label="Show Proof" disabled={!proof} proof={proof} />
       </div>
-      <div className="box-border pt-6">
-        <div className="grid grid-cols-2 gap-4 ml-2 mr-2">
-          <div className="box-border">
-            <h2 className="heading">Inputs</h2>
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="min-w-0 flex-1 box-border">
+            <h2 className="text-center text-xl font-semibold leading-7 text-gray-900 sm:truncate sm:tracking-tight text-transform: uppercase">
+              Inputs
+            </h2>
             <CodeMirror
               value={inputs}
               height="150px"
               theme={oneDark}
               onChange={setInputs}
+              className="mt-1"
             />
           </div>
-          <div className="box-border">
-            <h2 className="heading">Outputs</h2>
+          <div className="min-w-0 flex-1 box-border">
+            <h2 className="text-center text-xl font-semibold leading-7 text-gray-900 sm:truncate sm:tracking-tight text-transform: uppercase">
+              Outputs
+            </h2>
             <CodeMirror
               value={outputs}
               height="150px"
               theme={eclipse}
               onChange={setOutput}
+              className="mt-1"
             />
             {showDebug ? (
               <div className="flex pt-0 gap-x-1">
@@ -318,9 +324,11 @@ export default function CodingEnvironment(): JSX.Element {
           </div>
         </div>
       </div>
-      <div className="box-border pt-6 ml-2 mr-2">
-        <div className="box-border">
-          <h2 className="heading">Miden Assembly Code</h2>
+      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
+        <div className="min-w-0 flex-1 box-border">
+          <h2 className="text-center text-2xl font-semibold leading-7 text-violet-600 sm:truncate sm:tracking-tight text-transform: uppercase">
+            Miden Assembly Code
+          </h2>
           <CodeMirror
             value={code}
             height="500px"
@@ -338,6 +346,7 @@ export default function CodingEnvironment(): JSX.Element {
               autocompletion: true,
               highlightActiveLine: true,
             }}
+            className="mt-2"
           />
         </div>
       </div>
