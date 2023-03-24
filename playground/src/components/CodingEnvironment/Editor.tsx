@@ -1,12 +1,19 @@
-import CodeMirror from "@uiw/react-codemirror";
+import CodeMirror, { ReactCodeMirrorProps } from "@uiw/react-codemirror";
 
-const Editor = (props: any): JSX.Element =>
+type EditorProps = {
+    height: string;
+    value: string;
+    onChange: (value: string) => void;
+    theme: ReactCodeMirrorProps["theme"];
+};
+
+const Editor = (props: EditorProps): JSX.Element =>
     <dl className="mt-3 grid grid-cols-1">
         <CodeMirror
             value={props.value}
             height={props.height}
             theme={props.theme}
-            onChange={props.setValue}
+            onChange={props.onChange}
             basicSetup={{
                 foldGutter: true,
                 highlightActiveLineGutter: true,

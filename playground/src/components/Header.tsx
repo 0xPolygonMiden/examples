@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from 'react-router-dom';
 import MidenLogo from "./MidenLogo";
 import { Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -12,12 +11,7 @@ const navigation = [
     { name: 'Homepage', href: 'https://polygon.technology/solutions/polygon-miden/' },
 ]
 
-function classNames(...classes: any[]) {
-    return classes.filter(Boolean).join(' ')
-}
-
 const Header = () => {
-
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
     return (

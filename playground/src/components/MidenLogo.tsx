@@ -1,12 +1,16 @@
+type MidenLogoProps = {
+  className: string;
+};
+
 /**
  * A component that renders the Miden logo.
  *
  * @returns an svg component of the Polygon Miden logo
  */
-const MidenLogo = (props: any) => {
+const MidenLogo = ({ className }: MidenLogoProps) => {
   return (
     <svg
-      className={props.className}
+      className={className}
       version="1.0"
       viewBox="0 0 400 400"
     >
