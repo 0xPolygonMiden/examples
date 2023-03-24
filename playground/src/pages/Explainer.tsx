@@ -16,10 +16,12 @@ export default function ExplainerPage(): JSX.Element {
   });
 
   return (
-    <div className="flex justify-center pt-6 pb-20">
-      <article className="prose">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{explainer}</ReactMarkdown>
-      </article>
+    <div className="pt-6 pb-20 px-6 flex justify-center">
+      <div className="bg-white w-full md:w-auto py-20 px-12 rounded-lg shadow">
+        <article className="prose">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{explainer}</ReactMarkdown>
+        </article>
+      </div>
     </div>
   );
 }    
