@@ -60,9 +60,7 @@ impl DebugExecutor {
 
         let vm_state = vm_state_iter
             .next()
-            .ok_or(format!(
-                "Failed to instantiate DebugExecutor - `VmStateIterator` is not yielding!"
-            ))?
+            .ok_or("Failed to instantiate DebugExecutor - `VmStateIterator` is not yielding!")?
             .expect("initial state of vm must be healthy!");
 
         Ok(Self {
