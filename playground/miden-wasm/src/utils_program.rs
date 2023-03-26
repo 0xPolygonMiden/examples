@@ -17,7 +17,7 @@ impl MidenProgram {
         Self {
             assembler: Assembler::default(),
             masm_code: code_as_str.to_string(),
-            debug: debug,
+            debug,
             program: None,
             program_info: None,
         }

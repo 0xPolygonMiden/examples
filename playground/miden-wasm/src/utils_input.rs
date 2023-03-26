@@ -40,7 +40,7 @@ impl Inputs {
 
     pub fn deserialize_inputs(&mut self, inputs: &str) -> Result<(), String> {
         if !inputs.trim().is_empty() {
-            let inputs_des: InputFile = serde_json::from_str(&inputs).map_err(|e| e.to_string())?;
+            let inputs_des: InputFile = serde_json::from_str(inputs).map_err(|e| e.to_string())?;
 
             self.stack_inputs = self.parse_stack_inputs(&inputs_des).unwrap();
             self.advice_provider = self.parse_advice_provider(&inputs_des).unwrap();
@@ -51,14 +51,14 @@ impl Inputs {
     // Parse the outputs as str and return a vector of u64
     pub fn deserialize_outputs(&mut self, outputs_as_str: &str) -> Result<(), String> {
         let outputs_as_json: Outputs =
-            serde_json::from_str(&outputs_as_str).map_err(|e| e.to_string())?;
+            serde_json::from_str(outputs_as_str).map_err(|e| e.to_string())?;
 
         let outputs = StackOutputs::new(
             outputs_as_json.stack_output,
             outputs_as_json.overflow_addrs.unwrap_or(vec![]),
         );
 
-        self.stack_outputs = outputs.clone();
+        self.stack_outputs = outputs;
 
         Ok(())
     }
@@ -70,8 +70,7 @@ impl Inputs {
     ) -> Result<MemAdviceProvider, String> {
         let tape = advice_input_file
             .advice_tape
-            .as_ref()
-            .map(Vec::as_slice)
+            .as_deref()
             .unwrap_or(&[])
             .iter()
             .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
@@ -87,8 +86,7 @@ impl Inputs {
     fn parse_stack_inputs(&mut self, stack_input_file: &InputFile) -> Result<StackInputs, String> {
         let stack_inputs = stack_input_file
             .stack_init
-            .as_ref()
-            .map(Vec::as_slice)
+            .as_deref()
             .unwrap_or(&[])
             .iter()
             .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))

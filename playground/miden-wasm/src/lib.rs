@@ -298,11 +298,11 @@ fn test_prove_program() {
     assert_eq!(output.trace_len, Some(1024));
 
     // for the proof we have [0, 1] as overflow_addrs
-    assert_eq!(output.overflow_addrs.is_some(), true);
+    assert!(output.overflow_addrs.is_some());
     assert_eq!(output.overflow_addrs, Some(vec![0, 1]));
 
     // we expect a proof of []
-    assert_eq!(output.proof.is_some(), true);
+    assert!(output.proof.is_some());
     assert_eq!(
         output.proof,
         Some(expected_test_proof::EXPECTED_PROOF_BYTES.to_vec())
