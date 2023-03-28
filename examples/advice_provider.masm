@@ -1,0 +1,70 @@
+# A simple example that illustrates how to define advice provider inputs and access them using 
+# miden assembly. Please see the associated `advice_provider.inputs` file for the definition of
+# the advice provider inputs. 
+begin
+    # load a word from the advice stack
+    adv_loadw
+
+    # assert the word is what we would expect
+    push.1.2.3.4 assert_eqw
+
+    # push the key for the advice map onto the stack ("0000000000000000000000000000000000000000000000000000000000000000")
+    push.0.0.0.0 
+
+    # load the values associated with the key from the advice map onto the advice stack
+    adv.keyval 
+
+    # load the word from the advice stack
+    padw adv_loadw
+
+    # assert the word is what we would expect 
+    push.5.6.7.8 assert_eqw
+
+    # clear key
+    dropw
+
+    # push the key for the advice map onto the stack ("0000001000000000000000000000000000000000000000000000000000000000")
+    push.268435456.0.0.0 
+
+    # load the values associated with the key from the advice map onto the advice stack
+    adv.keyval 
+
+    # load the word from the advice stack
+    padw adv_loadw 
+
+    # assert the word is what we would expect 
+    push.9.10.11.12 assert_eqw
+
+    # clear key
+    dropw
+
+    # push the root of the merkle tree onto the stack 
+    push.18185978518863914335.936586966360019113.497299419609993926.1977881506773614749
+
+    # define the element we want to access (index: 0, depth: 2)
+    push.0.2
+
+    # fetch the leaf
+    mtree_get
+
+    # assert the word is what we would expect (ZERO)
+    padw assert_eqw
+
+    # drop the root
+    dropw
+
+    # push the root of the sparse merkle tree onto the stack
+    push.3065709585824830918.11536776394119099527.7500493345072598939.14293758615514107993
+
+    # define the element we want to access (index:1, depth: 63)
+    push.1.63
+
+    # fetch the leaf
+    mtree_get
+
+    # assert the word is what we would expect ("0000000000000000000000000000000333000000000000000000000000000000")
+    push.0.216172782113783808.51.0 assert_eqw
+
+    # drop the root
+    dropw
+end
