@@ -32,8 +32,7 @@ impl MidenProgram {
         self.program = Some(
             self.assembler
                 .compile(&self.masm_code)
-                .map_err(|err| format!("Failed to compile program - {}", err))
-                .unwrap(),
+                .map_err(|err| format!("Failed to compile program - {}", err))?,
         );
 
         self.program_info = Some(ProgramInfo::new(

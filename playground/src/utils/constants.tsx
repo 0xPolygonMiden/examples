@@ -1,6 +1,6 @@
 export const exampleInput = `{
-    "stack_init": ["0"],
-    "advice_tape": ["0"]
+    "operand_stack": ["0"],
+    "advice_stack": ["0"]
 }`
 
 export const exampleCode =

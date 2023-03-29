@@ -130,10 +130,7 @@ impl DebugExecutor {
 
     /// iterates to the previous clock cycle.
     fn prev_vm_state(&mut self) -> Option<VmState> {
-        match self.vm_state_iter.next_back() {
-            Some(prev_vm_state_result) => prev_vm_state_result.ok(),
-            None => None,
-        }
+        self.vm_state_iter.back()
     }
 
     // ACCESSORS

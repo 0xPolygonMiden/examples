@@ -117,7 +117,7 @@ export default function CodingEnvironment(): JSX.Element {
 }`);
         toast.success(`Execution successful in ${Date.now() - start} ms`);
       } catch (error) {
-        setOutput("Error: Check the developer console for details.");
+        setOutput(`Error: ${error}`);
       }
     }).finally(() => setIsProcessing(false));
   };
@@ -165,7 +165,7 @@ export default function CodingEnvironment(): JSX.Element {
           setProof(proof);
         }
       } catch (error) {
-        setOutput("Error: Check the developer console for details.");
+        setOutput(`Error: ${error}`);
         toast.error("Proving failed");
       }
     }).finally(() => setIsProcessing(false));
@@ -189,7 +189,7 @@ export default function CodingEnvironment(): JSX.Element {
         setDebugExecutor(new DebugExecutor(code, inputs));
         setOutput("Debugging session started");
       } catch (error) {
-        setOutput("Error: Check the developer console for details.");
+        setOutput(`Error: ${error}`);
       }
     });
   };
@@ -230,7 +230,7 @@ export default function CodingEnvironment(): JSX.Element {
           "bits."
         );
       } catch (error) {
-        setOutput("Error: Check the developer console for details.");
+        setOutput(`Error: ${error}`);
         toast.error("Verification failed");
       }
     });

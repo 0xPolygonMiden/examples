@@ -2,6 +2,9 @@
 # miden assembly. Please see the associated `advice_provider.inputs` file for the definition of
 # the advice provider inputs. 
 begin
+    # assert we have "1" on the stack to start
+    push.1 assert_eq
+
     # load a word from the advice stack
     adv_loadw
 

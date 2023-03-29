@@ -8,8 +8,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 console_error_panic_hook = { console_error_panic_hook = "0.1.7" }
-miden_vm = { version = "0.4.0", package = "miden-vm", default-features = false}
-miden_stdlib = { version = "0.3.0", package = "miden-stdlib", default-features = false}
+hex = { version = "0.4", default-features = false }
+miden_vm = { version = "0.5.0", package = "miden-vm", default-features = false}
+miden_stdlib = { version = "0.4.0", package = "miden-stdlib", default-features = false}
 serde = { version = "1", features = ["derive"] } # You only need this if you want app persistence
 serde_json = "1.0.48"
 wasm-bindgen = "0.2.78"

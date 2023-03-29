@@ -3,6 +3,7 @@ import { Listbox, Transition } from "@headlessui/react";
 
 const examples = [
   "example",
+  "advice_provider",
   "collatz",
   "comparison",
   "conditional",

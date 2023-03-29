@@ -11,7 +11,7 @@ type MidenInputsProps = {
 const MidenInputs = (props: MidenInputsProps): JSX.Element =>
     <div className="min-w-0 flex-1 box-border">
         <EditorLabel label="inputs" />
-        <Editor height="150px" {...props} />
+        <Editor height="250px" {...props} />
     </div>
 
 export default MidenInputs

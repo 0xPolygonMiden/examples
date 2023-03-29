@@ -1,4 +1,5 @@
-import type { DebugOutput } from "miden-wasm";
+import * as yup from 'yup';
+import type { DebugOutput } from 'miden-wasm';
 
 /**
  * Helper function to get the example from the examples repo.
@@ -21,87 +22,145 @@ export interface checkedData {
   errorMessage: string;
 }
 
-/**
- * Helper function to iterate over the inputs and check if they are valid.
- */
-export function checkFields(jsonInput: JSON): checkedData {
-  let returnValue: checkedData = { isValid: true, errorMessage: "" };
-
-  for (const key in jsonInput) {
-    if (key === "trace_len") {
-      continue;
+// Parser for advice_map
+const adviceMapParser = yup
+  .object()
+  .test(
+    'advice_map_keys',
+    'advice_map keys must be 64-character-long hexadecimal strings',
+    (value) => {
+      if (!value) return true;
+      return Object.keys(value).every((key) => /^[0-9a-fA-F]{64}$/.test(key));
     }
-
-    const checkFieldResult = checkField(jsonInput, key);
-    if (!checkFieldResult.isValid) {
-      returnValue = checkFieldResult;
-      break;
+  )
+  .test(
+    'advice_map_values',
+    'advice_map values must be arrays of numbers',
+    (value) => {
+      if (!value) return true;
+      return Object.values(value).every(
+        (arr) =>
+          Array.isArray(arr) && arr.every((num) => typeof num === 'number')
+      );
     }
+  )
+  .notRequired();
+
+// Schema for operand_stack and advice_stack
+const integerStringArraySchema = (inputName: string) => {
+  return yup
+    .mixed()
+    .test(
+      'is-integer',
+      `${inputName} must contain strings representing valid numbers.`,
+      (value) => {
+        if (typeof value === 'string') {
+          return Number.isInteger(parseInt(value ?? ''));
+        }
+        return false;
+      }
+    );
+};
+
+// Schema for merkle_store
+const merkleStoreParser = yup
+  .array()
+  .of(
+    yup
+      .object()
+      .shape({
+        merkle_tree: yup
+          .array()
+          .of(
+            yup
+              .string()
+              .length(64)
+              .matches(
+                /^[0-9a-fA-F]+$/,
+                'merkle_tree leaf must be a 64-character hexadecimal string'
+              )
+              .required()
+          )
+          .notRequired(),
+        sparse_merkle_tree: yup
+          .array()
+          .of(
+            yup.tuple([
+              yup.number().required(),
+              yup
+                .string()
+                .length(64)
+                .matches(
+                  /^[0-9a-fA-F]+$/,
+                  'sparse_merkle_tree leaf must be a 64-character hexadecimal string'
+                )
+                .required()
+            ])
+          )
+          .notRequired()
+      })
+      .test(
+        'no_additional_properties',
+        "merkle_store can only contain 'merkle_tree' or 'sparse_merkle_tree' objects",
+        (value) => {
+          const allowedProperties = ['merkle_tree', 'sparse_merkle_tree'];
+          const objectKeys = Object.keys(value);
+          return objectKeys.every((key) => allowedProperties.includes(key));
+        }
+      )
+  )
+  .notRequired();
+
+// Schema for the whole input
+const inputSchema = yup
+  .object()
+  .shape({
+    operand_stack: yup
+      .array()
+      .of(integerStringArraySchema('operand_stack'))
+      .notRequired(),
+    advice_stack: yup
+      .array()
+      .of(integerStringArraySchema('advice_stack'))
+      .notRequired(),
+    advice_map: adviceMapParser,
+    merkle_store: merkleStoreParser
+  })
+  .noUnknown(
+    "Only 'operand_stack', 'advice_stack', 'advice_map', and 'merkle_store' are allowed at the root level."
+  );
+
+
+export const checkInputs = (
+  inputString: string
+): checkedData => {
+  // Short circuit if the input is empty
+  if (inputString === '') {
+    return { isValid: true, errorMessage: '' };
   }
 
-  return returnValue;
-}
-
-/**
- * Helper function to check if a field contains at least one number and only numbers.
- */
-export function checkField(jsonField: JSON, key: string): checkedData {
-  const jsonInput = jsonField[key as keyof typeof jsonField];
-
-  if (!Array.isArray(jsonInput)) {
-    const errorMessage = `${key} must be an array of numbers.`;
-
+  // Parse the input string to JSON
+  let input: JSON;
+  try {
+    input = JSON.parse(inputString);
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const errorMessage = `Inputs must be a valid JSON object: ${error.message}`;
     return { isValid: false, errorMessage: errorMessage };
   }
-
-  if (
-    Object.values(jsonInput).length === 0 ||
-    Object.values(jsonInput).some(isNaN)
-  ) {
-    const errorMessage = `${key} must contain at least one number,
-and it can only contain numbers.`;
-
-    return { isValid: false, errorMessage: errorMessage };
-  }
-
-  return { isValid: true, errorMessage: "" };
-}
-
-/**
- * We check the inputs and return true or false. We allow:
- * - an empty input, and
- * - a valid JSON object containing stack_init or advice_tape (or both)
- * if the values are numbers
- */
-export function checkInputs(jsonString: string): checkedData {
-  if (jsonString === "") {
-    return { isValid: true, errorMessage: "" };
-  }
-
-  let jsonInput!: JSON;
 
   try {
-    jsonInput = JSON.parse(jsonString);
-  } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
-
-    const errorMessage = `Miden VM Inputs need to be a valid JSON object:
-${e.message}`;
-    return { isValid: false, errorMessage: errorMessage };
+    inputSchema.validateSync(input, { strict: true, stripUnknown: false });
+    return { isValid: true, errorMessage: '' };
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return { isValid: false, errorMessage: `Invalid inputs: ${error.message}` };
   }
+};
 
-  if (
-    !Object.keys(jsonInput).includes("stack_init") &&
-    !Object.keys(jsonInput).includes("advice_tape")
-  ) {
-    const errorMessage = `Miden VM Inputs can be empty or
-we need either a stack_init or
-an advice_tape.`;
-
-    return { isValid: false, errorMessage: errorMessage };
-  }
-
-  return checkFields(jsonInput);
-}
+const outputSchema = yup.object().shape({
+  stack_output: yup.array().of(yup.number().integer().min(0)).required(),
+  overflow_addrs: yup.array().of(yup.number().integer().min(0)).required(),
+  trace_len: yup.number().integer().min(0).optional(),
+});
 
 /**
  * We check the outputs and return true or false. We allow:
@@ -109,33 +168,28 @@ an advice_tape.`;
  * - only numbers as values
  */
 export function checkOutputs(jsonString: string): checkedData {
-  if (jsonString === "") {
-    const errorMessage = `We need some outputs to verify the program.
-Did you prove the program first?`;
-
+  if (jsonString === '') {
+    const errorMessage = `We need some outputs to verify the program. Did you prove the program first?`;
     return { isValid: false, errorMessage: errorMessage };
   }
 
+  // Parse the json output
   let jsonOutput!: JSON;
-
   try {
     jsonOutput = JSON.parse(jsonString);
-  } catch (e: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     const errorMessage = `Miden VM Outputs need to be a valid JSON object:
 ${e.message}
 Did you prove the program first?`;
-
     return { isValid: false, errorMessage: errorMessage };
   }
 
-  if (!Object.keys(jsonOutput).includes("stack_output")) {
-    const errorMessage = `We need some outputs to verify the program.
-Did you prove the program first?`;
-
-    return { isValid: false, errorMessage: errorMessage };
+  try {
+    outputSchema.validateSync(jsonOutput, { strict: true, stripUnknown: false });
+    return { isValid: true, errorMessage: '' };
+  } catch(error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return { isValid: false, errorMessage: `Invalid outputs: ${error.message}` };
   }
-
-  return checkFields(jsonOutput);
 }
 
 /**
@@ -156,14 +210,14 @@ export function nextPowerOf2(x: number): number {
 export function formatDebuggerOutput(debugOutput: DebugOutput): string {
   const output = `Clock: ${debugOutput.clk}
 Stack: [${debugOutput.stack.toString()}]
-Assembly Instruction: ${debugOutput.instruction ? debugOutput.instruction : ""}
+Assembly Instruction: ${debugOutput.instruction ? debugOutput.instruction : ''}
 Number of Operations: ${
-    debugOutput.num_of_operations ? debugOutput.num_of_operations : ""
+    debugOutput.num_of_operations ? debugOutput.num_of_operations : ''
   }
 Rel. Operation Index: ${
-    debugOutput.operation_index ? debugOutput.operation_index : ""
+    debugOutput.operation_index ? debugOutput.operation_index : ''
   }
-VM Operation: ${debugOutput.op ? debugOutput.op : ""}
+VM Operation: ${debugOutput.op ? debugOutput.op : ''}
 Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
 `;
 
@@ -174,7 +228,7 @@ Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
  * Helper function to format the Memory in the Debug Output.
  */
 export function formatMemory(memory: BigUint64Array): string {
-  let output = "";
+  let output = '';
   for (let i = 0; i < memory.length; i += 5) {
     const memorySlice = memory.slice(i, i + 5);
     output += `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}] \n           `;

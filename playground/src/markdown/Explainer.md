@@ -16,13 +16,36 @@ External inputs can be provided to the Miden VM in the Playground in two ways:
 
 ```json
 {
-  "stack_init": ["0"],
-  "advice_tape": ["0"]
+  "operand_stack": ["0"],
+  "advice_stack": ["0"],
+  "advice_map": {
+    "0000000000000000000000000000000000000000000000000000000000000000": [5, 6, 7, 8],
+    "0000001000000000000000000000000000000000000000000000000000000000": [9, 10, 11, 12]
+  },
+  "merkle_store": [
+    {"merkle_tree": [
+        "0000000000000000000000000000000000000000000000000000000000000000", 
+        "0000000000000000000000000000000000000000000000000000000000000000", 
+        "0000000000000000000000000000000000000000000000000000000000000000", 
+        "0000000000000000000000000000000000000000000000000000000000000000"]},
+    {"sparse_merkle_tree": [
+        [1, "0000000000000000000000000000000333000000000000000000000000000000"],
+        [3, "0000000000000000000000000000000222000000000000000000000000000000"]
+    ]}
+  ]
 }
 ```
 
-* Public inputs - `stack_init` - can be supplied to the VM by initializing the stack with desired values before a program starts executing. Up to 16 stack items can be initialized in this way.
-* Secret (or nondeterministic) inputs - `advice_tape` - can be supplied to the VM. There is no limit on how much data the advice provider can hold. 
+* Public inputs - `operand_stack` - can be supplied to the VM by initializing the stack with desired values before a program starts executing. Up to 16 stack items can be initialized in this way.
+* Secret (or nondeterministic) inputs:
+  * `advice_stack` - can be supplied to the VM. There is no limit on how much data the advice provider can hold. This is provided as a string array where each
+  string entry represents a field element.
+  * `advice_map` - is supplied as a map of 64 character long hex keys mapped to an array of numbers.  The hex keys are interpreted as 4 field elements and the 
+  array of numbers is interpreted as an array of field elements.
+  * `merkle_store` - the merkle store is container that allows the user to define `merkle_tree` and `sparse_merkle_tree` data structures.
+    * `merkle_tree` - is supplied as an array of 64 character long hex values where each value represents a leaf (4 elements) in the tree.
+    * `sparse_merkle_tree` - is supplied an an array of tuples of (number, 64 character hex string).  The number represents the leaf index and the hex string 
+    represents the leaf value (4 elements).   
 
 *Check out the [comparison example](https://github.com/0xPolygonMiden/examples/blob/main/examples/comparison.masm) to see how the secret input works*
 
@@ -61,7 +84,7 @@ The **trace_len** tells you how complex the computation is - it is the length of
 
 The Outputs must also be a valid JSON (if you want to verify) and it can only contain numbers. 
 
-You can also test the VM by proving a program and tampering with the Outputs. See if you can still verify the set of (`stack_init`, `code`, `stack_output` and `overflow_addrs`)
+You can also test the VM by proving a program and tampering with the Outputs. See if you can still verify the set of (`operand_stack`, `code`, `stack_output` and `overflow_addrs`)
 
 Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
 
@@ -104,4 +127,4 @@ This is what makes the Miden VM interesting. Here you can run your program and c
 You need to prove before you can verify.
 
 ### Verify a program
-Ok, here you can verify that the given `stack_init` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.
+Ok, here you can verify that the given `operand_stack` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.
