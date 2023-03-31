@@ -1,133 +1,133 @@
-mod expected_test_proof;
-use miden_vm::math::{Felt, FieldElement};
-use miden_vm::{
-    AdviceInputs, Assembler, Kernel, MemAdviceProvider, ProgramInfo, ProofOptions, StackInputs,
-};
-use miden_vm::utils::Serializable;
+mod utils_debug;
+mod utils_input;
+mod utils_program;
+use miden_vm::{ExecutionProof, ProofOptions};
 use wasm_bindgen::prelude::*;
 extern crate console_error_panic_hook;
 
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
-#[derive(serde::Deserialize, serde::Serialize)]
-pub struct InputFile {
-    pub stack_init: Option<Vec<String>>,
-    pub advice_tape: Option<Vec<String>>,
-}
-
 #[wasm_bindgen(getter_with_clone)]
+#[derive(serde::Deserialize, serde::Serialize)]
 pub struct Outputs {
-    pub stack_output: Vec<u64>, 
-    pub trace_length: usize,
-    pub program_info: Option<Vec<u8>>,
+    pub stack_output: Vec<u64>,
+    pub trace_len: Option<usize>,
     pub overflow_addrs: Option<Vec<u64>>,
     pub proof: Option<Vec<u8>>,
 }
 
-// Parse stack_init vector of strings to a vector of u64
-fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvider, String> {
-    let tape = advice_input_file
-        .advice_tape
-        .as_ref()
-        .map(Vec::as_slice)
-        .unwrap_or(&[])
-        .iter()
-        .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
-        .collect::<Result<Vec<_>, _>>()?;
-    let advice_inputs = AdviceInputs::default()
-        .with_tape_values(tape)
-        .map_err(|e| e.to_string())?;
-    Ok(MemAdviceProvider::from(advice_inputs))
-}
-
-// Parse advice_tape vector of strings to a vector of u64
-fn parse_stack_inputs(stack_input_file: &InputFile) -> Result<StackInputs, String> {
-    let stack_inputs = stack_input_file
-        .stack_init
-        .as_ref()
-        .map(Vec::as_slice)
-        .unwrap_or(&[])
-        .iter()
-        .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
-        .collect::<Result<Vec<_>, _>>()?;
-
-    StackInputs::try_from_values(stack_inputs).map_err(|e| e.to_string())
-}
-
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
-pub fn run_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Outputs {
+pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
+    console_error_panic_hook::set_once();
 
-    let assembler = Assembler::default();
-    let program = assembler.compile(&asm).expect("Could not compile source");
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
 
-    let mut stack_input = StackInputs::new([Felt::ZERO; 1].to_vec());
-    let mut advice_provider = MemAdviceProvider::default();
+    let mut inputs = utils_input::Inputs::new();
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
-    if inputs_frontend.trim().is_empty() == false {
-        let inputs_des: InputFile = serde_json::from_str(&inputs_frontend)
-            .map_err(|err| format!("Failed to deserialize input data - {}", err))
-            .unwrap();
+    let trace = miden_vm::execute(
+        &program.program.unwrap(),
+        inputs.stack_inputs,
+        inputs.advice_provider,
+    )
+    .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
-        stack_input = parse_stack_inputs(&inputs_des).unwrap();
-        advice_provider = parse_advice_provider(&inputs_des).unwrap();
-    }
-
-    let trace = miden_vm::execute(&program, stack_input, advice_provider)
-        .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
-        .unwrap();
-
-    let result = Outputs{
-        stack_output: trace.stack_outputs().stack_truncated(output_count as usize).to_vec(), 
-        trace_length: trace.get_trace_len(),
-        program_info: None,
+    let result = Outputs {
+        stack_output: trace.stack_outputs().stack().to_vec(),
+        trace_len: Some(trace.get_trace_len()),
         overflow_addrs: None,
         proof: None,
     };
 
-    result
+    Ok(result)
 }
 
 /// Proves the program with the given inputs
 #[wasm_bindgen]
-pub fn prove_program(asm: &str, inputs_frontend: &str, output_count: u16) -> Outputs {
+pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
+    console_error_panic_hook::set_once();
 
-    let assembler = Assembler::default();
-    let program = assembler.compile(&asm).expect("Could not compile source");
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
 
-    let mut stack_input = StackInputs::new([Felt::ZERO; 4].to_vec());
-    let mut advice_provider = MemAdviceProvider::default();
-
-    // TODO: We must catch all cases of inputs. Input can be not a valid json,
-    // input can be empty, stack_init can be empty, advice_tape can be empty. And all combinations.
-    if inputs_frontend.trim().is_empty() == false {
-        let inputs_des: InputFile = serde_json::from_str(&inputs_frontend)
-            .map_err(|err| format!("Failed to deserialize input data - {}", err))
-            .unwrap();
-
-        stack_input = parse_stack_inputs(&inputs_des).unwrap();
-        advice_provider = parse_advice_provider(&inputs_des).unwrap();
-    }
+    let mut inputs = utils_input::Inputs::new();
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
     let proof_options = ProofOptions::with_96_bit_security();
 
-    let (output, proof) = miden_vm::prove(&program, stack_input, advice_provider, proof_options)
-        .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
-        .unwrap();
+    let stack_input_cloned = inputs.stack_inputs.clone();
+    let (output, proof) = miden_vm::prove(
+        &program.program.unwrap(),
+        stack_input_cloned,
+        inputs.advice_provider,
+        proof_options,
+    )
+    .map_err(|err| format!("Failed to prove execution - {:?}", err))?;
 
-    let program_hash = program.hash();
-    let kernel = Kernel::default();
-    let program_info = ProgramInfo::new(program_hash, kernel);
-
-    let result = Outputs{
-        stack_output: output.stack_truncated(output_count as usize).to_vec(), 
-        trace_length: proof.stark_proof().trace_length(),
-        program_info: Some(program_info.to_bytes()),
+    let result = Outputs {
+        stack_output: output.stack().to_vec(),
+        trace_len: Some(proof.stark_proof().trace_length()),
         overflow_addrs: Some(output.overflow_addrs().to_vec()),
         proof: Some(proof.to_bytes()),
     };
 
-    result
+    miden_vm::verify(
+        program.program_info.unwrap(),
+        inputs.stack_inputs,
+        output,
+        proof,
+    )
+    .map_err(|err| format!("Failed to verify proof - {:?}", err))?;
+
+    Ok(result)
+}
+
+/// Verifies the proof with the given inputs
+#[wasm_bindgen]
+pub fn verify_program(
+    code_frontend: &str,
+    inputs_frontend: &str,
+    outputs_frontend: &str,
+    proof: Vec<u8>,
+) -> Result<u32, JsValue> {
+    console_error_panic_hook::set_once();
+
+    // we need to get the program info from the program
+    let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
+
+    let proof = ExecutionProof::from_bytes(&proof)
+        .map_err(|err| format!("Failed to deserialize proof - {}", err))?;
+
+    let mut inputs = utils_input::Inputs::new();
+
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {}", err))?;
+    inputs
+        .deserialize_outputs(outputs_frontend)
+        .map_err(|err| format!("Failed to deserialize outputs - {}", err))?;
+
+    let result: u32 = miden_vm::verify(
+        program.program_info.unwrap(),
+        inputs.stack_inputs,
+        inputs.stack_outputs,
+        proof,
+    )
+    .map_err(|err| format!("Program failed verification! - {}", err))?;
+
+    Ok(result)
 }
 
 /// Basic tests for the Rust part
@@ -139,10 +139,156 @@ fn test_run_program() {
             push.1 push.2 add
         end",
         "",
-        1,
+    )
+    .unwrap();
+    assert_eq!(
+        output.stack_output,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.stack_output, vec![3]);
-    assert_eq!(output.trace_length, 1024);
+    assert_eq!(output.trace_len, Some(1024));
+}
+
+#[test]
+fn test_run_program_with_std_lib() {
+    let output = run_program(
+        "use.std::math::u64
+
+        begin
+            push.1.0
+            push.2.0
+            exec.u64::checked_add
+        end",
+        "",
+    )
+    .unwrap();
+    assert_eq!(
+        output.stack_output,
+        vec![0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.trace_len, Some(1024));
+}
+
+#[test]
+fn test_debug_program() {
+    let mut debug_executor = utils_debug::DebugExecutor::new(
+        "begin
+            push.1 push.2 add
+        end",
+        "",
+    )
+    .unwrap();
+    let output = debug_executor.execute(utils_debug::DebugCommand::PlayAll, None);
+
+    // we test if it plays all the way to the end
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
+    assert_eq!(
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    let mut debug_executor_2 = utils_debug::DebugExecutor::new(
+        "begin
+            push.1 push.2 add
+        end",
+        "",
+    )
+    .unwrap();
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 1);
+    assert_eq!(output.op, Some("Span".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
+    assert_eq!(
+        output.stack,
+        vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 2);
+    assert_eq!(output.op, Some("Pad".to_string()));
+    assert_eq!(output.instruction, Some("\"push.1\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(2));
+    assert_eq!(output.operation_index, Some(1));
+    assert_eq!(
+        output.stack,
+        vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 3);
+    assert_eq!(output.op, Some("Incr".to_string()));
+    assert_eq!(output.instruction, Some("\"push.1\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(2));
+    assert_eq!(output.operation_index, Some(2));
+    assert_eq!(
+        output.stack,
+        vec![1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 4);
+    assert_eq!(output.op, Some("Push(BaseElement(8589934590))".to_string()));
+    assert_eq!(output.instruction, Some("\"push.2\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(1));
+    assert_eq!(output.operation_index, Some(1));
+    assert_eq!(
+        output.stack,
+        vec![2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 5);
+    assert_eq!(output.op, Some("Add".to_string()));
+    assert_eq!(output.instruction, Some("\"add\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(1));
+    assert_eq!(output.operation_index, Some(1));
+    assert_eq!(
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // we test playing one more cycle
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
+    assert_eq!(
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
+
+    // it should not play more cycles
+    let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
+    assert_eq!(output.clk, 6);
+    assert_eq!(output.op, Some("End".to_string()));
+    assert_eq!(output.instruction, None);
+    assert_eq!(output.num_of_operations, None);
+    assert_eq!(output.operation_index, None);
+    assert_eq!(
+        output.stack,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
 }
 
 #[test]
@@ -152,18 +298,45 @@ fn test_prove_program() {
             push.1 push.2 add
         end",
         "",
-        1,
-    );
+    )
+    .unwrap();
     // this is the result of the stack output, 3
-    assert_eq!(output.stack_output, vec![3]);
+    assert_eq!(
+        output.stack_output,
+        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.trace_len, Some(1024));
 
-    assert_eq!(output.trace_length, 1024);
-    
-   // for the proof we have [0, 1] as overflow_addrs
-   assert_eq!(output.overflow_addrs.is_some(), true);
+    // for the proof we have [0, 1] as overflow_addrs
+    assert!(output.overflow_addrs.is_some());
     assert_eq!(output.overflow_addrs, Some(vec![0, 1]));
 
     // we expect a proof of []
-    assert_eq!(output.proof.is_some(), true);
-    assert_eq!(output.proof, Some(expected_test_proof::EXPECTED_PROOF_BYTES.to_vec()));
+    assert!(output.proof.is_some());
+}
+
+#[test]
+fn test_verify_program() {
+    let asm: &str = "begin
+        push.1 push.2 add
+    end";
+
+    let input_str: &str = r#"
+    {
+        "operand_stack": ["0"],
+        "advice_stack": ["0"]
+    }"#;
+
+    let output_str: &str = r#"
+    {
+        "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "overflow_addrs": [0, 1],
+        "trace_len": 1024
+    }"#;
+
+    let prove_result = prove_program(asm, input_str).unwrap();
+
+    let result = verify_program(asm, input_str, output_str, prove_result.proof.unwrap()).unwrap();
+
+    assert_eq!(result, 96);
 }

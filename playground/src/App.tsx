@@ -1,24 +1,28 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import NavigationTabs from "./components/NavigationTabs";
 import CodingEnvironment from "./pages/CodingEnvironment";
 import InstructionTable from "./pages/InstructionTable";
+import ExplainerPage from "./pages/Explainer";
 
 function App() {
   return (
-    <>
-      <Router>
-        <NavBar />
+    <main className="bg-gray-100">
+      <HashRouter>
+        <Header />
+        <NavigationTabs />
         <Routes>
-          <Route path="/examples/" element={<CodingEnvironment />} />
+          <Route path="/" element={<CodingEnvironment />} />
+          <Route path="/examples" element={<CodingEnvironment />} />
           <Route
-            path="/examples/instruction-set/"
+            path="/instruction-set"
             element={<InstructionTable />}
           />
-          <Route path="/" element={<CodingEnvironment />} />
+          <Route path="/explainer" element={<ExplainerPage />} />
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
-      </Router>
-    </>
+      </HashRouter>
+    </main>
   );
 }
 
