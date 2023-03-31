@@ -96,7 +96,7 @@ Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/a
 You can create a program and run it. There will be no proof generated which is much faster. Every program that successfully executes can also be proven, so I suggest using this functionality when hacking around. 
 
 ### Debug a program
-You can step through the program and see the current VM state displayed in the Output section. 
+You can step through the program and see the current VM state displayed in the Output section. And the best thing is, that you can add `breakpoint` as Miden Assembly instruction, see below for an example. 
 
 ```
 Clock: 2001
@@ -120,6 +120,20 @@ Memory (Addr, Mem): [0]: [2, 0, 0, 0]
 Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xpolygonmiden.github.io/miden-vm/design/programs.html)
 
 Remember: Miden programs lenghts are expressed in cycles. The Miden VM will round the cycles always to the next power of 2 and has a minimum at 2^10.
+
+
+Example for setting the breakpoint:
+
+Just add `breakpoint` as instruction and the debugger will stop at this particular point. 
+
+```
+begin
+  push.1
+  push.2
+  breakpoint
+  add
+end
+```
 
 ### Prove a program
 This is what makes the Miden VM interesting. Here you can run your program and create a proof for it. The proof is stored in memory in the backend. You can take a look at the proof by clicking "Show Proof".
