@@ -289,6 +289,27 @@ fn test_debug_program() {
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
     assert_eq!(output.memory, Vec::<u64>::new());
+
+    let mut debug_executor_with_breakpoint = utils_debug::DebugExecutor::new(
+        "begin
+            push.1 push.2 breakpoint add
+        end",
+        "",
+    )
+    .unwrap();
+    let output = debug_executor_with_breakpoint.execute(utils_debug::DebugCommand::PlayAll, None);
+
+    // we test if it plays all the way to the end
+    assert_eq!(output.clk, 5);
+    assert_eq!(output.op, Some("Noop".to_string()));
+    assert_eq!(output.instruction, Some("\"breakpoint\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(0));
+    assert_eq!(output.operation_index, Some(1));
+    assert_eq!(
+        output.stack,
+        vec![2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
 }
 
 #[test]

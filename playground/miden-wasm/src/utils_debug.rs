@@ -78,6 +78,9 @@ impl DebugExecutor {
             DebugCommand::PlayAll => {
                 while let Some(new_vm_state) = self.next_vm_state() {
                     self.vm_state = new_vm_state;
+                    if self.should_break() {
+                        break;
+                    }
                 }
                 self.vm_state_to_output()
             }
@@ -86,6 +89,9 @@ impl DebugExecutor {
                     match self.next_vm_state() {
                         Some(next_vm_state) => {
                             self.vm_state = next_vm_state;
+                            if self.should_break() {
+                                break;
+                            }
                         }
                         None => break,
                     }
@@ -95,6 +101,9 @@ impl DebugExecutor {
             DebugCommand::RewindAll => {
                 while let Some(new_vm_state) = self.prev_vm_state() {
                     self.vm_state = new_vm_state;
+                    if self.should_break() {
+                        break;
+                    }
                 }
                 self.vm_state_to_output()
             }
@@ -103,6 +112,9 @@ impl DebugExecutor {
                     match self.prev_vm_state() {
                         Some(new_vm_state) => {
                             self.vm_state = new_vm_state;
+                            if self.should_break() {
+                                break;
+                            }
                         }
                         None => break,
                     }
@@ -156,6 +168,15 @@ impl DebugExecutor {
         };
 
         output
+    }
+
+    /// Returns `true` if the current state should break.
+    fn should_break(&self) -> bool {
+        self.vm_state
+            .asmop
+            .as_ref()
+            .map(|asm| asm.should_break())
+            .unwrap_or(false)
     }
 }
 
