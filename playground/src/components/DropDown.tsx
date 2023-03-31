@@ -12,8 +12,9 @@ const examples = [
   "game_of_life_4x4",
   "matrix_multiplication",
   "nprime",
+  "recursive_verification",
   "shamir_secret_share",
-  "standard_library"
+  "standard_library",
 ];
 
 function classExamples(...classes: string[]) {

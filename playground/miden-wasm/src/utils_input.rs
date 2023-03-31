@@ -1,5 +1,5 @@
 use miden_vm::{
-    crypto::MerkleStore,
+    crypto::{MerklePath, MerklePathSet, MerkleStore},
     math::{Felt, FieldElement},
     utils::collections::BTreeMap,
     AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs, Word,
@@ -32,6 +32,12 @@ pub enum MerkleData {
     /// representing the value of the node.
     #[serde(rename = "sparse_merkle_tree")]
     SparseMerkleTree(Vec<(u64, String)>),
+    /// String representation of a Merkle path set. A Merkle path set is represented as a vector of
+    /// tuples where each tuple consists of a u64 node index, a 32 byte hex string representing the
+    /// value of the node, and a vector of 32 byte hex strings representing the Merkle path to the
+    /// node.
+    #[serde(rename = "merkle_path_set")]
+    MerklePathSet(Vec<(u64, String, Vec<String>)>),
 }
 
 // INPUT FILE
@@ -155,6 +161,12 @@ impl InputFile {
                         format!("failed to add sparse merkle tree to merkle store - {e}")
                     })?;
                 }
+                MerkleData::MerklePathSet(data) => {
+                    let path_set = Self::parse_merkle_path_set(data)?;
+                    merkle_store.add_merkle_path_set(&path_set).map_err(|e| {
+                        format!("failed to add merkle path set to merkle store - {e}")
+                    })?;
+                }
             }
         }
 
@@ -179,6 +191,40 @@ impl InputFile {
                 Ok((*index, leaf))
             })
             .collect()
+    }
+
+    /// Parse and return merkle path set.
+    fn parse_merkle_path_set(
+        path_set: &[(u64, String, Vec<String>)],
+    ) -> Result<MerklePathSet, String> {
+        // parse merkle paths
+        let mut paths = Vec::with_capacity(path_set.len());
+        for (index, root, path) in path_set {
+            let root = Self::parse_word(root)?;
+            let path = path
+                .iter()
+                .map(|v| {
+                    let node: Word = Self::parse_word(v)?;
+                    Ok(node)
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            let path = MerklePath::new(path);
+            paths.push((*index, root, path));
+        }
+
+        // create merkle path set
+        let path_container = paths
+            .get(0)
+            .ok_or(format!("failed to get path from path set"))?;
+        let path_depth: u8 = path_container
+            .2
+            .len()
+            .try_into()
+            .map_err(|e| format!("failed to convert merkle path set depth to u8 - {e}"))?;
+        let merkle_path_set = MerklePathSet::new(path_depth)
+            .with_paths(paths)
+            .map_err(|e| format!("failed to add paths to merkle path set - {e}"))?;
+        Ok(merkle_path_set)
     }
 
     /// Parse a `Word` from a hex string.

@@ -6,10 +6,10 @@ import type { DebugOutput } from 'miden-wasm';
  */
 export async function getExample(example: string) {
   const inputs = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/recursive-verification/examples/${example}.inputs`
   );
   const masm = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/recursive-verification/examples/${example}.masm`
   );
   return [(await inputs).text(), (await masm).text()];
 }
@@ -97,13 +97,22 @@ const merkleStoreParser = yup
                 .required()
             ])
           )
-          .notRequired()
+          .notRequired(),
+        merkle_path_set: yup.array().of(
+          yup.tuple([
+            yup.number().required(),
+            yup.string().matches(/^[a-fA-F0-9]{64}$/).required(),
+            yup.array().of(
+              yup.string().matches(/^[a-fA-F0-9]{64}$/)
+            ).required()
+          ]).notRequired()
+        )
       })
       .test(
         'no_additional_properties',
         "merkle_store can only contain 'merkle_tree' or 'sparse_merkle_tree' objects",
         (value) => {
-          const allowedProperties = ['merkle_tree', 'sparse_merkle_tree'];
+          const allowedProperties = ['merkle_tree', 'sparse_merkle_tree', 'merkle_path_set'];
           const objectKeys = Object.keys(value);
           return objectKeys.every((key) => allowedProperties.includes(key));
         }
