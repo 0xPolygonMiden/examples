@@ -2,14 +2,17 @@ import { Fragment, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 
 const examples = [
-  "example",
+  "addition",
   "advice_provider",
+  "catalan",
   "collatz",
   "comparison",
   "conditional",
   "fibonacci",
-  "game-of-life-4x4",
+  "game_of_life_4x4",
+  "matrix_multiplication",
   "nprime",
+  "shamir_secret_share"
 ];
 
 function classExamples(...classes: string[]) {
