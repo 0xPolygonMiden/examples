@@ -1,0 +1,16 @@
+# This is a basic program to demonstrate using modules from the standard library.
+# It pushes two u64 numbers onto the stack and then adds them.
+# The numbers are placed on the stack by first pushing the low limb, then the high limb.
+
+# Import the u64 math module from the standard library.
+use.std::math::u64
+
+begin
+  # push the low limb then the high limb. b = 4294967296
+  push.0.1
+  # push the low limb then the high limb. a = 4294967299
+  push.3.1
+
+  # a + b = 8589934595, represented by limbs c_hi = 2 and c_lo = 3
+  exec.u64::checked_add
+end

@@ -12,7 +12,8 @@ const examples = [
   "game_of_life_4x4",
   "matrix_multiplication",
   "nprime",
-  "shamir_secret_share"
+  "shamir_secret_share",
+  "standard_library"
 ];
 
 function classExamples(...classes: string[]) {
