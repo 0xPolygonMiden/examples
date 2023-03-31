@@ -71,7 +71,7 @@ export default function CodingEnvironment(): JSX.Element {
    * If a new example is selected using the dropdown, the inputs and
    * the code are updated.
    */
-  const [, setExample] = React.useState<string>();
+  const [example, setExample] = React.useState<string>();
   const handleSelectChange = async (exampleChange: string) => {
     disableDebug();
     setProof(null);
@@ -243,7 +243,7 @@ export default function CodingEnvironment(): JSX.Element {
         <DropDown onExampleValueChange={handleSelectChange} />
         <ActionButton label="Run" onClick={runProgram} disabled={isProcessing} />
         <ActionButton label="Debug" onClick={startDebug} disabled={isProcessing} />
-        <ActionButton label="Prove" onClick={proveProgram} disabled={isProcessing} />
+        <ActionButton label="Prove" onClick={proveProgram} disabled={isProcessing || example == "recursive_verification" } />
         <ActionButton
           label="Verify"
           onClick={verifyProgram}
