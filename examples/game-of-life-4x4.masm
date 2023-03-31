@@ -1,5 +1,5 @@
 # GAME OF LIFE - and we can prove it
-# Provide initial configuaration in *.input {"stack_init": ["0" | "1" ] * 16 }
+# Provide initial configuaration in *.input {"operand_stack": ["0" | "1" ] * 16 }
 # Rules:
 # 1. Any live cell with two or three live neighbours survives.
 # 2. Any dead cell with three live neighbours becomes a live cell.
