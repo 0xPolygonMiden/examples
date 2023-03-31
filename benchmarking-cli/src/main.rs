@@ -27,7 +27,7 @@ fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvi
     Ok(MemAdviceProvider::from(advice_inputs))
 }
 
-// Parse advice_tape vector of strings to a vector of u64
+// Parse advice_stack vector of strings to a vector of u64
 fn parse_stack_inputs(stack_input_file: &InputFile) -> Result<StackInputs, String> {
     let stack_inputs = stack_input_file
         .operand_stack
