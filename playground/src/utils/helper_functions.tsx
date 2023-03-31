@@ -6,10 +6,10 @@ import type { DebugOutput } from 'miden-wasm';
  */
 export async function getExample(example: string) {
   const inputs = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/next/examples/${example}.inputs`
   );
   const masm = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/next/examples/${example}.masm`
   );
   return [(await inputs).text(), (await masm).text()];
 }
@@ -187,7 +187,7 @@ Did you prove the program first?`;
   try {
     outputSchema.validateSync(jsonOutput, { strict: true, stripUnknown: false });
     return { isValid: true, errorMessage: '' };
-  } catch(error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return { isValid: false, errorMessage: `Invalid outputs: ${error.message}` };
   }
 }
@@ -211,12 +211,10 @@ export function formatDebuggerOutput(debugOutput: DebugOutput): string {
   const output = `Clock: ${debugOutput.clk}
 Stack: [${debugOutput.stack.toString()}]
 Assembly Instruction: ${debugOutput.instruction ? debugOutput.instruction : ''}
-Number of Operations: ${
-    debugOutput.num_of_operations ? debugOutput.num_of_operations : ''
-  }
-Rel. Operation Index: ${
-    debugOutput.operation_index ? debugOutput.operation_index : ''
-  }
+Number of Operations: ${debugOutput.num_of_operations ? debugOutput.num_of_operations : ''
+    }
+Rel. Operation Index: ${debugOutput.operation_index ? debugOutput.operation_index : ''
+    }
 VM Operation: ${debugOutput.op ? debugOutput.op : ''}
 Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
 `;
