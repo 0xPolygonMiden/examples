@@ -41,7 +41,7 @@ export default function DropDown({
         <>
           <div className="relative" role="listbox" data-testid="listbox">
             <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
-              <span className="block truncate">{selected}</span>
+              <span className="block truncate">{selected.replace(/_/g, " ")}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -71,16 +71,16 @@ export default function DropDown({
                 className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                 role="options"
               >
-                {examples.map((examples) => (
+                {examples.map((example) => (
                   <Listbox.Option
-                    key={examples}
+                    key={example}
                     className={({ active }) =>
                       classExamples(
                         active ? "text-white bg-violet-600" : "text-gray-900",
                         "relative cursor-default select-none py-2 pl-3 pr-9"
                       )
                     }
-                    value={examples}
+                    value={example}
                     data-testid="select-option"
                   >
                     {({ selected, active }) => (
@@ -91,7 +91,7 @@ export default function DropDown({
                             "block truncate"
                           )}
                         >
-                          {examples}
+                          {example.replace(/_/g, " ")}
                         </span>
 
                         {selected ? (
