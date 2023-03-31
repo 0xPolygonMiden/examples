@@ -7,14 +7,14 @@ use std::time::Instant;
 
 #[derive(serde::Deserialize, serde::Serialize)]
 pub struct InputFile {
-    pub stack_init: Vec<String>,
-    pub advice_tape: Option<Vec<String>>,
+    pub operand_stack: Vec<String>,
+    pub advice_stack: Option<Vec<String>>,
 }
 
-// Parse stack_init vector of strings to a vector of u64
+// Parse operand_stack vector of strings to a vector of u64
 fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvider, String> {
     let tape = advice_input_file
-        .advice_tape
+        .advice_stack
         .as_ref()
         .map(Vec::as_slice)
         .unwrap_or(&[])
@@ -22,7 +22,7 @@ fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvi
         .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
         .collect::<Result<Vec<_>, _>>()?;
     let advice_inputs = AdviceInputs::default()
-        .with_tape_values(tape)
+        .with_stack_values(tape)
         .map_err(|e| e.to_string())?;
     Ok(MemAdviceProvider::from(advice_inputs))
 }
@@ -30,7 +30,7 @@ fn parse_advice_provider(advice_input_file: &InputFile) -> Result<MemAdviceProvi
 // Parse advice_tape vector of strings to a vector of u64
 fn parse_stack_inputs(stack_input_file: &InputFile) -> Result<StackInputs, String> {
     let stack_inputs = stack_input_file
-        .stack_init
+        .operand_stack
         .iter()
         .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
         .collect::<Result<Vec<_>, _>>()?;

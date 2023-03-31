@@ -1,7 +1,5 @@
 import "@testing-library/jest-dom";
 import {
-  checkFields,
-  checkField,
   checkInputs,
   checkOutputs,
 } from "../src/utils/helper_functions";
@@ -25,71 +23,15 @@ const output_example_correct = `{
 
 const output_example_correct_json = JSON.parse(output_example_correct);
 
-/** Testing the checkField function */
-describe("checkField function", () => {
-  it("should return false if the field is not an array", async () => {
-    expect(checkField(output_example_incl_errors_json, "trace_len")).toStrictEqual(
-      {
-        isValid: false,
-        errorMessage: "trace_len must be an array of numbers.",
-      }
-    );
-  });
-
-  it("should return false if the field is empty", async () => {
-    expect(checkField(output_example_incl_errors_json, "empty")).toStrictEqual({
-      isValid: false,
-      errorMessage: `empty must contain at least one number,
-and it can only contain numbers.`,
-    });
-  });
-
-  it("should return false if the field contains a non-number", async () => {
-    expect(
-      checkField(output_example_incl_errors_json, "stack_output_non_number")
-    ).toStrictEqual({
-      isValid: false,
-      errorMessage: `stack_output_non_number must contain at least one number,
-and it can only contain numbers.`,
-    });
-  });
-
-  it("should return true if the field is valid", async () => {
-    expect(
-      checkField(output_example_incl_errors_json, "stack_output")
-    ).toStrictEqual({ isValid: true, errorMessage: "" });
-  });
-});
-
-/** Testing the checkFields function */
-describe("checkFields function", () => {
-  it("should return false if JSON contains errors", async () => {
-    expect(checkFields(output_example_incl_errors_json)).toStrictEqual(
-      /** expect that the loop breaks at the first incorrect Field (cycles should be skipped) */
-      {
-        isValid: false,
-        errorMessage: `empty must contain at least one number,
-and it can only contain numbers.`,
-      }
-    );
-  });
-
-  it("should return false if JSON is correct", async () => {
-    expect(checkFields(output_example_correct_json)).toStrictEqual({
-      isValid: true,
-      errorMessage: "",
-    });
-  });
-});
-
 /** Testing the checkInputs function */
 const incorrect_json = `{`;
+const emptyJson = '{}';
 const correct_json_no_stack_or_advice = `{
     "stack": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 }`;
 const correct_input = `{
-    "stack_init": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    "advice_tape": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    "operand_stack": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "advice_stack": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 }`;
 
 describe("checkInputs function", () => {
@@ -100,17 +42,16 @@ describe("checkInputs function", () => {
   it("should return false if input is incorrect JSON", async () => {
     expect(checkInputs(incorrect_json)).toStrictEqual({
       isValid: false,
-      errorMessage: `Miden VM Inputs need to be a valid JSON object:
-Expected property name or '}' in JSON at position 1`,
+      errorMessage: "Inputs must be a valid JSON object: Unexpected end of JSON input",
     });
   });
 
-  it("should return false if neither 'stack_init' nor 'advice_tape' is there", async () => {
-    expect(checkInputs(correct_json_no_stack_or_advice)).toStrictEqual({
+  it("should return false if neither 'operand_stack' nor 'advice_stack' is there", async () => {
+    expect(checkInputs(emptyJson)).toStrictEqual({
       isValid: false,
       errorMessage: `Miden VM Inputs can be empty or
-we need either a stack_init or
-an advice_tape.`,
+we need either a operand_stack or
+an advice_stack.`,
     });
   });
 

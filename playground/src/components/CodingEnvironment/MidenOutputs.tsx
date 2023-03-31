@@ -75,7 +75,7 @@ const MidenOutputs = ({ showDebug, debugExecutor, ...props }: MidenOutputsProps)
                     </div>
                 ) : null}
             </div>
-            <Editor height="150px" {...props} />
+            <Editor height="250px" {...props} />
         </div>
     )
 }

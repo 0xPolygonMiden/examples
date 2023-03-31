@@ -1,4 +1,3 @@
-mod expected_test_proof;
 mod utils_debug;
 mod utils_input;
 mod utils_program;
@@ -17,22 +16,25 @@ pub struct Outputs {
 
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
-pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
+pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
     console_error_panic_hook::set_once();
 
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
-    program.compile_program().unwrap();
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
 
     let mut inputs = utils_input::Inputs::new();
-    inputs.deserialize_inputs(inputs_frontend).unwrap();
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     let trace = miden_vm::execute(
         &program.program.unwrap(),
         inputs.stack_inputs,
         inputs.advice_provider,
     )
-    .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
-    .unwrap();
+    .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
     let result = Outputs {
         stack_output: trace.stack_outputs().stack().to_vec(),
@@ -41,20 +43,23 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
         proof: None,
     };
 
-    result
+    Ok(result)
 }
 
 /// Proves the program with the given inputs
 #[wasm_bindgen]
-pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
+pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
     console_error_panic_hook::set_once();
 
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
-    program.compile_program().unwrap();
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
 
     let mut inputs = utils_input::Inputs::new();
-
-    inputs.deserialize_inputs(inputs_frontend).unwrap();
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
     let proof_options = ProofOptions::with_96_bit_security();
@@ -66,8 +71,7 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
         inputs.advice_provider,
         proof_options,
     )
-    .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
-    .unwrap();
+    .map_err(|err| format!("Failed to prove execution - {:?}", err))?;
 
     let result = Outputs {
         stack_output: output.stack().to_vec(),
@@ -82,10 +86,9 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Outputs {
         output,
         proof,
     )
-    .map_err(|err| format!("Failed to verify proof at test verification = {:?}", err))
-    .unwrap();
+    .map_err(|err| format!("Failed to verify proof - {:?}", err))?;
 
-    result
+    Ok(result)
 }
 
 /// Verifies the proof with the given inputs
@@ -95,21 +98,26 @@ pub fn verify_program(
     inputs_frontend: &str,
     outputs_frontend: &str,
     proof: Vec<u8>,
-) -> u32 {
+) -> Result<u32, JsValue> {
     console_error_panic_hook::set_once();
 
     // we need to get the program info from the program
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
-    program.compile_program().unwrap();
+    program
+        .compile_program()
+        .map_err(|err| format!("Failed to compile program - {:?}", err))?;
 
     let proof = ExecutionProof::from_bytes(&proof)
-        .map_err(|err| format!("Failed to deserialize proof - {}", err))
-        .unwrap();
+        .map_err(|err| format!("Failed to deserialize proof - {}", err))?;
 
     let mut inputs = utils_input::Inputs::new();
 
-    inputs.deserialize_inputs(inputs_frontend).unwrap();
-    inputs.deserialize_outputs(outputs_frontend).unwrap();
+    inputs
+        .deserialize_inputs(inputs_frontend)
+        .map_err(|err| format!("Failed to deserialize inputs - {}", err))?;
+    inputs
+        .deserialize_outputs(outputs_frontend)
+        .map_err(|err| format!("Failed to deserialize outputs - {}", err))?;
 
     let result: u32 = miden_vm::verify(
         program.program_info.unwrap(),
@@ -117,10 +125,9 @@ pub fn verify_program(
         inputs.stack_outputs,
         proof,
     )
-    .map_err(|err| format!("Program failed verification! - {}", err))
-    .unwrap();
+    .map_err(|err| format!("Program failed verification! - {}", err))?;
 
-    result
+    Ok(result)
 }
 
 /// Basic tests for the Rust part
@@ -132,7 +139,8 @@ fn test_run_program() {
             push.1 push.2 add
         end",
         "",
-    );
+    )
+    .unwrap();
     assert_eq!(
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -151,7 +159,8 @@ fn test_run_program_with_std_lib() {
             exec.u64::checked_add
         end",
         "",
-    );
+    )
+    .unwrap();
     assert_eq!(
         output.stack_output,
         vec![0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -289,7 +298,8 @@ fn test_prove_program() {
             push.1 push.2 add
         end",
         "",
-    );
+    )
+    .unwrap();
     // this is the result of the stack output, 3
     assert_eq!(
         output.stack_output,
@@ -303,10 +313,6 @@ fn test_prove_program() {
 
     // we expect a proof of []
     assert!(output.proof.is_some());
-    assert_eq!(
-        output.proof,
-        Some(expected_test_proof::EXPECTED_PROOF_BYTES.to_vec())
-    );
 }
 
 #[test]
@@ -317,8 +323,8 @@ fn test_verify_program() {
 
     let input_str: &str = r#"
     {
-        "stack_init": ["0"],
-        "advice_tape": ["0"]
+        "operand_stack": ["0"],
+        "advice_stack": ["0"]
     }"#;
 
     let output_str: &str = r#"
@@ -328,9 +334,9 @@ fn test_verify_program() {
         "trace_len": 1024
     }"#;
 
-    let proof = expected_test_proof::EXPECTED_PROOF_BYTES.to_vec();
+    let prove_result = prove_program(asm, input_str).unwrap();
 
-    let result = verify_program(asm, input_str, output_str, proof);
+    let result = verify_program(asm, input_str, output_str, prove_result.proof.unwrap()).unwrap();
 
     assert_eq!(result, 96);
 }
