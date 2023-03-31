@@ -142,19 +142,12 @@ export default function CodingEnvironment(): JSX.Element {
         const start = Date.now();
         const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
           prove_program(code, inputs);
-        const overflow = overflow_addrs ? overflow_addrs.toString() : null;
-        if (overflow) {
-          setOutput(`{
+        const overflow = overflow_addrs ? overflow_addrs.toString() : "[]";
+        setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "overflow_addrs" : [${overflow}],
 "trace_len" : ${trace_len}
 }`);
-        } else {
-          setOutput(`{
-"stack_output" : [${stack_output.toString()}],
-"trace_len" : ${trace_len}
-}`);
-        }
 
         toast.success(`Proving successful in ${Date.now() - start} ms`, {
           id: "provingToast",
