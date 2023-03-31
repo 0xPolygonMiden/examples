@@ -1,4 +1,4 @@
 {
-            "operand_stack": ["0"],
-            "advice_stack": ["1"]
+    "operand_stack": ["0"],
+    "advice_stack": ["1"]
 }
