@@ -7,7 +7,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 /** External links for the top navigation menu */
 const navigation = [
     { name: 'Documentation', href: 'https://wiki.polygon.technology/docs/miden/user_docs/assembly/main' },
-    { name: 'Developer Tools', href: 'https://0xpolygonmiden.github.io/miden-vm/intro/usage/main.html' },
+    { name: 'Developer Tools', href: 'https://0xpolygonmiden.github.io/miden-vm/tools/main.html' },
     { name: 'Homepage', href: 'https://polygon.technology/solutions/polygon-miden/' },
 ]
 
