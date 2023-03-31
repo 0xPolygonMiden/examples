@@ -78,7 +78,7 @@ export default function CodingEnvironment(): JSX.Element {
     const value = exampleChange;
     // set the current example to the selected one
     setExample(value);
-    if (value === "example") {
+    if (value === "addition") {
       setInputs(exampleInput);
       setCode(exampleCode);
       setOutput(emptyOutput);
