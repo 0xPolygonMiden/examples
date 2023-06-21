@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { ReactNode, createContext, useState } from 'react';
 
 type ConfigContextType = {
     darkmode: boolean;
@@ -6,7 +6,7 @@ type ConfigContextType = {
 }
 
 type ProviderProps = {
-    children: string | JSX.Element | JSX.Element[] 
+    children: ReactNode;
 }
 
 export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
