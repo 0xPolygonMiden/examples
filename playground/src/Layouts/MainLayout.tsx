@@ -1,6 +1,5 @@
 import { useContext, useEffect } from "react";
 import Header from "../components/Header";
-import NavigationTabs from "../components/NavigationTabs";
 import { ConfigContext } from "../contexts/ConfigProvider";
 import Helmet from "react-helmet";
 import Nav from "../components/Nav";

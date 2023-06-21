@@ -1,18 +1,81 @@
-:root,
+@use "sass:color";
+
+$base-color-primary: hsl(252, 29%, 90%);
+$base-color-secondary: hsl(259, 100%, 78%);
+$base-color-tertiary: hsl(119, 79%, 51%);
+$base-bg-color: hsl(252, 12%, 8%);
+
+$base-gradient-color-primary: hsl(249, 13%, 11%);
+
+$color-primary: $base-color-primary;
+$color-primary-tier2: color.change($base-color-primary, $saturation: 10%,  $lightness: 60%);
+$color-primary-tier3: color.change($base-color-primary, $saturation: 5%, $lightness: 30%);
+
+$color-secondary: $base-color-secondary;
+$color-secondary-tier2: color.change($base-color-secondary, $lightness: 38%);
+$color-secondary-tier3: color.change($base-color-secondary, $lightness: 80%);
+
+$color-tertiary: $base-color-tertiary;
+$color-tertiary-tier2: color.change($base-color-tertiary, $lightness: 38%);
+$color-tertiary-tier3: color.change($base-color-tertiary, $lightness: 80%);
+
+$color-bg: $base-bg-color;
+$color-bg-secondary: color.change($base-bg-color, $lightness: 20%);
+$color-bg-tertiary: color.change($base-bg-color, $lightness: 40%);
+
+$color-border: color.change($base-color-primary, $lightness: 18%);
+
+
 [data-theme="dark"] {
-    --color-primary: hsl(252, 12%, 92%);
-    --color-primary-tier2: hsl(252, 12%, 62%);
-    --color-primary-tier3: hsl(252, 12%, 32%);
+    --color-primary: #{$color-primary};
+    --color-primary-tier2: #{$color-primary-tier2};
+    --color-primary-tier3: #{$color-primary-tier3};
 
-    --color-secondary: hsl(259, 86%, 59%);
-    --color-secondary-tier2: hsl(259, 86%, 29%);
-    --color-secondary-tier3: hsl(259, 86%, 79%);
+    --color-secondary: #{$color-secondary};
+    --color-secondary-tier2: #{$color-secondary-tier2};
+    --color-secondary-tier3: #{$color-secondary-tier3};
 
-    --color-bg: hsl(252, 12%, 8%);
-    --color-bg-secondary: hsl(252, 12%, 18%);
-    --color-bg-tertiary: hsl(252, 12%, 38%);
+    --color-tertiary: #{$color-tertiary};
+    --color-tertiary-tier2: #{$color-tertiary-tier2};
+    --color-tertiary-tier3: #{$color-tertiary-tier3};
+
+    --color-bg: #{$color-bg};
+    --color-bg-secondary: #{$color-bg-secondary};
+    --color-bg-tertiary: #{$color-bg-tertiary};
+
+    --color-gradient-primary: linear-gradient(45deg, #{$base-gradient-color-primary} 100%, #{$base-gradient-color-primary} 0%);
+
+    --color-border: #{$color-border};
+
+}
 
 
+[data-theme="light"] {
+    --color-primary: #{color.invert($color-primary, 100%)};
+    --color-primary-tier2: #{color.invert($color-primary-tier2, 100%)};
+    --color-primary-tier3: #{color.invert($color-primary-tier3, 100%)};
+
+    --color-bg: #{color.invert($color-bg, 100%)};
+    --color-bg-secondary: #{color.invert($color-bg-secondary, 100%)};
+    --color-bg-tertiary: #{color.invert($color-bg-tertiary, 100%)};
+
+    --color-secondary: #{color.adjust($color-secondary, $lightness: -10%)};
+    --color-secondary-tier2: #{color.adjust($color-secondary-tier2, $lightness: -20%)};
+    --color-secondary-tier3: #{color.adjust($color-secondary-tier3, $lightness: -30%)};
+
+    --color-tertiary: #{$color-tertiary};
+    --color-tertiary-tier2: #{$color-tertiary-tier2};
+    --color-tertiary-tier3: #{$color-tertiary-tier3};
+
+    --color-gradient-primary: linear-gradient(45deg, #{color.invert($base-gradient-color-primary, 100%)} 100%, #{color.invert($base-gradient-color-primary, 100%)} 0%);
+
+    --color-border: #{color.invert($color-border, 100%)};
+
+}
+
+
+:root {
+    
     --size-tiny: 8px;
     --size-small: 9px;
     --size-regular: 11px;
@@ -74,21 +137,4 @@
     --breakpoint-laptop: 1024px;
     --breakpoint-laptop-large: 1440px;
     
-}
-
-[data-theme="light"] {
-    --color-primary: hsl(252, 12%, 8%);
-    --color-primary-tier2: hsl(252, 12%, 48%);
-    --color-primary-tier3: hsl(252, 12%, 68%);
-    
-    --color-secondary: hsl(259, 86%, 59%);
-    --color-secondary-tier2: hsl(259, 86%, 89%);
-    --color-secondary-tier3: hsl(259, 86%, 39%);
-    
-    --color-bg: hsl(252, 12%, 92%);
-    --color-bg-secondary: hsl(252, 12%, 82%);
-    --color-bg-tertiary: hsl(252, 12%, 72%);
-
-
-
 }

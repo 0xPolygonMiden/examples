@@ -5,9 +5,13 @@ type ConfigContextType = {
     toggleDarkmode: () => void;
 }
 
+type ProviderProps = {
+    children: string | JSX.Element | JSX.Element[] 
+}
+
 export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
 
-export const ConfigProvider = ({ children }: any) => {
+export const ConfigProvider = ({ children }: ProviderProps) => {
     const [darkmode, setDarkmode] = useState(true);
 
     const toggleDarkmode = () => setDarkmode(!darkmode);
