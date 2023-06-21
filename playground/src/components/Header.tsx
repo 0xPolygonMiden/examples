@@ -1,3 +1,6 @@
+import { useContext } from "react";
+import { ConfigContext } from "../contexts/ConfigProvider";
+
 import { useState } from "react";
 import MidenLogo from "./MidenLogo";
 import { Dialog } from '@headlessui/react'
@@ -5,12 +8,45 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
 
 /** External links for the top navigation menu */
-const navigation = [
-    { name: 'Documentation', href: 'https://wiki.polygon.technology/docs/miden/user_docs/assembly/main' },
-    { name: 'Developer Tools', href: 'https://0xpolygonmiden.github.io/miden-vm/tools/main.html' },
-    { name: 'Homepage', href: 'https://polygon.technology/solutions/polygon-miden/' },
-]
+const navigation = {
+    docs: { name: 'Documentation', href: 'https://wiki.polygon.technology/docs/miden/user_docs/assembly/main' },
+    tools: { name: 'Developer Tools', href: 'https://0xpolygonmiden.github.io/miden-vm/tools/main.html' },
+    home: { name: 'Homepage', href: 'https://polygon.technology/solutions/polygon-miden/' },
+}
 
+const Header = () => {
+    const { darkmode, toggleDarkmode } = useContext(ConfigContext);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    return <>
+        <header>
+            <div className="brand">
+                <a href={navigation.home.href}><MidenLogo className="brand" /></a>
+                <h1>Polygon Miden <span>Playground</span></h1>
+            </div>
+            <div className={`menu ${!mobileMenuOpen && 'hidden'}`}>
+                <button onClick={toggleDarkmode}>
+                    <i className={"fa fa-" + (darkmode ? 'sun' : 'moon')} />
+                </button>
+                <button>
+                    <i className="fa fa-question" />
+                </button>
+                <a href={navigation.docs.href}>{navigation.docs.name}</a>
+            </div>
+            <button className="hamburger mobile-only"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+                {mobileMenuOpen
+                    ? <i className="fa fa-times" />
+                    : <i className="fa fa-bars" />
+                }
+            </button>
+        </header>
+    </>
+}
+
+export default Header;
+
+/*
 const Header = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -82,4 +118,6 @@ const Header = () => {
     );
 };
 
+
 export default Header;
+*/

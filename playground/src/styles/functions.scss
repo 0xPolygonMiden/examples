@@ -1,0 +1,27 @@
+@function color($color-name) {
+    @return var(--color-#{$color-name});
+}
+
+@function fontSize($font-size-name) {
+    @return var(--font-size-#{$font-size-name});
+}
+
+@function fontWeights($font-weight-name) {
+    @return var(--font-weight-#{$font-weight-name});
+}
+
+@function borderRadius($border-radius-name) {
+    @return var(--border-radius-#{$border-radius-name});
+}
+
+@function padding($padding-name) {
+    @return var(--padding-#{$padding-name});
+}
+
+@function margin($margin-name) {
+    @return var(--margin-#{$margin-name});
+}
+
+@function breakpoint($breakpoint-name) {
+    @return var(--breakpoint-#{$breakpoint-name});
+}

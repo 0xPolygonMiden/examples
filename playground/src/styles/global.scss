@@ -1,0 +1,94 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    background-color: color(bg);
+}
+
+* {
+    color: color(primary);
+    box-sizing: border-box;
+
+    transition: all 0.3s ease-in-out;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+h1 { font-size: fontSize(huge); }
+h2 { font-size: fontSize(large); }
+h3 { font-size: fontSize(regular); }
+h4 { font-size: fontSize(regular); }
+h5 { font-size: fontSize(regular); }
+
+
+a {
+    position: relative;
+    color: color(primary);
+    text-decoration: none;
+    border: 1px solid transparent;
+    z-index: 1;
+
+    &::before {
+        content: "";
+        /* Required for pseudo-element */
+        position: absolute;
+        top: 0px;
+        left: 50%;
+        width: 0%;
+        height: calc(100% + 1px);
+        z-index: -1;
+
+        border-bottom: 2px solid transparent;
+
+        transition: all 0.5s;
+    }
+
+    &:hover {
+        &::before {
+            border-color: color(secondary);
+            width: 100%;
+            left: 0px;
+        }
+    }
+}
+
+
+button {
+    color: color(primary);
+    font-size: fontSize(small);
+    margin-left: margin(small);
+    padding: padding(small);
+    border-radius: borderRadius(small);
+    border-color: color(primary);
+    border-style: solid;
+    width: fontSize(small-2x);
+    height: fontSize(small-2x);
+    text-align: center;
+    align-items: center;
+    cursor: pointer;
+    background: transparent;
+
+    &:last-of-type {
+        border-width: 2px;
+    }
+
+    &:hover {
+        background-color: color(secondary);
+    }
+}
+
+.mobile-only {
+    display: none;
+
+    @media (max-width: 425px) {
+        display: block;
+    }
+}

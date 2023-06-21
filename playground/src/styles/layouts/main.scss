@@ -1,0 +1,8 @@
+.main {
+    min-height: 100%;
+    width: 100%;
+    min-width: breakpoint(mobile-large);
+    max-width: breakpoint(laptop-large);
+
+    margin: auto;
+}

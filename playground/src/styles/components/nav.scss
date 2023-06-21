@@ -1,0 +1,28 @@
+nav {
+    width: 100%;
+    font-size: fontSize(regular);
+    color: color(primary-tier2);
+
+    background-color: color(bg-secondary);
+
+    padding: padding(regular);
+
+    a {
+        margin-left: margin(huge);
+        text-transform: uppercase;
+        color: color(primary-tier2);
+
+        &::before {
+            top: fontSize(regular);
+            height: calc(100% - 2px);
+        }
+
+        &:first-of-type {
+            margin-left: clamp(0px, 10vw, 30px);
+        }
+    }
+
+    a.active {
+        color: color(primary);
+    }
+}
