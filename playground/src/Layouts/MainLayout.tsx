@@ -3,9 +3,10 @@ import Header from "../components/Header";
 import { ConfigContext } from "../contexts/ConfigProvider";
 import Helmet from "react-helmet";
 import { Outlet } from "react-router-dom";
+import ConfigWindow from "../components/ConfigWindow";
 
 const MainLayout = () => {
-    const { darkmode } = useContext(ConfigContext);
+    const { darkmode,  } = useContext(ConfigContext);
 
     useEffect(() => {
         //set data-theme attribute on html element
@@ -19,6 +20,7 @@ const MainLayout = () => {
         </Helmet>
         <Header />
         <Outlet />
+        <ConfigWindow />
     </>;
 };
 
