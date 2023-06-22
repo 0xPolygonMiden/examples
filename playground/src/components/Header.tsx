@@ -22,22 +22,22 @@ const Header = () => {
                 <h1>Polygon Miden <span>Playground</span></h1>
             </div>
             <div className={`menu ${!mobileMenuOpen && 'hidden'}`}>
-                <button onClick={toggleDarkmode}>
-                    <i className={"fa fa-" + (darkmode ? 'sun' : 'moon')} />
-                </button>
-                <button>
-                    <i className="fa fa-question" />
-                </button>
+                <div className="button"  onClick={toggleDarkmode} >
+                    <i className={" fa fa-" + (darkmode ? 'sun' : 'moon')}/>
+                </div>
+                <div className="button">
+                    <i className=" fa fa-question" />
+                </div>
                 <a href={navigation.docs.href}>{navigation.docs.name}</a>
             </div>
-            <button className="hamburger mobile-only"
+            <b className="hamburger mobile-only"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
                 {mobileMenuOpen
                     ? <i className="fa fa-times" />
                     : <i className="fa fa-bars" />
                 }
-            </button>
+            </b>
         </header>
     </>
 }

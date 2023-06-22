@@ -9,7 +9,7 @@ header {
     display: flex;
     align-items: stretch;
     justify-content: space-between;
-    
+
     .brand {
         display: flex;
         align-items: center;
@@ -44,22 +44,50 @@ header {
         align-items: center;
         gap: fontSize(huge);
 
-        button {
-            border-radius: borderRadius(circle);
-            padding: 0px;
+        .button {
+            color: color(primary);
+            font-size: fontSize(small);
             margin: 0px;
+            padding: fontSize(small);
 
-            position: relative;
+            border-radius: borderRadius(circle);
+            border-color: color(primary);
+            border-style: solid;
+            
+            width: fontSize(small-2x);
+            height: fontSize(small-2x);
+            
+            text-align: center;
+            align-items: center;
+            
+            cursor: pointer;
+            background: transparent;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &:last-of-type {
+                border-width: 2px;
+            }
+
+            &:hover {
+                background-color: color(secondary);
+            }
+
+            * {
+                margin-top: 1px;
+                margin-left: -1px;
+            }
 
         }
-
 
         margin-left: auto;
     }
 
     .hamburger {
         position: absolute;
-        top: 20px;
+        top: 12.5px;
         right: 30px;
         z-index: 101;
         border: 0px;
@@ -72,7 +100,7 @@ header {
 
     }
 
-    @media (max-width: 425px) {
+    @media (max-width: #{$breakpoint-mobile-large}) {
         .menu {
 
             margin-left: 0px;
@@ -86,7 +114,7 @@ header {
             top: 0px;
             left: 0px;
 
-            flex-direction:column-reverse;
+            flex-direction: column-reverse;
             align-items: center;
             justify-content: flex-end;
             gap: fontSize(regular);
@@ -96,7 +124,7 @@ header {
             padding-top: fontSize(huge);
 
 
-            box-shadow: 0px 0px 10px 10px hsla(0,0%,0%,0.75);
+            box-shadow: 0px 0px 10px 10px hsla(0, 0%, 0%, 0.75);
 
             overflow: hidden;
 
@@ -113,5 +141,5 @@ header {
             }
         }
     }
-    
+
 }

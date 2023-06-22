@@ -1,11 +1,12 @@
 @use "sass:color";
 
 $base-color-primary: hsl(252, 29%, 90%);
-$base-color-secondary: hsl(259, 100%, 78%);
+$base-color-secondary: hsl(259, 86%, 59%);
 $base-color-tertiary: hsl(119, 79%, 51%);
-$base-bg-color: hsl(252, 12%, 8%);
-
-$base-gradient-color-primary: hsl(249, 13%, 11%);
+$base-color-bg: hsl(252, 12%, 8%);
+$base-color-stroke: hsl(253, 10%, 18%);
+$base-color-button: hsl(0, 0%, 5%);
+$base-color-gradient-primary: hsl(249, 13%, 11%);
 
 $color-primary: $base-color-primary;
 $color-primary-tier2: color.change($base-color-primary, $saturation: 10%,  $lightness: 60%);
@@ -19,11 +20,19 @@ $color-tertiary: $base-color-tertiary;
 $color-tertiary-tier2: color.change($base-color-tertiary, $lightness: 38%);
 $color-tertiary-tier3: color.change($base-color-tertiary, $lightness: 80%);
 
-$color-bg: $base-bg-color;
-$color-bg-secondary: color.change($base-bg-color, $lightness: 20%);
-$color-bg-tertiary: color.change($base-bg-color, $lightness: 40%);
+$color-bg: $base-color-bg;
+$color-bg-secondary: color.change($base-color-bg, $lightness: 20%);
+$color-bg-tertiary: color.change($base-color-bg, $lightness: 40%);
 
-$color-border: color.change($base-color-primary, $lightness: 18%);
+$color-border: $base-color-stroke;
+$color-border-tier2: color.change($base-color-stroke, $lightness: 5%);
+
+$breakpoint-mobile-small: 320px;
+$breakpoint-mobile-medium: 375px;
+$breakpoint-mobile-large: 425px;
+$breakpoint-tablet: 768px;
+$breakpoint-laptop: 1024px;
+$breakpoint-laptop-large: 1440px;
 
 
 [data-theme="dark"] {
@@ -43,9 +52,10 @@ $color-border: color.change($base-color-primary, $lightness: 18%);
     --color-bg-secondary: #{$color-bg-secondary};
     --color-bg-tertiary: #{$color-bg-tertiary};
 
-    --color-gradient-primary: linear-gradient(45deg, #{$base-gradient-color-primary} 100%, #{$base-gradient-color-primary} 0%);
+    --color-gradient-primary: linear-gradient(135deg, #{$base-color-gradient-primary}, #{color.change($base-color-gradient-primary, $alpha: 0)});
 
     --color-border: #{$color-border};
+    --color-border-tier2: #{$color-border-tier2};
 
 }
 
@@ -67,9 +77,10 @@ $color-border: color.change($base-color-primary, $lightness: 18%);
     --color-tertiary-tier2: #{$color-tertiary-tier2};
     --color-tertiary-tier3: #{$color-tertiary-tier3};
 
-    --color-gradient-primary: linear-gradient(45deg, #{color.invert($base-gradient-color-primary, 100%)} 100%, #{color.invert($base-gradient-color-primary, 100%)} 0%);
+    --color-gradient-primary: linear-gradient(135deg, #{color.invert($base-color-gradient-primary, 100%)}, #{color.change(color.invert($base-color-gradient-primary, 100%), $alpha: 0)});
 
     --color-border: #{color.invert($color-border, 100%)};
+    --color-border-tier2: #{color.invert($color-border-tier2, 100%)};
 
 }
 
@@ -130,11 +141,11 @@ $color-border: color.change($base-color-primary, $lightness: 18%);
     --border-radius-huge: var(--font-size-huge);
     --border-radius-circle: 50%;
 
-    --breakpoint-mobile-small: 320px;
-    --breakpoint-mobile-medium: 375px;
-    --breakpoint-mobile-large: 425px;
-    --breakpoint-tablet: 768px;
-    --breakpoint-laptop: 1024px;
-    --breakpoint-laptop-large: 1440px;
+    --breakpoint-mobile-small: #{$breakpoint-mobile-small};
+    --breakpoint-mobile-medium: #{$breakpoint-mobile-medium};
+    --breakpoint-mobile-large: #{$breakpoint-mobile-large};
+    --breakpoint-tablet: #{$breakpoint-tablet};
+    --breakpoint-laptop: #{$breakpoint-laptop};
+    --breakpoint-laptop-large: #{$breakpoint-laptop-large};
     
 }

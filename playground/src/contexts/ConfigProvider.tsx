@@ -12,9 +12,13 @@ type ProviderProps = {
 export const ConfigContext = createContext<ConfigContextType>({} as ConfigContextType);
 
 export const ConfigProvider = ({ children }: ProviderProps) => {
-    const [darkmode, setDarkmode] = useState(true);
+    const [darkmode, setDarkmode] = useState(localStorage.getItem('darkmode') === 'true');
 
-    const toggleDarkmode = () => setDarkmode(!darkmode);
+    const toggleDarkmode = () => {
+        const newState = !darkmode;
+        localStorage.setItem('darkmode', newState ? 'true' : 'false');
+        setDarkmode(newState);
+    }
 
     return (
         <ConfigContext.Provider

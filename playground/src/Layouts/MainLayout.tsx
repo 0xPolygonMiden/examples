@@ -2,7 +2,7 @@ import { useContext, useEffect } from "react";
 import Header from "../components/Header";
 import { ConfigContext } from "../contexts/ConfigProvider";
 import Helmet from "react-helmet";
-import Nav from "../components/Nav";
+import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
     const { darkmode } = useContext(ConfigContext);
@@ -17,14 +17,8 @@ const MainLayout = () => {
         <Helmet>
             <script src="https://kit.fontawesome.com/be33eca35b.js" crossOrigin="anonymous"></script>
         </Helmet>
-        {/* <div className="main"> */}
-            <Header />
-            <Nav />
-
-            {/* <NavigationTabs /> */}
-
-            <h1>This is a text</h1>
-        {/* </div> */}
+        <Header />
+        <Outlet />
     </>;
 };
 

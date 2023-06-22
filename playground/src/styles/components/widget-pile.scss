@@ -1,0 +1,13 @@
+.widget-pile {
+    background: color(gradient-primary);
+    border-radius: fontSize(tiny);
+    border: 1px solid color(border); 
+    
+    .widget:last-child.collapsed .widget-header {
+        border-width: 0px;
+    }
+
+    .widget:last-child {
+        border-radius: fontSize(tiny);
+    }
+}

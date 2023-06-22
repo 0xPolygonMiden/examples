@@ -1,22 +1,27 @@
-import { Children, ReactNode, cloneElement } from "react";
+import { Children, ReactNode, cloneElement, useState } from "react";
 
 type WidgetProps = {
-    children: ReactNode,
+    children?: ReactNode,
     name?: string,
-    collapsible?: boolean
-    extended?: boolean
+    collapsible?: boolean,
+    collapsed?: boolean,
+    onToggleCollapsed?: () => void,
 }
 
-const Header = ({ children, name, collapsible, extended }: WidgetProps) => {
+const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: WidgetProps) => {
+
     return <>
         <div className="widget-header">
             <div>
-                <h2>{name}</h2>
+                <h2 className="widget-header-name">{name}</h2>
                 {
                     collapsible && (
-                        extended 
-                            ? <i className="fas fa-chevron-up"></i>
-                            : <i className="fas fa-chevron-down"></i>
+                        <div className="widget-header-collapsible" onClick={onToggleCollapsed}>
+                            {collapsed 
+                                ? <i className="fas fa-chevron-down" />
+                                : <i className="fas fa-chevron-up" />
+                            }
+                        </div>
                     )
                 }
             </div>
@@ -25,33 +30,52 @@ const Header = ({ children, name, collapsible, extended }: WidgetProps) => {
     </>;
 };
 
-const Body = ({ children, extended }: WidgetProps) => {
+const Body = ({ children }: WidgetProps) => {
     return <>
-        <div className="widget-body">
+        <div className={`widget-body`}>
             {children}
         </div>
     </>;
 };
 
 
-const Widget = ({ children, name, collapsible = true, extended = true }: WidgetProps) => {
+const Footer = ({ children }: WidgetProps) => {
     return <>
-        <div className="widget">
-            {
-                Children.map(children, (child: any) => {
-                    return cloneElement(child, {
-                        name,
-                        collapsible,
-                        extended
-                    });
-                })
+        <div className={`widget-footer`}>
+            {children}
+        </div>
+    </>
+}
+
+const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true }: WidgetProps) => {
+    const [collapsedState, setCollapsedState] = useState(collapsed);
+
+    const toggleCollapsed = () => setCollapsedState(!collapsedState);
+    
+    const header = Children.toArray(children).find(child => (child as any).type === Header);
+    const body = Children.toArray(children).find(child => (child as any).type === Body);
+    const footer = Children.toArray(children).find(child => (child as any).type === Footer);
+
+    return <>
+        <div className={`widget ${collapsedState && 'collapsed'}`}>
+            {header 
+                ? cloneElement(header as any, { name, collapsible, onToggleCollapsed: toggleCollapsed }) 
+                : <Header name={name} collapsible={collapsible} collapsed={collapsedState} onToggleCollapsed={toggleCollapsed} />
             }
+            {body 
+                ? cloneElement(body as any) 
+                : <Body  />
+            }
+            {footer && cloneElement(footer as any)}
         </div>
     </>;
+
+    
 };
 
 
 Widget.Header = Header;
 Widget.Body = Body;
+Widget.Footer = Footer;
 
 export default Widget;

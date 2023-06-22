@@ -9,6 +9,8 @@ body {
     -moz-osx-font-smoothing: grayscale;
 
     background-color: color(bg);
+
+    min-height: 100dvh;
 }
 
 * {
@@ -16,6 +18,19 @@ body {
     box-sizing: border-box;
 
     transition: all 0.3s ease-in-out;
+
+    //set scroolbar width and color
+    ::-webkit-scrollbar {
+        width: 2px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: color(bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: color(primary);
+    }
 }
 
 code {
@@ -61,34 +76,65 @@ a {
 }
 
 
-button {
-    color: color(primary);
-    font-size: fontSize(small);
-    margin-left: margin(small);
-    padding: padding(small);
-    border-radius: borderRadius(small);
-    border-color: color(primary);
-    border-style: solid;
-    width: fontSize(small-2x);
-    height: fontSize(small-2x);
-    text-align: center;
-    align-items: center;
-    cursor: pointer;
-    background: transparent;
-
-    &:last-of-type {
-        border-width: 2px;
-    }
-
-    &:hover {
-        background-color: color(secondary);
-    }
-}
 
 .mobile-only {
     display: none;
 
-    @media (max-width: 425px) {
+    @media (max-width: #{$breakpoint-mobile-large}) {
         display: block;
+    }
+}
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    padding: padding(regular);
+    margin: 0 auto;
+    gap: padding(regular);
+}
+
+button {
+    border: 1px solid color(border);
+    border-radius: fontSize(tiny);
+    background: color(bg);
+    color: color(primary);
+
+    margin: 0px fontSize(tiny);
+    
+    padding-top: padding(tiny);
+    padding-bottom: padding(tiny);
+    padding-left: padding(regular);
+    padding-right: padding(regular);
+
+    box-shadow: 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+
+    font-size: fontSize(small);
+
+    cursor: pointer;
+
+    &:hover {
+        background-color: color(bg);
+    }
+
+    &.active {
+        box-shadow: inset 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+    }
+
+    i {
+        color: color(secondary);
+        margin-left: fontSize(tiny);
+        margin-right: fontSize(tiny);
+    }
+
+    *:last-child {
+        margin-right: 0px;
+    }
+
+    &:first-child {
+        margin-left: 0px;
     }
 }
