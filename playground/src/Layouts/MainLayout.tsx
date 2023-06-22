@@ -4,6 +4,7 @@ import { ConfigContext } from "../contexts/ConfigProvider";
 import Helmet from "react-helmet";
 import { Outlet } from "react-router-dom";
 import ConfigWindow from "../components/ConfigWindow";
+import PopoverManager from "../components/PopoverManager";
 
 const MainLayout = () => {
     const { darkmode,  } = useContext(ConfigContext);
@@ -20,6 +21,7 @@ const MainLayout = () => {
         </Helmet>
         <Header />
         <Outlet />
+        <PopoverManager />
         <ConfigWindow />
     </>;
 };

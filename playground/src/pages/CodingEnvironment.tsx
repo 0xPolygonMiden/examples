@@ -11,7 +11,7 @@ const CodingEnvironment = () => {
                     <WidgetPile>
                         <Widget name="Test Widget" collapsed={false}>
                             <Widget.Header>
-                                <button>Run <i className="fas fa-caret-right"></i></button>
+                                <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
                                 <button>Debug</button>
                                 <button className="active">Prove</button>
                             </Widget.Header>
