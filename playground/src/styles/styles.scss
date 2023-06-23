@@ -14,13 +14,21 @@
 @import 'components/nav';
 @import 'components/widget-pile';
 @import 'components/widget';
+@import 'components/debugger';
 
 @import 'pages/coding-environment';
 
 
+
+//TODO - Should be in a separate file
 .input-output {
     div {
         padding: padding(small);
         border-bottom: 1px solid color(border);
     }
+}
+
+.cm-scroller {
+    overflow: auto !important;
+    min-height: 400px;
 }

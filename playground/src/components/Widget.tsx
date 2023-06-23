@@ -8,6 +8,8 @@ type WidgetProps = {
     collapsed?: boolean,
     onToggleCollapsed?: () => void,
     hidden?: boolean,
+    expandable?: boolean,
+    expanded?: boolean,
 }
 
 const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: WidgetProps) => {
@@ -48,7 +50,7 @@ const Footer = ({ children }: WidgetProps) => {
     </>
 }
 
-const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true, hidden = false }: WidgetProps) => {
+const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true, hidden = false, expandable = false, expanded = false }: WidgetProps) => {
     const [collapsedState, setCollapsedState] = useState(collapsed);
     const {widgets} = useContext(ConfigContext);
 
@@ -59,20 +61,12 @@ const Widget = ({ children, name = "Widget", collapsible = true, collapsed = tru
     const footer = Children.toArray(children).find(child => (child as any).type === Footer);
 
     return <>
-        <div className={`widget ${collapsedState && 'collapsed'}`} >
-            {header 
-                ? cloneElement(header as any, { collapsible, collapsed: collapsedState,  onToggleCollapsed: toggleCollapsed }) 
-                : <Header name={name} collapsible={collapsible} collapsed={collapsedState} onToggleCollapsed={toggleCollapsed} />
-            }
-            {body 
-                ? cloneElement(body as any) 
-                : <Body  />
-            }
+        <div className={`widget ${collapsedState && 'collapsed'} ${expanded && 'expanded'}`} >
+            {header && cloneElement(header as any, { collapsible, collapsed: collapsedState,  onToggleCollapsed: toggleCollapsed }) }
+            {body && cloneElement(body as any) }
             {footer && cloneElement(footer as any)}
         </div>
     </>;
-
-    
 };
 
 

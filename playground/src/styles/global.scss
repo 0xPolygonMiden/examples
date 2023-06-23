@@ -22,6 +22,7 @@ body {
     //set scroolbar width and color
     ::-webkit-scrollbar {
         width: 2px;
+        height: 2px;
     }
 
     ::-webkit-scrollbar-track {
@@ -68,11 +69,7 @@ a {
     }
 
     &:hover {
-        &::before {
-            border-color: color(secondary);
-            width: 100%;
-            left: 0px;
-        }
+        color: color(primary);
     }
 }
 

@@ -33,8 +33,11 @@
 
     .widget-body,
     .widget-footer {
+        position: relative;
         height: auto;      
         max-height: 1000px; 
+        overflow: auto;
+        max-height: 400px;
         overflow: auto;
     }
 
@@ -54,4 +57,16 @@
         display: none;
     }
 
+    &.expanded {
+        height: 100svh;
+        width: 100vw;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        z-index: 200;
+
+        .widget-body {
+            height: 100%;
+        }
+    }
 }

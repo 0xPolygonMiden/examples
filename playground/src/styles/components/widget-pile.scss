@@ -10,4 +10,14 @@
     .widget:last-child {
         border-radius: fontSize(tiny);
     }
+
+    
+    &.expanded {
+        height: 100svh;
+        width: 100vw;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        z-index: 200;
+    }
 }

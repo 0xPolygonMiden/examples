@@ -1,0 +1,33 @@
+#debugger {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: fontSize(small);
+
+    top:10px;
+    right: 10px;
+
+    background: color(bg-secondary);
+    padding: fontSize(tiny);
+
+    font-size: fontSize(small);
+
+    border-radius: fontSize(tiny);
+
+    box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.5);
+
+    z-index: 10;
+
+    &.horizontal {
+        flex-direction: row;
+        height: fontSize(huge-2x);
+
+    }
+
+    &.vertical {
+        flex-direction: column;
+        width: fontSize(huge-2x);
+    }
+
+}

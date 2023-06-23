@@ -1,11 +1,10 @@
 import { useContext, useState } from "react";
+import { ConfigContext } from "../contexts/ConfigProvider";
+import { exampleCode } from "../utils/constants";
 import Nav from "../components/Nav";
 import Widget from "../components/Widget";
 import WidgetPile from "../components/WidgetPile";
-import { ConfigContext } from "../contexts/ConfigProvider";
-import InstructionTable from "./InstructionTable";
-import MidenEditor from "../components/CodingEnvironment/MidenCode";
-import { exampleCode } from "../utils/constants";
+import Editor from "../components/widgets/Editor";
 
 
 const CodingEnvironment = () => {
@@ -18,18 +17,13 @@ const CodingEnvironment = () => {
             <div className="container">
                 <div className="widget-pile-container">
                     <WidgetPile>
-                        {widgets.editor.visible &&
-                            <Widget name="editor" collapsible={true} collapsed={false} >
-                                <Widget.Header name="Editor">
-                                    <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
-                                    <button id="debugbtn">Debug</button>
-                                    <button className="active">Prove</button>
-                                </Widget.Header>
-                                <Widget.Body>
-                                    <MidenEditor value={code} onChange={setCode} theme={darkmode ? 'dark' : 'light'} />
-                                </Widget.Body>
-                            </Widget>
-                        }
+                        {widgets.editor.visible && <Editor
+                            value={code}
+                            onChange={setCode}
+                            height="100%"
+                            theme={darkmode ? 'dark' : 'light'}
+                        
+                        />}
                     </WidgetPile>
                     <div className="input-output">
                         <div className="input">

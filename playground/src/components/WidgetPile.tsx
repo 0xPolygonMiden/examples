@@ -2,11 +2,12 @@ import { ReactNode } from "react"
 
 type WidgetPileProps = {
     children: ReactNode
+    expanded?: boolean
 }
 
-const WidgetPile = ({children}: WidgetPileProps) => {
+const WidgetPile = ({children, expanded}: WidgetPileProps) => {
     return <>
-        <div className="widget-pile">
+        <div className={`widget-pile ${expanded && 'expanded'}`}>
             {children}
         </div>
     </>;

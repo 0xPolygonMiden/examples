@@ -20,9 +20,18 @@ nav {
         &:first-of-type {
             margin-left: clamp(0px, 10vw, 30px);
         }
+
+
+        &.active {
+            color: color(primary);
+
+            &::before {
+                border-color: color(secondary);
+                width: 100%;
+                left: 0px;
+            }
+        }
     }
 
-    a.active {
-        color: color(primary);
-    }
+
 }
