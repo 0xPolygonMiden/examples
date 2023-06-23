@@ -1,0 +1,59 @@
+
+@use 'sass:color';
+
+
+#config-theme[data-theme="dark"] {
+    
+    --color-primary: #{$base-color-primary};
+    --color-primary-tier2: #{$base-color-primary-tier2};
+    --color-primary-tier3: #{$base-color-primary-tier3};
+
+    --color-secondary: #{$base-color-secondary};
+    --color-secondary-tier2: #{$base-color-secondary-tier2};
+    --color-secondary-tier3: #{$base-color-secondary-tier3};
+
+    --color-tertiary: #{$base-color-tertiary};
+    --color-tertiary-tier2: #{$base-color-tertiary-tier2};
+    --color-tertiary-tier3: #{$base-color-tertiary-tier3};
+
+    --color-popover-text: #{color.change($base-color-primary, $lightness: 100%)};
+    --color-popover-bg: #{$base-color-secondary};
+
+
+    --color-bg: #{$base-color-bg};
+    --color-bg-secondary: #{$base-color-bg-secondary};
+    --color-bg-tertiary: #{$base-color-bg-tertiary};
+
+    --color-gradient-primary: linear-gradient(135deg, #{$base-color-gradient-primary}, #{color.change($base-color-gradient-primary, $alpha: 0)});
+
+    --color-border: #{$base-color-border};
+    --color-border-tier2: #{$base-color-border-tier2};
+
+}
+
+#config-theme[data-theme="light"] {
+    --color-primary: #{color.invert($base-color-primary, 100%)};
+    --color-primary-tier2: #{color.invert($base-color-primary-tier2, 100%)};
+    --color-primary-tier3: #{color.invert($base-color-primary-tier3, 100%)};
+
+    --color-bg: #{color.invert($base-color-bg, 100%)};
+    --color-bg-secondary: #{color.invert($base-color-bg-secondary, 100%)};
+    --color-bg-tertiary: #{color.invert($base-color-bg-tertiary, 100%)};
+
+    --color-secondary: #{$base-color-secondary};
+    --color-secondary-tier2: #{color.adjust($base-color-secondary-tier2, $lightness: -20%)};
+    --color-secondary-tier3: #{color.adjust($base-color-secondary-tier3, $lightness: -30%)};
+
+    --color-popover-text: #{color.change($base-color-primary, $lightness: 100%)};
+    --color-popover-bg: #{$base-color-secondary};
+
+    --color-tertiary: #{$base-color-tertiary};
+    --color-tertiary-tier2: #{$base-color-tertiary-tier2};
+    --color-tertiary-tier3: #{$base-color-tertiary-tier3};
+
+    --color-gradient-primary: linear-gradient(135deg, #{color.invert($base-color-gradient-primary, 100%)}, #{color.change(color.invert($base-color-gradient-primary, 100%), $alpha: 0)});
+
+    --color-border: #{color.invert($base-color-border, 100%)};
+    --color-border-tier2: #{color.invert($base-color-border-tier2, 100%)};
+
+}

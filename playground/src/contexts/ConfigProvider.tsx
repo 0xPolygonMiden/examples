@@ -6,6 +6,8 @@ type ConfigContextType = {
     showConfigWindow: boolean;
     enableConfigWindow: boolean;
     setDefaultConfig: () => void;
+    showPopovers: boolean;
+    disablePopovers: () => void;
 }
 
 type ProviderProps = {
@@ -17,10 +19,16 @@ export const ConfigContext = createContext<ConfigContextType>({} as ConfigContex
 export const ConfigProvider = ({ children }: ProviderProps) => {
     const [darkmode, setDarkmode] = useState(localStorage.getItem('darkmode') === 'false' ? false : true);
     const [enableConfigWindow, setEnableConfigWindow] = useState(localStorage.getItem('enableConfigWindow') === 'true' ? true: false); 
+    const [showPopovers, setShowPopovers] = useState(localStorage.getItem('showPopovers') === 'false' ? false: true);
     const [showConfigWindow, setShowConfigWindow] = useState(false);
 
     const setDefaultConfig = () => {
         localStorage.clear();
+    }
+
+    const disablePopovers = () => {
+        localStorage.setItem('showPopovers', 'false');
+        setShowPopovers(false);
     }
 
     const toggleDarkmode = () => {
@@ -29,7 +37,6 @@ export const ConfigProvider = ({ children }: ProviderProps) => {
         setDarkmode(newState);
     }
 
-    //create a global function to enable config window accessible from the browser console
     (window as any).enableConfigWindow = () => {
         localStorage.setItem('enableConfigWindow', 'true');
         setEnableConfigWindow(true);
@@ -45,9 +52,13 @@ export const ConfigProvider = ({ children }: ProviderProps) => {
                 toggleDarkmode,
                 showConfigWindow,
                 enableConfigWindow,
-                setDefaultConfig
+                setDefaultConfig,
+                showPopovers,
+                disablePopovers
             }}>
-            {children}
+            <div id="config-theme" data-theme={darkmode ? 'dark' : 'light'}>
+                {children}
+            </div>
         </ConfigContext.Provider>
     );
 }

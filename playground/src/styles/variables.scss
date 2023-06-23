@@ -8,24 +8,24 @@ $base-color-stroke: hsl(253, 10%, 18%);
 $base-color-button: hsl(0, 0%, 5%);
 $base-color-gradient-primary: hsl(249, 13%, 11%);
 
-$color-primary: $base-color-primary;
-$color-primary-tier2: color.change($base-color-primary, $saturation: 10%,  $lightness: 60%);
-$color-primary-tier3: color.change($base-color-primary, $saturation: 5%, $lightness: 30%);
+$base-color-primary: $base-color-primary;
+$base-color-primary-tier2: color.change($base-color-primary, $saturation: 10%,  $lightness: 60%);
+$base-color-primary-tier3: color.change($base-color-primary, $saturation: 5%, $lightness: 30%);
 
-$color-secondary: $base-color-secondary;
-$color-secondary-tier2: color.change($base-color-secondary, $lightness: 38%);
-$color-secondary-tier3: color.change($base-color-secondary, $lightness: 80%);
+$base-color-secondary: $base-color-secondary;
+$base-color-secondary-tier2: color.change($base-color-secondary, $lightness: 38%);
+$base-color-secondary-tier3: color.change($base-color-secondary, $lightness: 80%);
 
-$color-tertiary: $base-color-tertiary;
-$color-tertiary-tier2: color.change($base-color-tertiary, $lightness: 38%);
-$color-tertiary-tier3: color.change($base-color-tertiary, $lightness: 80%);
+$base-color-tertiary: $base-color-tertiary;
+$base-color-tertiary-tier2: color.change($base-color-tertiary, $lightness: 38%);
+$base-color-tertiary-tier3: color.change($base-color-tertiary, $lightness: 80%);
 
-$color-bg: $base-color-bg;
-$color-bg-secondary: color.change($base-color-bg, $lightness: 20%);
-$color-bg-tertiary: color.change($base-color-bg, $lightness: 40%);
+$base-color-bg: $base-color-bg;
+$base-color-bg-secondary: color.change($base-color-bg, $lightness: 20%);
+$base-color-bg-tertiary: color.change($base-color-bg, $lightness: 40%);
 
-$color-border: $base-color-stroke;
-$color-border-tier2: color.change($base-color-stroke, $lightness: 5%);
+$base-color-border: $base-color-stroke;
+$base-color-border-tier2: color.change($base-color-stroke, $lightness: 5%);
 
 $breakpoint-mobile-small: 320px;
 $breakpoint-mobile-medium: 375px;
@@ -34,118 +34,3 @@ $breakpoint-tablet: 768px;
 $breakpoint-laptop: 1024px;
 $breakpoint-laptop-large: 1440px;
 
-
-[data-theme="dark"] {
-    --color-primary: #{$color-primary};
-    --color-primary-tier2: #{$color-primary-tier2};
-    --color-primary-tier3: #{$color-primary-tier3};
-
-    --color-secondary: #{$color-secondary};
-    --color-secondary-tier2: #{$color-secondary-tier2};
-    --color-secondary-tier3: #{$color-secondary-tier3};
-
-    --color-tertiary: #{$color-tertiary};
-    --color-tertiary-tier2: #{$color-tertiary-tier2};
-    --color-tertiary-tier3: #{$color-tertiary-tier3};
-
-    --color-bg: #{$color-bg};
-    --color-bg-secondary: #{$color-bg-secondary};
-    --color-bg-tertiary: #{$color-bg-tertiary};
-
-    --color-gradient-primary: linear-gradient(135deg, #{$base-color-gradient-primary}, #{color.change($base-color-gradient-primary, $alpha: 0)});
-
-    --color-border: #{$color-border};
-    --color-border-tier2: #{$color-border-tier2};
-
-}
-
-
-[data-theme="light"] {
-    --color-primary: #{color.invert($color-primary, 100%)};
-    --color-primary-tier2: #{color.invert($color-primary-tier2, 100%)};
-    --color-primary-tier3: #{color.invert($color-primary-tier3, 100%)};
-
-    --color-bg: #{color.invert($color-bg, 100%)};
-    --color-bg-secondary: #{color.invert($color-bg-secondary, 100%)};
-    --color-bg-tertiary: #{color.invert($color-bg-tertiary, 100%)};
-
-    --color-secondary: #{color.adjust($color-secondary, $lightness: -10%)};
-    --color-secondary-tier2: #{color.adjust($color-secondary-tier2, $lightness: -20%)};
-    --color-secondary-tier3: #{color.adjust($color-secondary-tier3, $lightness: -30%)};
-
-    --color-tertiary: #{$color-tertiary};
-    --color-tertiary-tier2: #{$color-tertiary-tier2};
-    --color-tertiary-tier3: #{$color-tertiary-tier3};
-
-    --color-gradient-primary: linear-gradient(135deg, #{color.invert($base-color-gradient-primary, 100%)}, #{color.change(color.invert($base-color-gradient-primary, 100%), $alpha: 0)});
-
-    --color-border: #{color.invert($color-border, 100%)};
-    --color-border-tier2: #{color.invert($color-border-tier2, 100%)};
-
-}
-
-
-:root {
-    
-    --size-tiny: 8px;
-    --size-small: 9px;
-    --size-regular: 11px;
-    --size-large: 13px;
-    --size-huge: 16px;
-    --size-max: 20px;
-
-    --size-vw-regular: 1.5vw;
-
-    --font-size-tiny: clamp(var(--size-tiny), var(--size-vw-regular), var(--size-small));
-    --font-size-small: clamp(var(--size-small), var(--size-vw-regular), var(--size-regular));
-    --font-size-regular: clamp(var(--size-regular), var(--size-vw-regular), var(--size-large));
-    --font-size-large: clamp(var(--size-large), var(--size-vw-regular), var(--size-huge));
-    --font-size-huge: clamp(var(--size-huge), var(--size-vw-regular), var(--size-max));
-
-    --font-size-tiny-2x: clamp(calc(var(--size-tiny) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-small) * 2));
-    --font-size-small-2x: clamp(calc(var(--size-small) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-regular) * 2));
-    --font-size-regular-2x: clamp(calc(var(--size-regular) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-large) * 2));
-    --font-size-large-2x: clamp(calc(var(--size-large) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-huge) * 2));
-    --font-size-huge-2x: clamp(calc(var(--size-huge) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-max) * 2));
-
-    --font-size-tiny-3x: clamp(calc(var(--size-tiny) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-small) * 3));
-    --font-size-small-3x: clamp(calc(var(--size-small) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-regular) * 3));
-    --font-size-regular-3x: clamp(calc(var(--size-regular) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-large) * 3));
-    --font-size-large-3x: clamp(calc(var(--size-large) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-huge) * 3));
-    --font-size-huge-3x: clamp(calc(var(--size-huge) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-max) * 3));
-
-    --font-weight-thin: 100;
-    --font-weight-light: 300;
-    --font-weight-regular: 400;
-    --font-weight-bold: 700;
-    --font-weight-black: 900;
-
-    --padding-fixed-2px: 2px;
-    --padding-fixed-4px: 4px;
-    --padding-tiny: var(--font-size-tiny);
-    --padding-small: var(--font-size-small);
-    --padding-regular: var(--font-size-regular);
-    --padding-large: var(--font-size-large);
-    --padding-huge: var(--font-size-huge);
-
-    --margin-tiny: var(--font-size-tiny);
-    --margin-small: var(--font-size-small);
-    --margin-regular: var(--font-size-regular);
-    --margin-large: var(--font-size-large);
-    --margin-huge: var(--font-size-huge);
-
-    --border-radius-tiny: var(--font-size-tiny);
-    --border-radius-small: var(--font-size-small);
-    --border-radius-regular: var(--font-size-regular);
-    --border-radius-large: var(--font-size-large);
-    --border-radius-huge: var(--font-size-huge);
-    --border-radius-circle: 50%;
-
-    --breakpoint-mobile-small: #{$breakpoint-mobile-small};
-    --breakpoint-mobile-medium: #{$breakpoint-mobile-medium};
-    --breakpoint-mobile-large: #{$breakpoint-mobile-large};
-    --breakpoint-tablet: #{$breakpoint-tablet};
-    --breakpoint-laptop: #{$breakpoint-laptop};
-    --breakpoint-laptop-large: #{$breakpoint-laptop-large};
-    
-}

@@ -1,10 +1,61 @@
+@use 'sass:color';
+
+
 .popover {
-    background-color: white;
-    color: black;
+    position:absolute;
+    background-color: color(popover-bg);
     padding:10px;
-    border: 1px solid black;
+    border-radius: borderRadius(tiny);
+    display: none;
+
+    &.enabled {
+        display: block;
+    }
+    
+    * {
+        color: color(popover-text);
+    }
+
+    .header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:10px;
+        padding-bottom:10px;
+        border-bottom: 1px solid color(border);
+        padding: fontSize(tiny);
+        padding-top:0px;
+
+        .operations * {
+            cursor: pointer;
+
+        }
+        .operations *:last-child {
+            margin-left:10px;
+        }
+    }
+
+    .body {
+        padding: 0px fontSize(small);
+        color: color(tertiary);
+
+    }
 }
 
 .popover-element {
-    border:1px solid red;
+    box-shadow: inset 0 0 5px 2px color(secondary);
+    animation: popover-element-illumination 3s infinite ease-in-out;
+}
+
+@keyframes popover-element-illumination {
+    0% {
+        box-shadow: inset 0 0 2px 1px color(secondary);
+    }
+    50% {
+        box-shadow: inset 0 0 5px 3px color(secondary);
+    }
+    100% {
+        box-shadow: inset 0 0 2px 1px color(secondary);
+    }
+
 }

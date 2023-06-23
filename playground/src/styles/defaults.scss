@@ -1,0 +1,63 @@
+:root {
+    --size-tiny: 8px;
+    --size-small: 9px;
+    --size-regular: 11px;
+    --size-large: 13px;
+    --size-huge: 16px;
+    --size-max: 20px;
+
+    --size-vw-regular: 1.5vw;
+
+    --font-size-tiny: clamp(var(--size-tiny), var(--size-vw-regular), var(--size-small));
+    --font-size-small: clamp(var(--size-small), var(--size-vw-regular), var(--size-regular));
+    --font-size-regular: clamp(var(--size-regular), var(--size-vw-regular), var(--size-large));
+    --font-size-large: clamp(var(--size-large), var(--size-vw-regular), var(--size-huge));
+    --font-size-huge: clamp(var(--size-huge), var(--size-vw-regular), var(--size-max));
+
+    --font-size-tiny-2x: clamp(calc(var(--size-tiny) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-small) * 2));
+    --font-size-small-2x: clamp(calc(var(--size-small) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-regular) * 2));
+    --font-size-regular-2x: clamp(calc(var(--size-regular) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-large) * 2));
+    --font-size-large-2x: clamp(calc(var(--size-large) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-huge) * 2));
+    --font-size-huge-2x: clamp(calc(var(--size-huge) * 2), calc(var(--size-vw-regular) * 2), calc(var(--size-max) * 2));
+
+    --font-size-tiny-3x: clamp(calc(var(--size-tiny) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-small) * 3));
+    --font-size-small-3x: clamp(calc(var(--size-small) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-regular) * 3));
+    --font-size-regular-3x: clamp(calc(var(--size-regular) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-large) * 3));
+    --font-size-large-3x: clamp(calc(var(--size-large) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-huge) * 3));
+    --font-size-huge-3x: clamp(calc(var(--size-huge) * 3), calc(var(--size-vw-regular) * 3), calc(var(--size-max) * 3));
+
+    --font-weight-thin: 100;
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
+
+    --padding-fixed-2px: 2px;
+    --padding-fixed-4px: 4px;
+    --padding-tiny: var(--font-size-tiny);
+    --padding-small: var(--font-size-small);
+    --padding-regular: var(--font-size-regular);
+    --padding-large: var(--font-size-large);
+    --padding-huge: var(--font-size-huge);
+
+    --margin-tiny: var(--font-size-tiny);
+    --margin-small: var(--font-size-small);
+    --margin-regular: var(--font-size-regular);
+    --margin-large: var(--font-size-large);
+    --margin-huge: var(--font-size-huge);
+
+    --border-radius-tiny: var(--font-size-tiny);
+    --border-radius-small: var(--font-size-small);
+    --border-radius-regular: var(--font-size-regular);
+    --border-radius-large: var(--font-size-large);
+    --border-radius-huge: var(--font-size-huge);
+    --border-radius-circle: 50%;
+
+    --breakpoint-mobile-small: #{$breakpoint-mobile-small};
+    --breakpoint-mobile-medium: #{$breakpoint-mobile-medium};
+    --breakpoint-mobile-large: #{$breakpoint-mobile-large};
+    --breakpoint-tablet: #{$breakpoint-tablet};
+    --breakpoint-laptop: #{$breakpoint-laptop};
+    --breakpoint-laptop-large: #{$breakpoint-laptop-large};
+    
+}

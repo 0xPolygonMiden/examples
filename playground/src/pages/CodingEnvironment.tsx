@@ -12,7 +12,7 @@ const CodingEnvironment = () => {
                         <Widget name="Test Widget" collapsed={false}>
                             <Widget.Header>
                                 <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
-                                <button>Debug</button>
+                                <button id="debugbtn">Debug</button>
                                 <button className="active">Prove</button>
                             </Widget.Header>
                             <Widget.Body>

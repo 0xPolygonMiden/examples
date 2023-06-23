@@ -1,11 +1,12 @@
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import MainLayout from "./Layouts/MainLayout";
 import CodingEnvironment from "./pages/CodingEnvironment";
 
 const Router = () => {
     return <>
-        <HashRouter>
-            <Routes>
+        <BrowserRouter>
+            
+        <Routes>
                 <Route path="" element={<MainLayout />}>
                     <Route path="" element={<CodingEnvironment />} />
                     {/* <Route path="" element={<CodingEnvironment />} */}
@@ -15,9 +16,10 @@ const Router = () => {
                     <Route path="/explainer" element={<ExplainerPage />} /> */}
                 </Route>
 
-                <Route path="*" element={<p>Path not resolved</p>} />
+                {/* <Route path="*" element={<p>Path not resolved</p>} /> */}
             </Routes>
-        </HashRouter>
+
+        </BrowserRouter>
     </>
 };
 export default Router;

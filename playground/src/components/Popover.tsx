@@ -1,14 +1,18 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 type PopoverProps = {
+    enabled: boolean;
     title: string;
     elementId: string;
     children: ReactNode;
     onClickPrevious?: () => void;
     onClickNext?: () => void;
+    onClickClose?: () => void;
+    hasNext?: boolean;
+    hasPrevious?: boolean;
 }
 
-const Popover = ({title, elementId, children, onClickPrevious, onClickNext}: PopoverProps) => {
+const Popover = ({ title, enabled = false, elementId, children, onClickPrevious, onClickNext, onClickClose, hasNext, hasPrevious}: PopoverProps) => {
     const [element, setElement] = useState<HTMLElement | null>();
     const popoverRef = useRef(null);
 
@@ -19,50 +23,66 @@ const Popover = ({title, elementId, children, onClickPrevious, onClickNext}: Pop
             console.log(
                 `Popover with title "${title}" and elementId "${elementId}" could not find the element with id "${elementId}".`
             );
+
+            console.log(el);
             return;
         }
 
         setElement(el);
-    }, [elementId]);
 
-    if (!element) {
-        return null;
+        if (element && popoverRef.current ) {
+
+            //position the popover next to the element always limited by the viewport
+            const elementRect = element.getBoundingClientRect();
+            const popoverRect = (popoverRef.current as any).getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            const gap = 3;
+
+            let top = elementRect.top + elementRect.height + gap;
+            let left = elementRect.left + elementRect.width / 2;
+
+            if (top + popoverRect.height > viewportHeight) {
+                top = elementRect.top - popoverRect.height - gap;
+            }
+
+            if (left + popoverRect.width > viewportWidth) {
+                left = viewportWidth - popoverRect.width - gap;
+            }
+
+            (popoverRef.current as any).style.top = `${top}px`;
+            (popoverRef.current as any).style.left = `${left}px`;
+
+        }
+
+    }, [element, popoverRef.current]);
+
+    if (!element ) { return null; }
+    if (enabled && element) {
+        //add a border to the element by adding a class
+        element.classList.add('popover-element');
+    } else {
+        //remove the border from the element by removing the class
+        element.classList.remove('popover-element');
     }
 
-    // //add a border to the element by adding a class
-    // element.classList.add('popover-element');
-
-    // //position the popover next to the element always limited by the viewport
-    // const elementRect = element.getBoundingClientRect();
-    // const popoverRect = (popoverRef.current as any).getBoundingClientRect();
-    // const viewportWidth = window.innerWidth;
-    // const viewportHeight = window.innerHeight;
-
-    // let top = elementRect.top + elementRect.height + 10;
-    // let left = elementRect.left + elementRect.width / 2 - popoverRect.width / 2;
-
-    // if (top + popoverRect.height > viewportHeight) {
-    //     top = elementRect.top - popoverRect.height - 10;
-    // }
-
-    // if (left + popoverRect.width > viewportWidth) {
-    //     left = elementRect.left + elementRect.width - popoverRect.width;
-    // }
-
-    // (popoverRef.current as any).style.top = `${top}px`;
-    // (popoverRef.current as any).style.left = `${left}px`;
-
     return <>
-        <div className="popover" ref={popoverRef}>
+        <div className={`popover ${enabled && 'enabled'}`} ref={popoverRef} >
             <div className="header">
                 <span>{title}</span>
-                <div>
-                    <i className="fas fa-chevron-left" onClick={onClickPrevious} />
-                    <i className="fas fa-chevron-right" onClick={onClickNext} />
+                <div className="operations">
+                    {hasPrevious && <i className="fas fa-chevron-left" onClick={onClickPrevious} /> }
+                    {hasNext
+                        ? <i className="fas fa-chevron-right" onClick={onClickNext} /> 
+                        : <i className="fas fa-times" onClick={onClickClose} />
+                    }
                 </div>
             </div>
-            {children}
-        </div>        
+            <div className="body">
+                {children}
+            </div>
+        </div>
     </>;
 };
 
