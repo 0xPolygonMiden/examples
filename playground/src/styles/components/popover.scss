@@ -7,6 +7,7 @@
     padding:10px;
     border-radius: borderRadius(tiny);
     display: none;
+    min-width: 250px;
 
     &.enabled {
         display: block;

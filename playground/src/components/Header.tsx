@@ -22,7 +22,7 @@ const Header = () => {
                 <h1>Polygon Miden <span>Playground</span></h1>
             </div>
             <div className={`menu ${!mobileMenuOpen && 'hidden'}`}>
-                <div className="button"  onClick={toggleDarkmode} >
+                <div className="button"  onClick={toggleDarkmode}>
                     <i className={" fa fa-" + (darkmode ? 'sun' : 'moon')}/>
                 </div>
                 <div className="button">

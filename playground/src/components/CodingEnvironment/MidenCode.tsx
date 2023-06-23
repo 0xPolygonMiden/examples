@@ -10,10 +10,7 @@ type MidenCodeProps = {
 
 const MidenCode = (props: MidenCodeProps): JSX.Element => {
     return (
-        <div className="min-w-0 flex-1 box-border">
-            <EditorLabel label="miden assembly code" />
-            <Editor height="700px" {...props} />
-        </div>
+        <Editor height="300px" {...props} />
     )
 }
 

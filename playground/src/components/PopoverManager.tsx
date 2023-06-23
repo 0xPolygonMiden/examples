@@ -6,19 +6,25 @@ const popovers = [
     {
         title: 'Run',
         elementId: 'runbtn',
-        children: <p>This is one example of something cool!</p>,
+        children: <p>Run your code, stay set and fat.</p>,
     },
     {
         title: 'Debug',
         elementId: 'debugbtn',
-        children: <p>This is another example of something cool!</p>,
+        children: <p>Debug your code and have a great day.</p>,
     },
+    {
+        title: 'Toggle Instructions',
+        elementId: 'show-instructions',
+        children: <p>Toggle the instructions. You know you'll need them.</p>,
+
+    }
 ]
 
 const PopoverManager = () => {
-    const [id, setId] = useState(0);
-    const [hide, setHide] = useState(false);
     const {showPopovers,disablePopovers} = useContext(ConfigContext);
+    const [id, setId] = useState(0);
+    const [hide, setHide] = useState(!showPopovers);
 
     if(!showPopovers) return null;
 
@@ -28,7 +34,7 @@ const PopoverManager = () => {
         setId(id + 1);
         if (id >= total) {
             setId(total);
-            setHide(true);
+            handleLast();
         }
     }
 
@@ -44,7 +50,7 @@ const PopoverManager = () => {
         return true;
     }
     const handleLast = () => {
-        setHide(true);
+        setId(-1);
         disablePopovers();
     }
 
@@ -58,7 +64,7 @@ const PopoverManager = () => {
                     elementId={popover.elementId} 
                     onClickPrevious={handlePrevious} 
                     onClickNext={handleNext}
-                    onClickClose={handleNext}
+                    onClickClose={handleLast}
                     hasNext={id < total - 1}
                     hasPrevious={id > 0}
                 >

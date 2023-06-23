@@ -16,3 +16,11 @@
 @import 'components/widget';
 
 @import 'pages/coding-environment';
+
+
+.input-output {
+    div {
+        padding: padding(small);
+        border-bottom: 1px solid color(border);
+    }
+}

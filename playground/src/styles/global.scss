@@ -50,6 +50,7 @@ a {
     text-decoration: none;
     border: 1px solid transparent;
     z-index: 1;
+    cursor: pointer;
 
     &::before {
         content: "";

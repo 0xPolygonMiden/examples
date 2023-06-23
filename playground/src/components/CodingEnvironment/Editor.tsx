@@ -8,7 +8,7 @@ type EditorProps = {
 };
 
 const Editor = (props: EditorProps): JSX.Element =>
-    <dl className="mt-3 grid grid-cols-1">
+    <dl >
         <CodeMirror
             value={props.value}
             height={props.height}
@@ -26,7 +26,6 @@ const Editor = (props: EditorProps): JSX.Element =>
                 autocompletion: true,
                 highlightActiveLine: true,
             }}
-            className="overflow-hidden rounded-lg bg-white p-2 shadow sm:p-3"
         />
     </dl>
 

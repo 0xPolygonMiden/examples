@@ -1,4 +1,5 @@
-import { Children, ReactNode, cloneElement, useState } from "react";
+import { Children, ReactNode, cloneElement, useContext, useState } from "react";
+import { ConfigContext } from "../contexts/ConfigProvider";
 
 type WidgetProps = {
     children?: ReactNode,
@@ -6,10 +7,10 @@ type WidgetProps = {
     collapsible?: boolean,
     collapsed?: boolean,
     onToggleCollapsed?: () => void,
+    hidden?: boolean,
 }
 
 const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: WidgetProps) => {
-
     return <>
         <div className="widget-header">
             <div>
@@ -47,8 +48,9 @@ const Footer = ({ children }: WidgetProps) => {
     </>
 }
 
-const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true }: WidgetProps) => {
+const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true, hidden = false }: WidgetProps) => {
     const [collapsedState, setCollapsedState] = useState(collapsed);
+    const {widgets} = useContext(ConfigContext);
 
     const toggleCollapsed = () => setCollapsedState(!collapsedState);
     
@@ -57,9 +59,9 @@ const Widget = ({ children, name = "Widget", collapsible = true, collapsed = tru
     const footer = Children.toArray(children).find(child => (child as any).type === Footer);
 
     return <>
-        <div className={`widget ${collapsedState && 'collapsed'}`}>
+        <div className={`widget ${collapsedState && 'collapsed'}`} >
             {header 
-                ? cloneElement(header as any, { name, collapsible, onToggleCollapsed: toggleCollapsed }) 
+                ? cloneElement(header as any, { collapsible, collapsed: collapsedState,  onToggleCollapsed: toggleCollapsed }) 
                 : <Header name={name} collapsible={collapsible} collapsed={collapsedState} onToggleCollapsed={toggleCollapsed} />
             }
             {body 

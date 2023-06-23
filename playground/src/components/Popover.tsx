@@ -48,7 +48,7 @@ const Popover = ({ title, enabled = false, elementId, children, onClickPrevious,
             }
 
             if (left + popoverRect.width > viewportWidth) {
-                left = viewportWidth - popoverRect.width - gap;
+                left = viewportWidth - 250 ;
             }
 
             (popoverRef.current as any).style.top = `${top}px`;
