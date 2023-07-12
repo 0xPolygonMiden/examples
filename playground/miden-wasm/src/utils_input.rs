@@ -1,5 +1,5 @@
 use miden_vm::{
-    crypto::MerkleStore,
+    crypto::{MerkleStore, MerkleTree, SimpleSmt},
     math::{Felt, FieldElement},
     utils::collections::BTreeMap,
     AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs, Word,
@@ -145,15 +145,18 @@ impl InputFile {
             match data {
                 MerkleData::MerkleTree(data) => {
                     let leaves = Self::parse_merkle_tree(data)?;
-                    merkle_store
-                        .add_merkle_tree(leaves)
+                    let merkle_tree = MerkleTree::new(leaves)
                         .map_err(|e| format!("failed to add merkle tree to merkle store - {e}"))?;
+                    merkle_store.extend(merkle_tree.inner_nodes());
                 }
                 MerkleData::SparseMerkleTree(data) => {
                     let entries = Self::parse_sparse_merkle_tree(data)?;
-                    merkle_store.add_sparse_merkle_tree(entries).map_err(|e| {
-                        format!("failed to add sparse merkle tree to merkle store - {e}")
-                    })?;
+                    // TODO: Support variable depth
+                    let smt =
+                        SimpleSmt::with_leaves(SimpleSmt::MAX_DEPTH, entries).map_err(|e| {
+                            format!("failed to add sparse merkle tree to merkle store - {e}")
+                        })?;
+                    merkle_store.extend(smt.inner_nodes());
                 }
             }
         }

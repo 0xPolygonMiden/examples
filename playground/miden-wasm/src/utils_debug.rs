@@ -43,9 +43,6 @@ impl DebugExecutor {
     /// Returns an error if the command cannot be parsed.
     #[wasm_bindgen(constructor)]
     pub fn new(code_frontend: &str, inputs_frontend: &str) -> Result<DebugExecutor, String> {
-        // Todo: remove this once we have a better way to handle panics in wasm
-        console_error_panic_hook::set_once();
-
         let mut program = MidenProgram::new(code_frontend, DEBUG_ON);
         program.compile_program().unwrap();
 

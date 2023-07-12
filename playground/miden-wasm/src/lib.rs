@@ -1,9 +1,10 @@
+mod transaction;
 mod utils_debug;
 mod utils_input;
 mod utils_program;
+use miden_tx::{mock::MockDataStore, TransactionExecutor};
 use miden_vm::{ExecutionProof, ProofOptions};
 use wasm_bindgen::prelude::*;
-extern crate console_error_panic_hook;
 
 #[wasm_bindgen(getter_with_clone)]
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -17,8 +18,6 @@ pub struct Outputs {
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
 pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
-    console_error_panic_hook::set_once();
-
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
         .compile_program()
@@ -49,8 +48,6 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
 /// Proves the program with the given inputs
 #[wasm_bindgen]
 pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
-    console_error_panic_hook::set_once();
-
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
         .compile_program()
@@ -62,7 +59,7 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outpu
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
-    let proof_options = ProofOptions::with_96_bit_security();
+    let proof_options = ProofOptions::default();
 
     let stack_input_cloned = inputs.stack_inputs.clone();
     let (output, proof) = miden_vm::prove(
@@ -99,8 +96,6 @@ pub fn verify_program(
     outputs_frontend: &str,
     proof: Vec<u8>,
 ) -> Result<u32, JsValue> {
-    console_error_panic_hook::set_once();
-
     // we need to get the program info from the program
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
@@ -129,6 +124,15 @@ pub fn verify_program(
 
     Ok(result)
 }
+
+#[wasm_bindgen]
+pub fn prepare_transaction() -> Result<(), JsValue> {
+    let data_store = MockDataStore::new();
+    Ok(())
+}
+
+// TESTS
+// ================================================================================================
 
 /// Basic tests for the Rust part
 /// Tests are run with `cargo test`
