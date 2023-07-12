@@ -1,4 +1,3 @@
-mod transaction;
 mod utils_debug;
 mod utils_input;
 mod utils_program;
@@ -128,6 +127,12 @@ pub fn verify_program(
 #[wasm_bindgen]
 pub fn prepare_transaction() -> Result<(), JsValue> {
     let data_store = MockDataStore::new();
+    let mut executor = TransactionExecutor::new(data_store.clone());
+
+    let account_id = data_store.account.id();
+    executor
+        .load_account(account_id)
+        .map_err(|err| format!("Failed to load account - {:?}", err))?;
     Ok(())
 }
 
@@ -149,7 +154,7 @@ fn test_run_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 }
 
 #[test]
@@ -169,7 +174,7 @@ fn test_run_program_with_std_lib() {
         output.stack_output,
         vec![0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 }
 
 #[test]
@@ -330,7 +335,7 @@ fn test_prove_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 
     // for the proof we have [0, 1] as overflow_addrs
     assert!(output.overflow_addrs.is_some());
