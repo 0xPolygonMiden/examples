@@ -1,9 +1,16 @@
 mod utils_debug;
 mod utils_input;
 mod utils_program;
-use miden_objects::{notes::Note, transaction::PreparedTransaction};
-use miden_tx::{mock::MockDataStore, TransactionExecutor};
-use miden_vm::{crypto::RpoDigest, math::StarkField, ExecutionProof, ProofOptions, Word};
+use miden_objects::{
+    notes::Note,
+    transaction::{PreparedTransaction, ProvenTransaction},
+};
+use miden_tx::{mock::MockDataStore, TransactionExecutor, TransactionProver};
+use miden_vm::{
+    crypto::RpoDigest,
+    math::{Felt, StarkField},
+    ExecutionProof, ProofOptions, Word,
+};
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::Serializer;
 use wasm_bindgen::prelude::*;
@@ -226,6 +233,87 @@ pub fn prepare_transaction() -> Result<JsValue, JsValue> {
 
     let serializer = Serializer::new().serialize_large_number_types_as_bigints(true);
     Ok(result.serialize(&serializer)?)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WasmProvenTransaction {
+    pub account_id: u64,
+    pub initial_account_hash: Vec<u64>,
+    pub final_account_hash: Vec<u64>,
+    pub consumed_notes: Vec<Vec<u64>>,
+    pub created_notes: Vec<Vec<u64>>,
+    pub tx_script_root: Option<Vec<u64>>,
+    pub proof: Vec<u8>,
+}
+
+impl From<ProvenTransaction> for WasmProvenTransaction {
+    fn from(proven_transaction: ProvenTransaction) -> WasmProvenTransaction {
+        let consumed_notes = proven_transaction
+            .consumed_notes()
+            .iter()
+            .map(|x| {
+                Into::<[Felt; 8]>::into(*x)
+                    .iter()
+                    .map(|x| x.as_int())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let created_notes = proven_transaction
+            .created_notes()
+            .iter()
+            .map(|x| {
+                Into::<[Felt; 8]>::into(*x)
+                    .iter()
+                    .map(|x| x.as_int())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        WasmProvenTransaction {
+            account_id: proven_transaction.account_id().into(),
+            initial_account_hash: Into::<Digest>::into(proven_transaction.initial_account_hash())
+                .into(),
+            final_account_hash: Into::<Digest>::into(proven_transaction.final_account_hash())
+                .into(),
+            consumed_notes,
+            created_notes,
+            tx_script_root: proven_transaction
+                .tx_script_root()
+                .and_then(|x| Some(Into::<Digest>::into(x).into())),
+            proof: proven_transaction.proof().to_bytes(),
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn prove_transaction() -> Result<JsValue, JsValue> {
+    let data_store = MockDataStore::new();
+    let mut executor = TransactionExecutor::new(data_store.clone());
+
+    let account_id = data_store.account.id();
+    executor
+        .load_account(account_id)
+        .map_err(|err| format!("Failed to load account - {:?}", err))?;
+
+    let block_ref = data_store.block_header.block_num().as_int() as u32;
+    let note_origins = data_store
+        .notes
+        .iter()
+        .map(|note| note.proof().as_ref().unwrap().origin().clone())
+        .collect::<Vec<_>>();
+
+    let prepared_transaction = executor
+        .prepare_transaction(data_store.account.id(), block_ref, &note_origins, None)
+        .map_err(|err| format!("Failed to prepare transaction - {:?}", err))?;
+
+    let prover = TransactionProver::new(ProofOptions::default());
+    let proven_transaction: WasmProvenTransaction = prover
+        .prove_prepared_transaction(prepared_transaction)
+        .map_err(|e| format!("Failed to prove prepared transaction - {:?}", e))?
+        .into();
+
+    let serializer = Serializer::new().serialize_large_number_types_as_bigints(true);
+    Ok(proven_transaction.serialize(&serializer)?)
 }
 
 // TESTS
