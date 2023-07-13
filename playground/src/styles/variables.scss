@@ -8,6 +8,7 @@ $base-color-stroke: hsl(253, 10%, 18%);
 $base-color-button: hsl(0, 0%, 5%);
 $base-color-gradient-primary: hsl(249, 13%, 11%);
 
+
 $base-color-primary: $base-color-primary;
 $base-color-primary-tier2: color.change($base-color-primary, $saturation: 10%,  $lightness: 60%);
 $base-color-primary-tier3: color.change($base-color-primary, $saturation: 5%, $lightness: 30%);
