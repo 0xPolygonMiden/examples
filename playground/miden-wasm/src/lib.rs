@@ -1,12 +1,15 @@
 mod utils_debug;
 mod utils_input;
 mod utils_program;
+use miden_objects::{notes::Note, transaction::PreparedTransaction};
 use miden_tx::{mock::MockDataStore, TransactionExecutor};
-use miden_vm::{ExecutionProof, ProofOptions};
+use miden_vm::{crypto::RpoDigest, math::StarkField, ExecutionProof, ProofOptions, Word};
+use serde::{Deserialize, Serialize};
+use serde_wasm_bindgen::Serializer;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(getter_with_clone)]
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Outputs {
     pub stack_output: Vec<u64>,
     pub trace_len: Option<usize>,
@@ -124,8 +127,83 @@ pub fn verify_program(
     Ok(result)
 }
 
+pub struct Digest(pub Vec<u64>);
+
+impl From<RpoDigest> for Digest {
+    fn from(digest: RpoDigest) -> Self {
+        Digest(digest.into_iter().map(|n| n.as_int()).collect::<Vec<_>>())
+    }
+}
+
+impl From<Digest> for Vec<u64> {
+    fn from(digest: Digest) -> Self {
+        digest.0
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WasmPreparedTransaction {
+    pub account_id: u64,
+    pub block_hash: Vec<u64>,
+    pub block_number: u32,
+    pub consumed_notes: Vec<WasmNote>,
+    pub tx_script_root: Option<Vec<u64>>,
+    pub tx_program_root: Vec<u64>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WasmNote {
+    pub script_root: Vec<u64>,
+    pub inputs_hash: Vec<u64>,
+    pub vault_hash: Vec<u64>,
+    pub assets: Vec<Vec<u64>>,
+    pub serial_num: Vec<u64>,
+    pub metadata: Vec<u64>,
+}
+
+impl From<&Note> for WasmNote {
+    fn from(note: &Note) -> Self {
+        let assets = note
+            .vault()
+            .iter()
+            .map(|x| {
+                Word::from(*x)
+                    .iter()
+                    .map(|x| x.as_int())
+                    .collect::<Vec<u64>>()
+            })
+            .collect();
+        Self {
+            script_root: Into::<Digest>::into(note.script().hash()).into(),
+            inputs_hash: Into::<Digest>::into(note.inputs().hash()).into(),
+            vault_hash: Into::<Digest>::into(note.vault().hash()).into(),
+            assets,
+            serial_num: note.serial_num().into_iter().map(|x| x.as_int()).collect(),
+            metadata: Into::<Word>::into(note.metadata())
+                .into_iter()
+                .map(|x| x.as_int())
+                .collect(),
+        }
+    }
+}
+
+impl From<PreparedTransaction> for WasmPreparedTransaction {
+    fn from(tx: PreparedTransaction) -> Self {
+        Self {
+            account_id: tx.account().id().into(),
+            block_hash: Into::<Digest>::into(tx.block_header().hash()).into(),
+            block_number: tx.block_header().block_num().as_int() as u32,
+            consumed_notes: tx.consumed_notes().notes().iter().map(Into::into).collect(),
+            tx_script_root: tx
+                .tx_script_root()
+                .and_then(|x| Some(Into::<Digest>::into(x).into())),
+            tx_program_root: Into::<Digest>::into(tx.tx_program().root().hash()).into(),
+        }
+    }
+}
+
 #[wasm_bindgen]
-pub fn prepare_transaction() -> Result<(), JsValue> {
+pub fn prepare_transaction() -> Result<JsValue, JsValue> {
     let data_store = MockDataStore::new();
     let mut executor = TransactionExecutor::new(data_store.clone());
 
@@ -133,7 +211,21 @@ pub fn prepare_transaction() -> Result<(), JsValue> {
     executor
         .load_account(account_id)
         .map_err(|err| format!("Failed to load account - {:?}", err))?;
-    Ok(())
+
+    let block_ref = data_store.block_header.block_num().as_int() as u32;
+    let note_origins = data_store
+        .notes
+        .iter()
+        .map(|note| note.proof().as_ref().unwrap().origin().clone())
+        .collect::<Vec<_>>();
+
+    let result: WasmPreparedTransaction = executor
+        .prepare_transaction(data_store.account.id(), block_ref, &note_origins, None)
+        .map_err(|err| format!("Failed to prepare transaction - {:?}", err))?
+        .into();
+
+    let serializer = Serializer::new().serialize_large_number_types_as_bigints(true);
+    Ok(result.serialize(&serializer)?)
 }
 
 // TESTS
