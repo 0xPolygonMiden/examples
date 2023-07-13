@@ -1,4 +1,5 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
+import defaultStorage from "../data/defaultStorage.json";
 
 interface ProviderProps {
     children: React.ReactNode;
@@ -8,71 +9,92 @@ type StorageContextProps = {
     save: (key: string, value: any) => void;
     load: (key: string) => any;
     remove: (key: string) => void;
+    getStorage: (filter: FilterType) => StorageType;
+}
+
+type StorageType = {
+    [key: string]: {
+        name: string;
+        type: string;
+        value: string;
+    }
+}
+
+type FilterType = {
+    name?: string;
+    type?: string;
 }
 
 export const StorageContext = createContext({} as StorageContextProps);
 
 export const StorageProvider = ({ children }: ProviderProps) => {
+    const [storage, setStorage] = useState<StorageType>(JSON.parse(JSON.stringify(defaultStorage)));
     const storageKey = "storage";
-
+    
     useEffect(() => {
-        //if storage doesn't exist, create it
-        if (!localStorage.getItem(storageKey)) {
-            localStorage.setItem(storageKey, JSON.stringify({}));
+        const storageData = localStorage.getItem(storageKey);
+        if (storageData) {
+            setStorage(JSON.parse(storageData));
+        }
     }, []);
 
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(storage));
+    },[storage]);
+
     const save = (key: string, value: any) => {
-        //save to localstorage
-        //return true if saved, false if not
-
-        const storage = localStorage.getItem(storageKey);
-        if (storage) {
-            const parsedStorage = JSON.parse(storage);
-            const newStorage = {
-                ...parsedStorage,
-                [key]: value
-            };
-
-            localStorage.setItem(storageKey, JSON.stringify(newStorage));
-
-            return true;
+        const newStorage = {
+            ...storage,
+            [key]: value
         }
 
-        return false;
+        setStorage(newStorage);
     }
+
     const load = (key: string) => {
-        //load from localstorage
-        //return value
-
-        const storage = localStorage.getItem(storageKey);
-        if (storage) {
-            const parsedStorage = JSON.parse(storage);
-            return parsedStorage[key];
-        }
-
-        return null;
+        return storage[key];
     }
+
     const remove = (key: string) => {
-        //remove from localstorage
-        //return true if removed, false if not
-
-        const storage = localStorage.getItem(storageKey);
-        if (storage) {
-            const parsedStorage = JSON.parse(storage);
-            delete parsedStorage[key];
-
-            localStorage.setItem(storageKey, JSON.stringify(parsedStorage));
-
-            return true;
+        const newStorage = {
+            ...storage
         }
 
-        return false;
+        delete newStorage[key];
+
+        setStorage(newStorage);
+
     }
+
+    const getStorage = (filter: FilterType) => {
+        let newStorage = storage;
+
+        if (filter.name) {
+            const filtered = Object.fromEntries(Object.entries(newStorage).filter(([key, value]) => value.name === filter.name));
+            newStorage = {
+                ...newStorage,
+                ...filtered
+            }
+        }
+
+        if (filter.type) {
+            const filtered = Object.fromEntries(Object.entries(newStorage).filter(([key, value]) => value.type === filter.type));
+            newStorage = {
+                ...newStorage,
+                ...filtered
+            }
+        }
+
+        return newStorage;
+
+    }
+
 
     return <StorageContext.Provider value={{
         save,
         load,
-        remove 
+        remove,
+        getStorage 
     }}>{children}</StorageContext.Provider>;
 }
 
