@@ -1,0 +1,3 @@
+{
+    "fibonacci.wasm": "# Elegant way to calculate the 1000th fibonacci number\n    begin\n        repeat.1000\n            swap\n            dup.1\n            add\n        end\n    end"
+}    

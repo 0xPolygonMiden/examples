@@ -25,13 +25,20 @@ const Editor = (props: EditorProps): JSX.Element => {
     return <>
         <Widget name="editor" collapsible={true} collapsed={false} expanded={expanded} >
             <Widget.Header name="Editor">
-                <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
-                <button id="debugbtn" onClick={handleDebugClick} className={`${isDebugging && 'active'}`}>Debug</button>
-                <button className="active">Prove</button>
-                { expanded 
-                    ? <button className="fas fa-compress" onClick={() => setExpanded(false)} />
-                    : <button className="fas fa-expand" onClick={() => setExpanded(true)} />
-                }
+                <div className="panel">
+                    {/* Save and Load */}
+                    <button className="fas fa-save" />
+                    <button className="fas fa-folder-open" />
+                </div>
+                <div className="panel"> 
+                    <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
+                    <button id="debugbtn" onClick={handleDebugClick} className={`${isDebugging && 'active'}`}>Debug</button>
+                    <button className="active">Prove</button>
+                    { expanded 
+                        ? <button className="fas fa-compress" onClick={() => setExpanded(false)} />
+                        : <button className="fas fa-expand" onClick={() => setExpanded(true)} />
+                    }
+                </div>
             </Widget.Header>
             <Widget.Body>
                 {isDebugging && <Debugger />  }

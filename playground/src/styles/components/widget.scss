@@ -29,6 +29,24 @@
                 color: color(secondary);
             }
         }
+
+
+        .widget-header-panels {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: fontSize(tiny);
+            max-height: 1000px;
+
+            &.hidden {
+                max-height: 0px;
+                opacity: 0;
+            }
+
+        }
+
     }
 
     .widget-body,
@@ -49,10 +67,18 @@
             max-height: 0px;
             overflow: hidden;
         }
+
+        .widget-header .widget-header-panels,
+        .widget-header .widget-header-toggle-panels {
+            max-height: 0px;
+            opacity: 0;
+        }
     }
 
     &.hidden {
-        display: none;
+        // display: none;
+        max-height: 0px;
+        opacity: 0;
     }
 
     &.expanded {

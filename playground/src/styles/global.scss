@@ -74,6 +74,13 @@ a {
 }
 
 
+.expand-on-mobile {
+    
+    @media (max-width: #{$breakpoint-mobile-large}) {
+        flex: 1 1 100%;
+    }
+
+}
 
 .mobile-only {
     display: none;

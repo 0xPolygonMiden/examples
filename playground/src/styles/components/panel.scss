@@ -1,0 +1,19 @@
+.panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: fontSize(tiny);    
+    padding: 0px;
+    border: 0px;
+
+    &.vertical {
+        flex-direction: column;
+    }
+
+    button {
+        margin: 0px;
+        cursor: pointer;
+    }
+}

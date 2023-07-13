@@ -13,9 +13,11 @@ type WidgetProps = {
 }
 
 const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: WidgetProps) => {
+    const [panelsVisible, setPanelsVisible] = useState(true);
+
     return <>
         <div className="widget-header">
-            <div>
+            <div className="widget-header-utils">
                 <h2 className="widget-header-name">{name}</h2>
                 {
                     collapsible && (
@@ -28,7 +30,14 @@ const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: W
                     )
                 }
             </div>
-            <div>{children}</div>
+            {
+                children && (
+                    <div className="widget-header-toggle-panels mobile-only">
+                        <i className="fas fa-bars" onClick={() => setPanelsVisible(!panelsVisible)} />
+                    </div>
+                )
+            }
+            {children && <div className={`widget-header-panels expand-on-mobile ${panelsVisible ? "" : "hidden" }`}>{children}</div> }
         </div>
     </>;
 };
