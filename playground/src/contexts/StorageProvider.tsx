@@ -9,26 +9,15 @@ type StorageContextProps = {
     save: (key: string, value: any) => void;
     load: (key: string) => any;
     remove: (key: string) => void;
-    getStorage: (filter: FilterType) => StorageType;
+    getStorage: (filter: Filter) => Storage;
 }
 
-type StorageType = {
-    [key: string]: {
-        name: string;
-        type: string;
-        value: string;
-    }
-}
 
-type FilterType = {
-    name?: string;
-    type?: string;
-}
 
 export const StorageContext = createContext({} as StorageContextProps);
 
 export const StorageProvider = ({ children }: ProviderProps) => {
-    const [storage, setStorage] = useState<StorageType>(JSON.parse(JSON.stringify(defaultStorage)));
+    const [storage, setStorage] = useState<Storage>(JSON.parse(JSON.stringify(defaultStorage)));
     const storageKey = "storage";
     
     useEffect(() => {
@@ -66,7 +55,7 @@ export const StorageProvider = ({ children }: ProviderProps) => {
 
     }
 
-    const getStorage = (filter: FilterType) => {
+    const getStorage = (filter: Filter) => {
         let newStorage = storage;
 
         if (filter.name) {
