@@ -1,15 +1,17 @@
 import { createContext, useEffect, useState } from "react";
-import defaultStorage from "../data/defaultStorage.json";
+import LocalStorage from "../plugins/StoragePlugins/LocalStorage";
 
 interface ProviderProps {
     children: React.ReactNode;
 }
 
 type StorageContextProps = {
-    save: (key: string, value: any) => void;
-    load: (key: string) => any;
-    remove: (key: string) => void;
-    getStorage: (filter: Filter) => Storage;
+    listPlugins: () => StoragePlugin[];
+    addPlugin: (plugin: StoragePlugin) => void;
+    list: (plugin: number) => string[];
+    get: (plugin: number, key: string) => string;
+    save: (plugin: number, key: string, content: string) => boolean;
+    remove: (plugin: number, key: string) => boolean;
 }
 
 
@@ -17,75 +19,31 @@ type StorageContextProps = {
 export const StorageContext = createContext({} as StorageContextProps);
 
 export const StorageProvider = ({ children }: ProviderProps) => {
-    const [storage, setStorage] = useState<Storage>(JSON.parse(JSON.stringify(defaultStorage)));
-    const [plugins, setPlugins] = useState<StoragePlugin[]>([]); 
-    const storageKey = "storage";
-    
-    useEffect(() => {
-        const storageData = localStorage.getItem(storageKey);
-        if (storageData) {
-            setStorage(JSON.parse(storageData));
-        }
-    }, []);
+    const [plugins, setPlugins] = useState<StoragePlugin[]>([
+        new LocalStorage()
+    ]); 
 
     useEffect(() => {
-        localStorage.setItem(storageKey, JSON.stringify(storage));
-    },[storage]);
+        console.log("StorageProvider: ", plugins);
+    }, [plugins]);
 
-    const save = (key: string, value: any) => {
-        const newStorage = {
-            ...storage,
-            [key]: value
-        }
+    const listPlugins = () => { return plugins }
+    const addPlugin = (plugin: StoragePlugin) => {return false}
+    const list = (plugin: number) => { return [] }
+    const get = (plugin: number, key: string) => { return "" }
+    const save = (plugin: number, key: string, content: string) => { return false }
+    const remove = (plugin: number, key: string) => { return false }
 
-        setStorage(newStorage);
-    }
-
-    const load = (key: string) => {
-        return storage[key];
-    }
-
-    const remove = (key: string) => {
-        const newStorage = {
-            ...storage
-        }
-
-        delete newStorage[key];
-
-        setStorage(newStorage);
-
-    }
-
-    const getStorage = (filter: Filter) => {
-        let newStorage = storage;
-
-        if (filter.name) {
-            const filtered = Object.fromEntries(Object.entries(newStorage).filter(([key, value]) => value.name === filter.name));
-            newStorage = {
-                ...newStorage,
-                ...filtered
-            }
-        }
-
-        if (filter.type) {
-            const filtered = Object.fromEntries(Object.entries(newStorage).filter(([key, value]) => value.type === filter.type));
-            newStorage = {
-                ...newStorage,
-                ...filtered
-            }
-        }
-
-        return newStorage;
-
-    }
-
-
-    return <StorageContext.Provider value={{
-        save,
-        load,
-        remove,
-        getStorage 
-    }}>{children}</StorageContext.Provider>;
+    return (
+        <StorageContext.Provider value={{ 
+            listPlugins,
+            addPlugin,
+            list,
+            get,
+            save,
+            remove
+        }}> {children} </StorageContext.Provider>
+    );
 }
 
 export default StorageProvider;

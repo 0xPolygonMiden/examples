@@ -20,7 +20,7 @@ const Editor = (props: EditorProps) => {
     const [showLoadStorageDialog, setShowLoadStorageDialog] = useState(false);
     const [filename, setFilename] = useState("");
     const [content, setContent] = useState(props.value);
-    const {save, load} = useContext(StorageContext);
+    const {save, get} = useContext(StorageContext);
     const editorRef = useRef(null);
 
     const handleDebugClick = () => {
@@ -33,7 +33,8 @@ const Editor = (props: EditorProps) => {
         if(filename === "") {
             setShowSaveStorageDialog(true);
         } else {
-            const status = save(filename, props.value);
+            //TODO - add save functionality
+            // const status = save(filename, props.value);
         }
     }
 
@@ -99,8 +100,9 @@ const Editor = (props: EditorProps) => {
                 onOk={
                     filename => {
                         setFilename(filename);
-                        save(filename, props.value);
-                        
+                        //TODO
+                        //save(filename, props.value);
+
                         setShowSaveStorageDialog(false);
                     }
                 }
@@ -121,7 +123,8 @@ const Editor = (props: EditorProps) => {
                         setFilename(filename);
                         setShowLoadStorageDialog(false);
 
-                        const content = load(filename);
+                        //TODO
+                        //const content = load(filename);
                         setContent(content);
 
                         props.onChange(content);
