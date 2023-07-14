@@ -1,6 +1,6 @@
 import CodeMirror, { ReactCodeMirrorProps } from "@uiw/react-codemirror";
 import Widget from "../Widget";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import Debugger from "./Debugger";
 import StorageDialog from "../StorageDialog";
 import { StorageContext } from "../../contexts/StorageProvider";
@@ -16,7 +16,8 @@ const Editor = (props: EditorProps) => {
     const [expanded, setExpanded] = useState(false);
     const [codeMirrorHeight, setCodeMirrorHeight] = useState("100%");
     const [isDebugging, setIsDebugging] = useState(false);
-    const [showStorageDialog, setShowStorageDialog] = useState(false);
+    const [showSaveStorageDialog, setShowSaveStorageDialog] = useState(false);
+    const [showLoadStorageDialog, setShowLoadStorageDialog] = useState(false);
     const [filename, setFilename] = useState("");
     const [content, setContent] = useState(props.value);
     const {save, load} = useContext(StorageContext);
@@ -30,37 +31,18 @@ const Editor = (props: EditorProps) => {
 
     const handleClickSave = () => {
         if(filename === "") {
-            setShowStorageDialog(true);
+            setShowSaveStorageDialog(true);
         } else {
             const status = save(filename, props.value);
         }
     }
 
     const handleClickLoad = () => {
-        setShowStorageDialog(true);
+        setShowLoadStorageDialog(true);
     }
 
 
     return <>
-        <StorageDialog filter={{
-                type: "application/wasm",
-            }} 
-            show={showStorageDialog}
-            filename={filename}
-            onLoad={(filename: string) => {
-                const value = load(filename);
-                if(value) {
-                    setFilename(filename);
-                    setContent(value);
-                    setShowStorageDialog(false);
-                }
-            }}
-            onSave={(filename: string) => {
-                const status = save(filename, content);
-                setFilename(filename);
-                setShowStorageDialog(false);
-            }}
-        />
 
         <Widget name="editor" collapsible={true} collapsed={false} expanded={expanded} >
             <Widget.Header name="Editor">
@@ -70,7 +52,7 @@ const Editor = (props: EditorProps) => {
                     <button className="fas fa-folder-open" onClick={handleClickLoad} />
                 </div>
                 <div className="panel"> 
-                    <button id="runbtn">Run <i className="fas fa-caret-right"></i></button>
+                    <button id="runbtn">Run <i className="fas fa-caret-right secondary-color"></i></button>
                     <button id="debugbtn" onClick={handleDebugClick} className={`${isDebugging && 'active'}`}>Debug</button>
                     <button className="active">Prove</button>
                     { expanded 
@@ -101,9 +83,54 @@ const Editor = (props: EditorProps) => {
                         }}
                     />
                 </div>
-                {/* <MidenEditor value={code} onChange={setCode} theme={darkmode ? 'dark' : 'light'} /> */}
             </Widget.Body>
         </Widget>
+        
+
+        {showSaveStorageDialog &&
+            <StorageDialog
+                title="Save to Storage"
+                filter={{
+                    type: "application/wasm",
+                }}
+                show={showSaveStorageDialog}
+                filename={filename}
+                okText={<>Save<i className="fas fa-save" /></>}
+                onOk={
+                    filename => {
+                        setFilename(filename);
+                        save(filename, props.value);
+                        
+                        setShowSaveStorageDialog(false);
+                    }
+                }
+                onCancel={() => setShowSaveStorageDialog(false)}
+            />
+        }   
+
+        {showLoadStorageDialog &&
+            <StorageDialog
+                filter={{
+                    type: "application/wasm",
+                }}
+                show={showLoadStorageDialog}
+                filename={filename}
+                okText={<>Load<i className="fas fa-folder-open" /></>}
+                onOk={
+                    filename => {
+                        setFilename(filename);
+                        setShowLoadStorageDialog(false);
+
+                        const content = load(filename);
+                        setContent(content);
+
+                        props.onChange(content);
+
+                    }
+                }
+                onCancel={() => setShowLoadStorageDialog(false)}
+            />
+        }
 
 
     </>

@@ -91,7 +91,7 @@ a {
 }
 
 .drop-shadow {
-    position: absolute !important;
+    position: fixed !important;
     top: 0;
     left: 0;
     width: 100vw;
@@ -130,7 +130,6 @@ button {
     padding-left: padding(regular);
     padding-right: padding(regular);
 
-    box-shadow: 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
 
     font-size: fontSize(small);
 
@@ -138,6 +137,12 @@ button {
 
     &:hover {
         background-color: color(bg);
+        color: color(secondary);
+        box-shadow: 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+
+        i {
+            color: color(secondary);
+        }
     }
 
     &.active {
@@ -145,10 +150,29 @@ button {
     }
 
     i {
-        color: color(secondary);
         margin-left: fontSize(tiny);
         margin-right: fontSize(tiny);
     }
+
+
+    &.secondary {
+        background: color(bg-primary);
+        color: color(primary);
+
+        i {
+            color: color(primary);
+        }
+    }
+
+    &.secondary:hover {
+        background: color(bg-secondary);
+        color: color(secondary);
+
+        i {
+            color: color(secondary);
+        }
+    }
+
 
     *:last-child {
         margin-right: 0px;
@@ -156,5 +180,90 @@ button {
 
     &:first-child {
         margin-left: 0px;
+    }
+}
+
+.btn {
+    cursor: pointer;
+    // padding: padding(tiny);
+    // box-shadow: 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+    // border-radius: fontSize(tiny);
+    color: color(primary);
+
+    &.secondary {
+        color: color(bg-secondary);
+    }
+    
+    &:hover {
+        color: color(secondary);
+    }
+
+    // &:active {
+    //     box-shadow: inset 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+    // }
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: padding(regular);
+
+    th {
+        text-align: left;
+        padding: padding(tiny);
+        border-bottom: 1px solid color(border);
+
+        &.stretch {
+            width: 100%;
+        }
+
+    }
+
+    tbody {
+        td {
+            padding: padding(tiny);
+            border-bottom: 1px solid color(border);
+        }
+
+        tr.selected {
+            td {
+                background-color: color(bg-tertiary);
+            }
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: color(bg-tertiary);
+        }
+    }
+}
+
+.card {
+    padding: padding(regular);
+    border-radius: fontSize(tiny);
+    background: color(bg);
+    box-shadow: 0px 2px 4px 0px hsla(0, 0%, 0%, 0.28);
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    
+}
+
+.secondary-color {
+    color: color(secondary);
+}
+
+input[type="text"] {
+    padding: 0px;
+    border: 0px;
+    background: transparent;
+
+    &:focus {
+        outline: none;
     }
 }

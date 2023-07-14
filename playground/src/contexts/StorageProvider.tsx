@@ -18,6 +18,7 @@ export const StorageContext = createContext({} as StorageContextProps);
 
 export const StorageProvider = ({ children }: ProviderProps) => {
     const [storage, setStorage] = useState<Storage>(JSON.parse(JSON.stringify(defaultStorage)));
+    const [plugins, setPlugins] = useState<StoragePlugin[]>([]); 
     const storageKey = "storage";
     
     useEffect(() => {

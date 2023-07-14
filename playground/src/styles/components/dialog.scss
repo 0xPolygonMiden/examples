@@ -12,6 +12,9 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: stretch;
+
+    width: clamp(300px, 90vw, 800px);
+    height: clamp(300px, 90vh, 500px);
     
     .dialog-header {
         display: flex;
@@ -29,6 +32,14 @@
 
     .dialog-body {
         flex: 1 1 100%;
+        overflow: scroll;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: var(--padding-regular);
     }
 
     .dialog-footer {
