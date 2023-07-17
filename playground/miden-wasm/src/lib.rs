@@ -9,7 +9,7 @@ use miden_tx::{mock::MockDataStore, TransactionExecutor, TransactionProver};
 use miden_vm::{
     crypto::RpoDigest,
     math::{Felt, StarkField},
-    ExecutionProof, ProofOptions, Word,
+    ExecutionProof, ProgramInfo, ProofOptions, Word,
 };
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::Serializer;
@@ -316,6 +316,59 @@ pub fn prove_transaction() -> Result<JsValue, JsValue> {
     Ok(proven_transaction.serialize(&serializer)?)
 }
 
+#[wasm_bindgen(getter_with_clone)]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WasmVerifyTransactionResult {
+    pub success: bool,
+    pub proof: Vec<u8>,
+}
+
+#[wasm_bindgen]
+pub fn verify_transaction() -> Result<WasmVerifyTransactionResult, JsValue> {
+    let data_store = MockDataStore::new();
+    let mut executor = TransactionExecutor::new(data_store.clone());
+
+    let account_id = data_store.account.id();
+    executor
+        .load_account(account_id)
+        .map_err(|err| format!("Failed to load account - {:?}", err))?;
+
+    let block_ref = data_store.block_header.block_num().as_int() as u32;
+    let note_origins = data_store
+        .notes
+        .iter()
+        .map(|note| note.proof().as_ref().unwrap().origin().clone())
+        .collect::<Vec<_>>();
+
+    let prepared_transaction = executor
+        .prepare_transaction(data_store.account.id(), block_ref, &note_origins, None)
+        .map_err(|err| format!("Failed to prepare transaction - {:?}", err))?;
+
+    let program_hash = prepared_transaction.tx_program().hash();
+    let kernel = prepared_transaction.tx_program().kernel().clone();
+
+    let prover = TransactionProver::new(ProofOptions::default());
+    let proven_transaction = prover
+        .prove_prepared_transaction(prepared_transaction)
+        .map_err(|e| format!("Failed to prove prepared transaction - {:?}", e))?;
+
+    let stack_inputs = proven_transaction.stack_inputs();
+    let stack_outputs = proven_transaction.stack_outputs();
+    let program_info = ProgramInfo::new(program_hash, kernel);
+    let result: u32 = miden_vm::verify(
+        program_info,
+        stack_inputs,
+        stack_outputs,
+        proven_transaction.proof().clone(),
+    )
+    .map_err(|err| format!("Program failed verification! - {}", err))?;
+
+    Ok(WasmVerifyTransactionResult {
+        success: true,
+        proof: proven_transaction.proof().to_bytes(),
+    })
+}
+
 // TESTS
 // ================================================================================================
 
@@ -549,4 +602,9 @@ fn test_verify_program() {
     let result = verify_program(asm, input_str, output_str, prove_result.proof.unwrap()).unwrap();
 
     assert_eq!(result, 96);
+}
+
+#[test]
+fn test_verify_transaction() {
+    println!("{:?}", verify_transaction().unwrap());
 }

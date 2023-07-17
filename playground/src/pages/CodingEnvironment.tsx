@@ -15,6 +15,7 @@ import init, {
   verify_program,
   prepare_transaction,
   prove_transaction,
+  verify_transaction,
 } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -113,6 +114,8 @@ export default function CodingEnvironment(): JSX.Element {
       try {
         const start = Date.now();
         const { stack_output, trace_len }: Outputs = run_program(code, inputs);
+        const verify = verify_transaction();
+        console.log(verify);
         setOutput(`{
 "stack_output" : [${stack_output.toString()}],
 "trace_len" : ${trace_len}
