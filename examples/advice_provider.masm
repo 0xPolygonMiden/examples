@@ -15,7 +15,7 @@ begin
     push.0.0.0.0 
 
     # load the values associated with the key from the advice map onto the advice stack
-    adv.keyval 
+    adv.push_mapval 
 
     # load the word from the advice stack
     padw adv_loadw
@@ -30,7 +30,7 @@ begin
     push.268435456.0.0.0 
 
     # load the values associated with the key from the advice map onto the advice stack
-    adv.keyval 
+    adv.push_mapval 
 
     # load the word from the advice stack
     padw adv_loadw 
@@ -70,4 +70,6 @@ begin
 
     # drop the root
     dropw
+
+    push.0.0.0.1 adv.push_mapval padw adv_loadw
 end

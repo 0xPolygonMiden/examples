@@ -12,6 +12,7 @@ const tabs: TabType[] = [
   { name: 'Instruction Set', href: '/instruction-set', current: false },
   { name: 'Playground', href: '/examples', current: true },
   { name: 'Help', href: '/explainer', current: false },
+  { name: 'TX-Proof', href: '/tx-proof', current: false },
 ]
 
 function classNames(...classes: string[]) {

@@ -13,6 +13,9 @@ import init, {
   run_program,
   prove_program,
   verify_program,
+  prepare_transaction,
+  prove_transaction,
+  verify_transaction,
 } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 import {
