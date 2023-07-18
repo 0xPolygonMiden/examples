@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+assembly = { package = "miden-assembly", git = "https://github.com/0xPolygonMiden/miden-vm.git", branch = "frisitano-tx-result", default-features = false }
 hex = { version = "0.4", default-features = false }
 miden-vm = { package = "miden-vm", git = "https://github.com/0xPolygonMiden/miden-vm.git", branch = "frisitano-tx-result", default-features = false }
 miden-tx = {  git = "https://github.com/0xPolygonMiden/miden-base.git", branch = "frisitano-prover-tx", features = ["testing"], default-features = false }

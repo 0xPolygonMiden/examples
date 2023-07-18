@@ -1,12 +1,16 @@
+use super::ExecutionProof;
+use assembly::Assembler;
+use miden_lib::{MidenLib, SatKernel};
 use miden_objects::{
     notes::Note,
     transaction::{PreparedTransaction, ProvenTransaction},
 };
+use miden_stdlib::StdLibrary;
 use miden_tx::{mock::MockDataStore, TransactionExecutor, TransactionProver};
 use miden_vm::{
     crypto::RpoDigest,
     math::{Felt, StarkField},
-    ProgramInfo, ProofOptions, Word,
+    ProgramInfo, ProofOptions, StackInputs, StackOutputs, Word,
 };
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::Serializer;
@@ -131,6 +135,9 @@ pub struct WasmProvenTransaction {
     pub consumed_notes: Vec<Vec<u64>>,
     pub created_notes: Vec<Vec<u64>>,
     pub tx_script_root: Option<Vec<u64>>,
+    pub stack_inputs: Vec<u64>,
+    pub stack_outputs: Vec<u64>,
+    pub program_hash: Vec<u64>,
     pub proof: Vec<u8>,
 }
 
@@ -168,6 +175,20 @@ impl From<ProvenTransaction> for WasmProvenTransaction {
             tx_script_root: proven_transaction
                 .tx_script_root()
                 .and_then(|x| Some(Into::<Digest>::into(x).into())),
+            stack_inputs: proven_transaction
+                .stack_inputs()
+                .values()
+                .iter()
+                .rev()
+                .map(|x| x.as_int())
+                .collect::<Vec<_>>(),
+            stack_outputs: proven_transaction
+                .stack_outputs()
+                .stack()
+                .iter()
+                .cloned()
+                .collect(),
+            program_hash: Into::<Digest>::into(proven_transaction.program_hash()).into(),
             proof: proven_transaction.proof().to_bytes(),
         }
     }
@@ -176,8 +197,7 @@ impl From<ProvenTransaction> for WasmProvenTransaction {
 // PROVE TRANSACTION
 // ================================================================================================
 
-#[wasm_bindgen]
-pub fn prove_transaction() -> Result<JsValue, JsValue> {
+pub fn do_prove_transaction() -> Result<WasmProvenTransaction, String> {
     let data_store = MockDataStore::new();
     let mut executor = TransactionExecutor::new(data_store.clone());
 
@@ -199,73 +219,54 @@ pub fn prove_transaction() -> Result<JsValue, JsValue> {
         .map_err(|err| format!("Failed to prepare transaction - {:?}", err))?;
 
     let prover = TransactionProver::new(ProofOptions::default());
-    let proven_transaction: WasmProvenTransaction = prover
+    Ok(prover
         .prove_prepared_transaction(prepared_transaction)
         .map_err(|e| format!("Failed to prove prepared transaction - {:?}", e))?
-        .into();
+        .into())
+}
+
+#[wasm_bindgen]
+pub fn prove_transaction() -> Result<JsValue, JsValue> {
+    let proven_transaction: WasmProvenTransaction = do_prove_transaction()?;
 
     let serializer = Serializer::new().serialize_large_number_types_as_bigints(true);
     Ok(proven_transaction.serialize(&serializer)?)
-}
-
-// VERIFY TRANSACTION TYPES
-// ================================================================================================
-
-#[wasm_bindgen(getter_with_clone)]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct WasmVerifyTransactionResult {
-    pub success: bool,
-    pub proof: Vec<u8>,
 }
 
 // VERIFY TRANSACTION
 // ================================================================================================
 
 #[wasm_bindgen]
-pub fn verify_transaction() -> Result<WasmVerifyTransactionResult, JsValue> {
-    let data_store = MockDataStore::new();
-    let mut executor = TransactionExecutor::new(data_store.clone());
+pub fn verify_transaction(
+    stack_inputs: Vec<u64>,
+    stack_outputs: Vec<u64>,
+    program_hash: Vec<u64>,
+    proof: Vec<u8>,
+) -> Result<bool, JsValue> {
+    let stack_inputs = StackInputs::try_from_values(stack_inputs)
+        .map_err(|e| format!("Invalid stack inputs:  {}", e))?;
+    let stack_outputs = StackOutputs::new(stack_outputs, Default::default());
+    let program_hash: [Felt; 4] = program_hash
+        .into_iter()
+        .map(|x| Felt::try_from(x.to_le_bytes()).map_err(|x| format!("{x}")))
+        .collect::<Result<Vec<_>, String>>()?
+        .try_into()
+        .map_err(|x| format!("Invalid program hash:  {:?}", x))?;
+    let program_hash = RpoDigest::new(program_hash);
+    let proof = ExecutionProof::from_bytes(&proof)
+        .map_err(|err| format!("Failed to deserialize proof - {}", err))?;
+    let assembler = Assembler::default()
+        .with_library(&MidenLib::default())
+        .expect("library is well formed")
+        .with_library(&StdLibrary::default())
+        .expect("library is well formed")
+        .with_kernel(SatKernel::kernel())
+        .expect("kernel is well formed");
+    let program_info = ProgramInfo::new(program_hash, assembler.kernel().clone());
+    let _result: u32 = miden_vm::verify(program_info, stack_inputs, stack_outputs, proof)
+        .map_err(|err| format!("Program failed verification! - {}", err))?;
 
-    let account_id = data_store.account.id();
-    executor
-        .load_account(account_id)
-        .map_err(|err| format!("Failed to load account - {:?}", err))?;
-
-    let block_ref = data_store.block_header.block_num().as_int() as u32;
-    let note_origins = data_store
-        .notes
-        .iter()
-        .take(1)
-        .map(|note| note.proof().as_ref().unwrap().origin().clone())
-        .collect::<Vec<_>>();
-
-    let prepared_transaction = executor
-        .prepare_transaction(data_store.account.id(), block_ref, &note_origins, None)
-        .map_err(|err| format!("Failed to prepare transaction - {:?}", err))?;
-
-    let program_hash = prepared_transaction.tx_program().hash();
-    let kernel = prepared_transaction.tx_program().kernel().clone();
-
-    let prover = TransactionProver::new(ProofOptions::default());
-    let proven_transaction = prover
-        .prove_prepared_transaction(prepared_transaction)
-        .map_err(|e| format!("Failed to prove prepared transaction - {:?}", e))?;
-
-    let stack_inputs = proven_transaction.stack_inputs();
-    let stack_outputs = proven_transaction.stack_outputs();
-    let program_info = ProgramInfo::new(program_hash, kernel);
-    let _result: u32 = miden_vm::verify(
-        program_info,
-        stack_inputs,
-        stack_outputs,
-        proven_transaction.proof().clone(),
-    )
-    .map_err(|err| format!("Program failed verification! - {}", err))?;
-
-    Ok(WasmVerifyTransactionResult {
-        success: true,
-        proof: proven_transaction.proof().to_bytes(),
-    })
+    Ok(true)
 }
 
 // TESTS
@@ -273,5 +274,12 @@ pub fn verify_transaction() -> Result<WasmVerifyTransactionResult, JsValue> {
 
 #[test]
 fn test_verify_transaction() {
-    println!("{:?}", verify_transaction().unwrap());
+    let proven_transaction = do_prove_transaction().unwrap();
+    assert!(verify_transaction(
+        proven_transaction.stack_inputs,
+        proven_transaction.stack_outputs,
+        proven_transaction.program_hash,
+        proven_transaction.proof
+    )
+    .is_ok());
 }
