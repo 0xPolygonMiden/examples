@@ -13,9 +13,6 @@ import init, {
   run_program,
   prove_program,
   verify_program,
-  prepare_transaction,
-  prove_transaction,
-  verify_transaction,
 } from "miden-wasm";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -27,7 +24,7 @@ import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
 
 export default function CodingEnvironment(): JSX.Element {
 
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   /**
    * This sets the inputs to the default values.

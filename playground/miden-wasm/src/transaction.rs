@@ -126,7 +126,6 @@ pub fn prepare_transaction() -> Result<JsValue, JsValue> {
 
 // PROVE TRANSACTION TYPES
 // ================================================================================================
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WasmProvenTransaction {
     pub account_id: u64,
