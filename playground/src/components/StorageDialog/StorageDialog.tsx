@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import Dialog from "./Dialog";
+import Dialog from "../Dialog";
 
 interface StorageDialogProps {
     title?: string;
-    filter: Filter;
+    filter: StorageFilter;
     show?: boolean;
     filename?: string;
     onOk?: (filename: string) => void;

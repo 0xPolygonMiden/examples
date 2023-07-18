@@ -1,0 +1,34 @@
+.storage-dialog-files-body {
+    padding: padding(regular);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: padding(regular);
+    
+    .card,
+    .go-back {
+        display:flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 80px;
+        
+        border: 0px;
+        box-shadow: none;
+
+        &:hover {
+            box-shadow: 0 0 2px 0 hsla(0, 0%, 0%, 0.25);
+        }
+    }
+    .icon,
+    .icon img {
+        width: 30px;
+        height: 30px;
+    }
+
+}
+
+.breadcrumbs {
+    padding: padding(regular);
+    font-size: fontSizes(small);
+}

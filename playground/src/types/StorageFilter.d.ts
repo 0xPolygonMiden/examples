@@ -2,7 +2,7 @@
  * @interface Filter
  * @description Represents a filter used for searching or narrowing down results.
  */
-interface Filter {
+interface StorageFilter {
     /**
      * @property {string} name - The name to filter by.
      */

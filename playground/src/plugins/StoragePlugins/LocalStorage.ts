@@ -1,95 +1,84 @@
+import { useEffect, useState } from "react";
+
+
 class LocalStorage implements StoragePlugin {
-    private localStorageBaseKey = 'storage';
-    public name = 'Browser Storage';
+    public name = 'Local Storage';
+    public icon = '/assets/img/browser.png';
+    private key = 'storage';
 
-    public constructor(localStorageBaseKey?: string){
-        this.localStorageBaseKey = localStorageBaseKey || "storage"
+    public constructor(key?: string) {
+        if (key) {
+            this.key = key;
+        }
     }
 
-    public list = async (key?: string) => {
-        if(!key) {
-            key = '/';
+    private getLocalStorage = (): StorageFile[] => {
+        const storage = localStorage.getItem(this.key );
+        if (storage) {
+            return JSON.parse(storage);
         }
 
-        const storageKey = `${this.localStorageBaseKey}-${key}`;
-
-        // Get all keys that start with the storageKey
-        const keys = Object.keys(localStorage).filter(k => k.startsWith(storageKey));
-
-        /*
-            /dir1/file1
-            /dir1/file2
-            /dir2/file1
-            /dir2/file2
-            /file1  
-            /file2
-
-            only the following should be returned
-            /dir1
-            /dir2
-            /file1
-            /file2
-        */
-
-        // Get the unique directories
-        const directories = keys.map(k => k.replace(storageKey, '').split('/')[0]).filter((v, i, a) => a.indexOf(v) === i);
-
-        // Get the unique files
-        const files = keys.map(k => k.replace(storageKey, '').split('/').slice(1).join('/')).filter((v, i, a) => a.indexOf(v) === i);
-
-        // Create the StorageFile objects
-        const storageFiles = directories.map(d => {
-            return {
-                name: d,
-                type: 'directory',
-                size: 0,
-                lastModified: 0,
-                value: ''
-            } as StorageFile;
-        }).concat(files.map(f => {
-            return {
-                name: f,
-                type: 'file',
-                size: 0,
-                lastModified: 0,
-                value: ''
-            } as StorageFile;
-        }));
-
-        return storageFiles;
-
+        return [];
     }
+
+    private setLocalStorage = (storage: StorageFile[]) => {
+        localStorage.setItem(this.key, JSON.stringify(storage));
+    }
+
+    public list = async (location: string): Promise<StorageFile[]> => {
+        if(location === '') {
+            location = '/';
+        }
         
-    public get = async (key: string) => {
-        const storageKey = `${this.localStorageBaseKey}-${key}`;
-        try {
-            const storageValue = localStorage.getItem(storageKey);
-            if(storageValue){
-                return JSON.parse(storageValue);
-            }
-        } catch (error) {
-            return {} as StorageFile;
-        }
+        const storage = this.getLocalStorage();
+        return storage.filter(file => file.location === location);
     }
-    public save = async (key: string, value: any) => {
-        const storageKey = `${this.localStorageBaseKey}-${key}`;
-        try {
-            localStorage.setItem(storageKey, JSON.stringify(value));
+
+    public get = async (id: string): Promise<string> => {
+        const storage = this.getLocalStorage();
+        const file = storage.find(file => file.id === id);
+        if (file) {
+            return file.value;
+        }
+
+        return '';
+    }
+
+    public save = async (file: Partial<StorageFile>): Promise<boolean> => {
+        const storage = this.getLocalStorage();
+
+        const id = file.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const location = file.location || '/';
+        const name = file.name || 'Untitled';
+        const type = file.type || 'unknown';
+        const value = file.value || '';
+        const size = file.size || value.length;
+        const lastModified = Date.now();
+
+        let index = storage.findIndex(f => f.id === file.id);
+        if (index === -1) {
+            index = storage.length;
+        }
+
+        storage[index] = file as StorageFile;
+
+        this.setLocalStorage([...storage]);
+
+        return true;
+    }
+
+    public remove = async (id: string): Promise<boolean> => {
+        const storage = this.getLocalStorage();
+        const index = storage.findIndex(file => file.id === id);
+        if (index > -1) {
+            storage.splice(index, 1);
+            this.setLocalStorage([...storage]);
             return true;
-        } catch (error) {
-            return false;
         }
+
+        return false;
     }
-    public remove = async (key: string) => {
-        const storageKey = `${this.localStorageBaseKey}-${key}`;
-        try {
-            localStorage.removeItem(storageKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
-    
 }
+
 
 export default LocalStorage;

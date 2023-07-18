@@ -267,3 +267,12 @@ input[type="text"] {
         outline: none;
     }
 }
+
+.fontTiny {
+    font-size: fontSize(tiny);
+}
+
+.fontSmall {
+    font-size: fontSize(small);
+}
+

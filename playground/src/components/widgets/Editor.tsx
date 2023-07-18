@@ -20,8 +20,13 @@ const Editor = (props: EditorProps) => {
     const [showLoadStorageDialog, setShowLoadStorageDialog] = useState(false);
     const [filename, setFilename] = useState("");
     const [content, setContent] = useState(props.value);
-    const {save, get} = useContext(StorageContext);
+    const {save, get, list} = useContext(StorageContext);
     const editorRef = useRef(null);
+
+    useEffect(() => {
+        // console.log("List in plugin 0", list(0, "/dir1"));
+        list(0, "")
+    }, []);
 
     const handleDebugClick = () => {
         //TODO - add debugging functionality
