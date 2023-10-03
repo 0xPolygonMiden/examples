@@ -1,0 +1,31 @@
+# A program which computes the Discrete Fourier Transform (DFT) of the provided public inputs.
+# We only allow input sizes of a power of 2 for convenience of computing the primitive root of unity.
+# This program makes use of the fact that the modulus for the Miden VM's prime field is 2^64 - 2^32 + 1.
+#
+# See the corresponding Wikipedia article: https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring
+
+# Root of unity for domain of 2^32 elements, taken from Winterfell. See:
+# https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/f64/mod.rs#L270
+const.TWO_ADIC_ROOT_OF_UNITY=7277203076849721926
+
+# This means there's a multiplicative subgroup of size 2^32 that exists in the field.
+# For more information about two-adicity, see https://cryptologie.net/article/559/whats-two-adicity/.
+const.TWO_ADICITY=32
+
+#! Input: n (must be <= 32)
+#! Output: Returns the primitive root of unity of order 2^n.
+#!
+#! Equivalent to Winterfell's implementation: 
+#! https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/traits.rs#L254-L259
+proc.get_root_of_unity
+    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY     # stack: [TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY, n]
+    movup.2                                     # stack: [n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
+    sub                                         # stack: [TWO_ADICITY - n, TWO_ADIC_ROOT_OF_UNITY]
+    pow2                                        # stack: [2^(TWO_ADICITY - n), TWO_ADIC_ROOT_OF_UNITY]
+    exp                                         # stack: [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - n))]
+end
+
+
+begin
+    exec.get_root_of_unity
+end
