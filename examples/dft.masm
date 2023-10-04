@@ -50,10 +50,8 @@ proc.f_k.5
     loc_store.0                                # store k
     loc_store.1                                # store root_of_unity
     loc_store.2                                # store n
-    push.0
-    loc_store.3                                # store j, initialized to 0
-    push.0
-    loc_store.4                                # store result, initialized to 0
+
+    # `j` and `result` are initialized to 0 by the VM
 
     # Stack here: [v0, ..., v{n-1}, ...]
 
@@ -93,7 +91,7 @@ begin
     dup                                        # duplicate n (size of the input list)
     exec.get_root_of_unity
 
-    push.0                                     # push 0
+    push.0                                     # push k=0
 
     # stack: [k=0, , root_of_unity, n, v_0, ..., v_{n-1}]
     exec.f_k
