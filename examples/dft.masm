@@ -20,6 +20,10 @@ const.TWO_ADIC_ROOT_OF_UNITY=7277203076849721926
 # For more information about two-adicity, see https://cryptologie.net/article/559/whats-two-adicity/.
 const.TWO_ADICITY=32
 
+# Location where we will store the input array.
+# [0, 2^30) is global memory, so we store it at the beginning.
+const.ARR_LOC=0
+
 #! Computes the primitive root of unity for a subgroup of size 2^n.
 #!
 #! Input: n, the size of the input list (must be <= 32)
@@ -85,6 +89,45 @@ proc.f_k.5
 
     # Return result
     loc_load.4                                 # load result
+end
+
+# Stores an array to `ARR_LOC`, where an "array" is a list of elements prefixed by their length.
+# The array is stored in the same order, that is [n, v0, ..., v{n-1}].
+# The inverse operation is `proc.retrieve_array`.
+# Input: [n, v0, ..., v{n-1}, ...]
+# Output: [...]
+proc.store_array
+    # Store n
+    dup
+    mem_store.ARR_LOC
+
+    # Prepare stack for loop
+    push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
+
+    while.true
+        # stack: [i, n, v{i}, ..., v{n-1}]
+
+        # Setup write offset
+        # Note: we write at location i + (ARR_LOC + 1), since the element at ARR_LOC is `n`
+        movup.2                               # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
+        dup.1                                 # stack: [i, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        push.ARR_LOC                          # stack: [ARR_LOC, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        add.1                                 # stack: [ARR_LOC+1, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        add                                   # stack: [i+ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
+
+        # Write v{i}
+        mem_store                             # stack: [i, n, v{i+1}, ..., v{n-1}]
+
+        # Increment i and check if we're done
+        add.1                                 # stack: [i+1, n, v{i+1}, ..., v{n-1}]
+        dup.1                                 # stack: [n, i+1, n, v{i+1}, ..., v{n-1}]
+        dup.1                                 # stack: [i+1, n, i+1, n, v{i+1}, ..., v{n-1}]
+        neq                                   # stack: [1 or 0, i+1, n, v{i+1}, ..., v{n-1}]
+    end
+
+    # stack: [n, n, ...]
+    drop                                      # stack: [n, ...]
+    drop                                      # stack: [...]
 end
 
 begin
