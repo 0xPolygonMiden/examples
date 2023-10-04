@@ -132,10 +132,15 @@ proc.store_array
 end
 
 #! Retrieves an array previously stored with `proc.store_array`.
-#! Input: None
+#! Input: [array_loc], the memory location to retrieve the array
 #! Output: [n, v0, ..., v{n-1}]
-proc.retrieve_array
-    mem_load.ARR_LOC                          # stack: [n, ...]
+#!
+#! Locals
+#! 0: array_loc
+proc.retrieve_array.1
+    dup                                       # stack: [array_loc, array_loc, ...]
+    loc_store.0                               # stack: [array_loc, ...]
+    mem_load                                  # stack: [n, ...]
 
     # Prepare stack for loop
     push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
@@ -144,13 +149,13 @@ proc.retrieve_array
         # stack: [i, n, v{i}, ..., v{n-1}]
 
         # Setup read offset
-        # Note: we read at location `ARR_LOC + n - i`, since the element at ARR_LOC is `n`
-        # (i.e. the array starts at address `ARR_LOC + 1`)
+        # Note: we read at location `array_loc + n - i`, since the element at array_loc is `n`
+        # (i.e. the array starts at address `array_loc + 1`)
         dup.1                                   # stack: [n, i, n, v{i+1}, ..., v{n-1}]
         dup.1                                   # stack: [i, n, i, n, v{i+1}, ..., v{n-1}]
         sub                                     # stack: [n - i, i, n, v{i+1}, ..., v{n-1}]
-        push.ARR_LOC                            # stack: [ARR_LOC, n - i, i, n, v{i+1}, ..., v{n-1}]
-        add                                     # stack: [ARR_LOC + n - i, i, n, v{i+1}, ..., v{n-1}]
+        loc_load.0                              # stack: [array_loc, n - i, i, n, v{i+1}, ..., v{n-1}]
+        add                                     # stack: [array_loc + n - i, i, n, v{i+1}, ..., v{n-1}]
 
         # Read v{i} and put in its spot on the stack
         mem_load                                # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
