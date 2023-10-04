@@ -22,12 +22,15 @@ const.TWO_ADICITY=32
 
 # Location where we will store the input array.
 # [0, 2^30) is global memory, so we store it at the beginning.
-const.ARR_LOC=0
+const.INPUT_ARR_LOC=0
+
+# Location at 3 * 2^30, the first address "with no special meaning" in the root context
+const.RESULT_ARR_LOC=3221225472
 
 #! Computes the primitive root of unity for a subgroup of size 2^n.
 #!
-#! Input: n, the size of the input list (must be <= 32)
-#! Output: Places the primitive root of unity of order 2^n on the stack
+#! Input: [n], the size of the input list (must be <= 32)
+#! Output: [root_of_unity], where `root_of_unity` is the primitive root of unity of order 2^n
 #!
 #! Equivalent to Winterfell's implementation: 
 #! https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/traits.rs#L254-L259
@@ -91,7 +94,7 @@ proc.f_k.5
     loc_load.4                                 # load result
 end
 
-# Stores an array to `ARR_LOC`, where an "array" is a list of elements prefixed by their length.
+# Stores an array to `INPUT_ARR_LOC`, where an "array" is a list of elements prefixed by their length.
 # The array is stored in the same order, that is [n, v0, ..., v{n-1}].
 # The inverse operation is `proc.retrieve_array`.
 # Input: [n, v0, ..., v{n-1}, ...]
@@ -99,7 +102,7 @@ end
 proc.store_array
     # Store n
     dup
-    mem_store.ARR_LOC
+    mem_store.INPUT_ARR_LOC
 
     # Prepare stack for loop
     push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
@@ -108,13 +111,13 @@ proc.store_array
         # stack: [i, n, v{i}, ..., v{n-1}]
 
         # Setup write offset
-        # Note: we write at location i + (ARR_LOC + 1), since the element at ARR_LOC is `n`
-        # (i.e. the array starts at address `ARR_LOC + 1`)
+        # Note: we write at location i + (INPUT_ARR_LOC + 1), since the element at INPUT_ARR_LOC is `n`
+        # (i.e. the array starts at address `INPUT_ARR_LOC + 1`)
         movup.2                               # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
         dup.1                                 # stack: [i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        push.ARR_LOC                          # stack: [ARR_LOC, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        add.1                                 # stack: [ARR_LOC+1, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        add                                   # stack: [i+ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        push.INPUT_ARR_LOC                          # stack: [INPUT_ARR_LOC, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        add.1                                 # stack: [INPUT_ARR_LOC+1, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        add                                   # stack: [i+INPUT_ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
 
         # Write v{i}
         mem_store                             # stack: [i, n, v{i+1}, ..., v{n-1}]
@@ -173,12 +176,62 @@ proc.retrieve_array.1
     drop                                      # stack: [n, v0, ..., v{n-1}]
 end
 
+#! Input: [n, v0, ..., v{n-1}]
+#!
+#! Locals
+#! 0: n
+#! 1: root_of_unity
+#! 2: k
+proc.main.3
+    # Initialize memory
+    # Note: k is initialized to 0 by the VM
+    dup                                      # stack: [n, n, v0, ..., v{n-1}]
+    loc_store.0                              # stack: [n, v0, ..., v{n-1}]
+    dup                                      # stack: [n, n, v0, ..., v{n-1}]
+    mem_store.RESULT_ARR_LOC                 # stack: [n, v0, ..., v{n-1}]
+    dup                                      # stack: [n, n, v0, ..., v{n-1}]
+    exec.get_root_of_unity                   # stack: [root_of_unity, n v0, ..., v{n-1}]
+    loc_store.1                              # stack: [n, v0, ..., v{n-1}]
+    exec.store_array                         # stack: []
+
+    # Prepare stack for loop
+    push.1                                 # push 1 so that we enter the loop
+
+    while.true
+        # prepare call to `proc.f_k`
+        push.INPUT_ARR_LOC                         # stack: [INPUT_ARR_LOC]
+        exec.retrieve_array                  # stack: [n, v0, ..., v{n-1}]
+        loc_load.1                           # stack: [root_of_unity, n, v0, ..., v{n-1}]
+        loc_load.2                           # stack: [k, root_of_unity, n, v0, ..., v{n-1}]
+
+        # call `proc.f_k`
+        exec.f_k                             # stack: [f_k]
+
+        # Store `f_k` at `RESULT_ARR_LOC + k + 1`
+        push.RESULT_ARR_LOC                  # stack: [RESULT_ARR_LOC, f_k]
+        loc_load.2                           # stack: [k, RESULT_ARR_LOC, f_k]
+        add                                  # stack: [RESULT_ARR_LOC + k, f_k]
+        add.1                                # stack: [RESULT_ARR_LOC + k + 1, f_k]
+        mem_store                            # stack: []
+
+        # Load, increment k, and store 
+        loc_load.2                            # stack: [k]
+        add.1                                 # stack: [k+1]
+        dup                                   # stack: [k+1, k+1]
+        loc_store.2                           # stack: [k+1]
+
+        # Check if we're done
+        loc_load.0                            # stack: [n, k+1]
+        neq                                   # stack: [1 or 0]
+    end
+
+    # stack: []
+
+    push.RESULT_ARR_LOC                       # stack: [RESULT_ARR_LOC]
+    exec.retrieve_array                       # stack: [n, f0, ..., f{n-1}]
+    drop                                      # stack: [f0, ..., f{n-1}]
+end
+
 begin
-    dup                                        # duplicate n (size of the input list)
-    exec.get_root_of_unity
-
-    push.0                                     # push k=0
-
-    # stack: [k=0, , root_of_unity, n, v_0, ..., v_{n-1}]
-    exec.f_k
+    exec.main
 end
