@@ -109,6 +109,7 @@ proc.store_array
 
         # Setup write offset
         # Note: we write at location i + (ARR_LOC + 1), since the element at ARR_LOC is `n`
+        # (i.e. the array starts at address `ARR_LOC + 1`)
         movup.2                               # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
         dup.1                                 # stack: [i, v{i}, i, n, v{i+1}, ..., v{n-1}]
         push.ARR_LOC                          # stack: [ARR_LOC, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
@@ -128,6 +129,43 @@ proc.store_array
     # stack: [n, n, ...]
     drop                                      # stack: [n, ...]
     drop                                      # stack: [...]
+end
+
+#! Retrieves an array previously stored with `proc.store_array`.
+#! Input: None
+#! Output: [n, v0, ..., v{n-1}]
+proc.retrieve_array
+    mem_load.ARR_LOC                          # stack: [n, ...]
+
+    # Prepare stack for loop
+    push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
+
+    while.true
+        # stack: [i, n, v{i}, ..., v{n-1}]
+
+        # Setup read offset
+        # Note: we read at location `ARR_LOC + n - i`, since the element at ARR_LOC is `n`
+        # (i.e. the array starts at address `ARR_LOC + 1`)
+        dup.1                                   # stack: [n, i, n, v{i+1}, ..., v{n-1}]
+        dup.1                                   # stack: [i, n, i, n, v{i+1}, ..., v{n-1}]
+        sub                                     # stack: [n - i, i, n, v{i+1}, ..., v{n-1}]
+        push.ARR_LOC                            # stack: [ARR_LOC, n - i, i, n, v{i+1}, ..., v{n-1}]
+        add                                     # stack: [ARR_LOC + n - i, i, n, v{i+1}, ..., v{n-1}]
+
+        # Read v{i} and put in its spot on the stack
+        mem_load                                # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
+        movdn.2                                 # stack: [i, n, v{i}, v{i+1}, ..., v{n-1}]
+
+        # Increment i and check if we're done
+        add.1                                 # stack: [i+1, n, v{i}, v{i+1}, ..., v{n-1}]
+        dup.1                                 # stack: [n, i+1, n, v{i}, v{i+1}, ..., v{n-1}]
+        dup.1                                 # stack: [i+1, n, i+1, n, v{i}, v{i+1}, ..., v{n-1}]
+        neq                                   # stack: [1 or 0, i+1, n, v{i}, v{i+1}, ..., v{n-1}]
+    end
+
+    # stack: [n, n, v0, ..., v{n-1}]
+
+    drop                                      # stack: [n, v0, ..., v{n-1}]
 end
 
 begin
