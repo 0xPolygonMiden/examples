@@ -107,8 +107,10 @@ proc.f_k.5
     loc_store.0                                # store k
     loc_store.1                                # store root_of_unity
     loc_store.2                                # store n
-
-    # `j` and `result` are initialized to 0 by the VM
+    push.0                                     # Prepare j = 0
+    loc_store.3                                # Set j = 0
+    push.0                                     # Prepare result = 0
+    loc_store.4                                # Set result = 0
 
     # Stack here: [v0, ..., v{n-1}, ...]
 
