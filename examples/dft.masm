@@ -27,6 +27,56 @@ const.INPUT_ARR_LOC=0
 # Location at 3 * 2^30, the first address "with no special meaning" in the root context
 const.RESULT_ARR_LOC=3221225472
 
+#! Computes log base 2. Only supports {1, 2, 4, 8, 16}.
+#! Input: [n]
+#! Output: [log2(n)] if n is supported, otherwise halts
+proc.log2
+    dup                                        # stack: [n, n]
+    eq.1                                       # stack: [0 or 1, n]
+    if.true
+        # n == 1
+        drop                                   # stack: []
+        push.0                                 # stack: [0]
+    else
+        dup                                    # stack: [n, n]
+        eq.2                                   # stack: [0 or 1, n]
+        if.true
+            # n == 2
+            drop                               # stack: []
+            push.1                             # stack: [1]
+        else
+            dup                                # stack: [n, n]
+            eq.4                               # stack: [0 or 1, n]
+            if.true
+                # n == 4
+                drop                           # stack: []
+                push.2                         # stack: [2]
+            else
+                dup                            # stack: [n, n]
+                eq.8                           # stack: [0 or 1, n]
+                if.true
+                    # n == 8
+                    drop                       # stack: []
+                    push.3                     # stack: [3]
+                else
+                    dup                        # stack: [n, n]
+                    eq.16                      # stack: [0 or 1, n]
+                    if.true
+                        # n == 16
+                        drop                       # stack: []
+                        push.4                     # stack: [4]
+                    else
+                        # n unsupported; halt
+                        push.1
+                        assertz
+                    end
+                end
+            end
+        end
+
+    end
+end
+
 #! Computes the primitive root of unity for a subgroup of size 2^n.
 #!
 #! Input: [n], the size of the input list (must be <= 32)
@@ -65,29 +115,27 @@ proc.f_k.5
     push.1                                     # push 1 to enter the loop
     while.true
         # compute `root_of_unity^(jk)`
-        loc_load.1                             # load root_of_unity
-        loc_load.0                             # load k
-        loc_load.3                             # load j
-        mul                                    # compute j*k
-        exp                                    # compute root_of_unity^(jk)
-        mul                                    # compute v{j} * root_of_unity^(jk)
+        loc_load.1                             # stack: [root_of_unity, v{j}, ..., v{n-1}]
+        loc_load.0                             # stack: [k , root_of_unity, v{j}, ..., v{n-1}]
+        loc_load.3                             # stack: [j, k , root_of_unity, v{j}, ..., v{n-1}]
+        mul                                    # stack: [j*k , root_of_unity, v{j}, ..., v{n-1}]
+        exp                                    # stack: [root_of_unity^(jk), v{j}, ..., v{n-1}]
+        mul                                    # stack: [v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
 
         # update result
-        loc_load.4                             # load result
-        add                                    # sum previous partial result with v{j} * root_of_unity^(jk)
-        loc_store.4                            # store partial result
+        loc_load.4                             # stack: [result, v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
+        add                                    # stack: [result + v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
+        loc_store.4                            # stack: [v{j+1}, ..., v{n-1}]
 
-        # Stack here: [v{j+1}, ..., v{n-1}, ...]
-
-        # Update j
-        loc_load.3                             # load j
-        add.1                                  # increment j by 1
-        dup                                    # dup before store to keep j+1 on stack
-        loc_store.3                            # store j+1
+        # Increment j
+        loc_load.3                             # stack: [j, v{j+1}, ..., v{n-1}]
+        add.1                                  # stack: [j+1, v{j+1}, ..., v{n-1}]
+        dup                                    # stack: [j+1, j+1, v{j+1}, ..., v{n-1}]
+        loc_store.3                            # stack: [j+1, v{j+1}, ..., v{n-1}]
 
         # Check if we're done looping
-        loc_load.2                             # load n. stack: [n, j+1, ...]
-        neq                                     # Check if j+1 != n; if so, we continue. Else, we're done.
+        loc_load.2                             # stack: [n, j+1, v{j+1}, ..., v{n-1}]
+        neq                                    # stack: [1 or 0, v{j+1}, ..., v{n-1}]
     end
 
     # Return result
@@ -233,5 +281,8 @@ proc.main.3
 end
 
 begin
+    # TODO:
+    # fix f_k for k>0
+    # fix "unreachable" error
     exec.main
 end
