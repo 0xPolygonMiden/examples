@@ -282,8 +282,5 @@ proc.main.3
 end
 
 begin
-    # TODO:
-    # fix f_k for k>0
-    # fix "unreachable" error
     exec.main
 end
