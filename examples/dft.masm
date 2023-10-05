@@ -79,17 +79,17 @@ end
 
 #! Computes the primitive root of unity for a subgroup of size 2^n.
 #!
-#! Input: [n], the size of the input list (must be <= 32)
+#! Input: [log2_n], log2 of the size of the input list (must be <= 32)
 #! Output: [root_of_unity], where `root_of_unity` is the primitive root of unity of order 2^n
 #!
 #! Equivalent to Winterfell's implementation: 
 #! https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/traits.rs#L254-L259
 proc.get_root_of_unity
-    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY     # stack: [TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY, n]
-    movup.2                                     # stack: [n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
-    sub                                         # stack: [TWO_ADICITY - n, TWO_ADIC_ROOT_OF_UNITY]
-    pow2                                        # stack: [2^(TWO_ADICITY - n), TWO_ADIC_ROOT_OF_UNITY]
-    exp                                         # stack: [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - n))]
+    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY     # stack: [TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY, log2_n]
+    movup.2                                     # stack: [log2_n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
+    sub                                         # stack: [TWO_ADICITY - log2_n, TWO_ADIC_ROOT_OF_UNITY]
+    pow2                                        # stack: [2^(TWO_ADICITY - log2_n), TWO_ADIC_ROOT_OF_UNITY]
+    exp                                         # stack: [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - log2_n))]
 end
 
 #! Computes the kth element of the "frequency domain" (i.e. of the transformed list).
@@ -238,6 +238,7 @@ proc.main.3
     dup                                      # stack: [n, n, v0, ..., v{n-1}]
     mem_store.RESULT_ARR_LOC                 # stack: [n, v0, ..., v{n-1}]
     dup                                      # stack: [n, n, v0, ..., v{n-1}]
+    exec.log2                                # stack: [log2(n), n, v0, ..., v{n-1}]
     exec.get_root_of_unity                   # stack: [root_of_unity, n v0, ..., v{n-1}]
     loc_store.1                              # stack: [n, v0, ..., v{n-1}]
     exec.store_array                         # stack: []
