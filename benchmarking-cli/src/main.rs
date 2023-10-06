@@ -64,8 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Compilation time
     let now = Instant::now();
-    let mut program =
-        utils_program::MidenProgram::new(program_string.as_str(), utils_program::DEBUG_OFF);
+    let mut program = utils_program::MidenProgram::new(program_string.as_str());
     program
         .compile_program()
         .map_err(|err| format!("Failed to compile program - {:?}", err))?;

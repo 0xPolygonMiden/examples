@@ -1,17 +1,15 @@
 # In this example we verify 1000 merkle paths in a sparse Merkle tree.
 # Every leaf on position i looks like [i, 0, 0, 0].
 begin
+    padw
     repeat.1000
-        # stack = [d, i, R, ...]
-        # duplicate the index and use as counter
-        dup.1 padw drop swap.3 
         # => [i, 0, 0, 0, d, i, R,...]
 
         # verify merkle path for node i
         mtree_verify
         # => [i, 0, 0, 0, d, i, R ...]
 
-        push.1 add swap.5 dropw
-        # => [d, i+1, R, ...]
+        add.1 swap.5 add.1
+        # => [i+1, 0, 0, 0, d, i+1, R ...]
     end
 end
