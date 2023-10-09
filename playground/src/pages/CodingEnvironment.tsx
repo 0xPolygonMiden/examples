@@ -27,7 +27,7 @@ import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
 
 export default function CodingEnvironment(): JSX.Element {
 
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   /**
    * This sets the inputs to the default values.
