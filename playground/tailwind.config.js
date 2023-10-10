@@ -1,22 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   theme: {
     extend: {},
     palette: {
-      mode: "light",
+      mode: 'light',
       primary: {
-        main: "#7b3fe4",
+        main: '#7b3fe4'
       },
       secondary: {
-        main: "#efe2fe",
+        main: '#efe2fe'
       },
       background: {
-        default: "#fafafa",
-      },
-    },
+        default: '#fafafa'
+      }
+    }
   },
-  
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
-};
 
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')]
+};

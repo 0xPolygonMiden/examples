@@ -130,10 +130,7 @@ const inputSchema = yup
     "Only 'operand_stack', 'advice_stack', 'advice_map', and 'merkle_store' are allowed at the root level."
   );
 
-
-export const checkInputs = (
-  inputString: string
-): checkedData => {
+export const checkInputs = (inputString: string): checkedData => {
   // Short circuit if the input is empty
   if (inputString === '') {
     return { isValid: true, errorMessage: '' };
@@ -143,7 +140,8 @@ export const checkInputs = (
   let input: JSON;
   try {
     input = JSON.parse(inputString);
-  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     const errorMessage = `Inputs must be a valid JSON object: ${error.message}`;
     return { isValid: false, errorMessage: errorMessage };
   }
@@ -151,7 +149,8 @@ export const checkInputs = (
   try {
     inputSchema.validateSync(input, { strict: true, stripUnknown: false });
     return { isValid: true, errorMessage: '' };
-  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     return { isValid: false, errorMessage: `Invalid inputs: ${error.message}` };
   }
 };
@@ -159,7 +158,7 @@ export const checkInputs = (
 const outputSchema = yup.object().shape({
   stack_output: yup.array().of(yup.number().integer().min(0)).required(),
   overflow_addrs: yup.array().of(yup.number().integer().min(0)).notRequired(),
-  trace_len: yup.number().integer().min(0).optional(),
+  trace_len: yup.number().integer().min(0).optional()
 });
 
 /**
@@ -177,7 +176,8 @@ export function checkOutputs(jsonString: string): checkedData {
   let jsonOutput!: JSON;
   try {
     jsonOutput = JSON.parse(jsonString);
-  } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     const errorMessage = `Miden VM Outputs need to be a valid JSON object:
 ${e.message}
 Did you prove the program first?`;
@@ -185,10 +185,17 @@ Did you prove the program first?`;
   }
 
   try {
-    outputSchema.validateSync(jsonOutput, { strict: true, stripUnknown: false });
+    outputSchema.validateSync(jsonOutput, {
+      strict: true,
+      stripUnknown: false
+    });
     return { isValid: true, errorMessage: '' };
-  } catch(error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-    return { isValid: false, errorMessage: `Invalid outputs: ${error.message}` };
+  } catch (error: any) {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
+    return {
+      isValid: false,
+      errorMessage: `Invalid outputs: ${error.message}`
+    };
   }
 }
 

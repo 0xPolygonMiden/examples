@@ -3,9 +3,9 @@ import {
   ChevronDoubleRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CircleStackIcon,
-} from "@heroicons/react/20/solid";
-import { BsChevronBarLeft, BsChevronBarRight } from "react-icons/bs";
+  CircleStackIcon
+} from '@heroicons/react/20/solid';
+import { BsChevronBarLeft, BsChevronBarRight } from 'react-icons/bs';
 
 type DebugButtonProps = {
   icon: string;
@@ -20,26 +20,54 @@ const DebugButton = ({ icon, onClick }: DebugButtonProps): JSX.Element => {
       onClick={onClick}
     >
       <span className="sr-only">icon</span>
-      {icon === "Start" ? (
-        <BsChevronBarLeft className=" h-5 w-5" aria-hidden="true" title="Go to start" />
+      {icon === 'Start' ? (
+        <BsChevronBarLeft
+          className=" h-5 w-5"
+          aria-hidden="true"
+          title="Go to start"
+        />
       ) : null}
-      {icon === "PPrevious" ? (
-        <ChevronDoubleLeftIcon className="h-5 w-5" aria-hidden="true" title="100 cycles back" />
+      {icon === 'PPrevious' ? (
+        <ChevronDoubleLeftIcon
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="100 cycles back"
+        />
       ) : null}
-      {icon === "Previous" ? (
-        <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" title="1 cycle back" />
+      {icon === 'Previous' ? (
+        <ChevronLeftIcon
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="1 cycle back"
+        />
       ) : null}
-      {icon === "Stack" ? (
-        <CircleStackIcon className="h-5 w-5" aria-hidden="true" title="Print current stack" />
+      {icon === 'Stack' ? (
+        <CircleStackIcon
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="Print current stack"
+        />
       ) : null}
-      {icon === "Forward" ? (
-        <ChevronRightIcon className="h-5 w-5" aria-hidden="true" title="1 cycles" />
+      {icon === 'Forward' ? (
+        <ChevronRightIcon
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="1 cycles"
+        />
       ) : null}
-      {icon === "FForward" ? (
-        <ChevronDoubleRightIcon className="h-5 w-5" aria-hidden="true" title="100 cycles" />
+      {icon === 'FForward' ? (
+        <ChevronDoubleRightIcon
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="100 cycles"
+        />
       ) : null}
-      {icon === "End" ? (
-        <BsChevronBarRight className="h-5 w-5" aria-hidden="true" title="Go to end" />
+      {icon === 'End' ? (
+        <BsChevronBarRight
+          className="h-5 w-5"
+          aria-hidden="true"
+          title="Go to end"
+        />
       ) : null}
     </button>
   );

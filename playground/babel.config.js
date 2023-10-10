@@ -3,23 +3,23 @@ module.exports = {
     test: {
       presets: [
         [
-          "@babel/preset-env",
+          '@babel/preset-env',
           {
             targets: {
-              node: "current",
+              node: 'current'
             },
-            modules: "commonjs",
-          },
-        ],
+            modules: 'commonjs'
+          }
+        ]
       ],
       plugins: [
         [
-          "@babel/plugin-transform-modules-commonjs",
+          '@babel/plugin-transform-modules-commonjs',
           {
-            importInterop: "node",
-          },
-        ],
-      ],
-    },
-  },
+            importInterop: 'node'
+          }
+        ]
+      ]
+    }
+  }
 };

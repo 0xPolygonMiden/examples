@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-
-import Explainer from "../markdown/Explainer.md";
+import Explainer from '../markdown/Explainer.md';
 
 export default function ExplainerPage(): JSX.Element {
-  const [explainer, setExplainer] = useState("");
+  const [explainer, setExplainer] = useState('');
 
   // Fetch Explainer
   useEffect(() => {
@@ -24,4 +23,4 @@ export default function ExplainerPage(): JSX.Element {
       </div>
     </div>
   );
-}    
+}
