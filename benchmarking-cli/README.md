@@ -1,27 +1,28 @@
 # Benchmarking CLI for Miden Examples
 
-This is a simple CLI that enables users to benchmark the Miden examples. You can run any example in https://github.com/0xPolygonMiden/examples/tree/main/examples. 
+This is a simple CLI that enables users to benchmark the Miden examples. You can run any example in https://github.com/0xPolygonMiden/examples/tree/main/examples.
 
 ## Usage
+
 To run the fibonacci example, you can either run
 
 ```
 cargo build
 ```
 
-and then 
+and then
 
 ```
 ./target/debug/miden-benchmarking-cli --example fibonacci
 ```
 
-OR you run 
+OR you run
 
 ```
-cargo run --release -- -e fibonacci   
+cargo run --release -- -e fibonacci
 ```
 
-You can pass two additional parameters to the CLI `security` and `output`. `security` can be `"high"` for 128-bit security and will default to 96-bit. `output` defines the number of stack outputs the program returns. It defaults to 1. 
+You can pass two additional parameters to the CLI `security` and `output`. `security` can be `"high"` for 128-bit security and will default to 96-bit. `output` defines the number of stack outputs the program returns. It defaults to 1.
 
 In general the CLI works as follows:
 
