@@ -14,25 +14,25 @@ repos:
         name: Cargo fmt
         args: ['+stable', 'fmt', '--all']
         stages: [commit]
-        files: ^examples/playground/miden-wasm/src/
+        files: ^examples/playground/miden-wasm/.*\.rs$
       # Requires code to be properly formatted prior to pushing upstream
       - id: cargo
         name: Cargo fmt --check
         args: ['+stable', 'fmt', '--all', '--check']
         stages: [push, manual]
-        files: ^examples/playground/miden-wasm/src/
+        files: ^examples/playground/miden-wasm/.*\.rs$
       - id: cargo
         name: Cargo check --all-targets
         args: ['+stable', 'check', '--all-targets']
-        files: ^examples/playground/miden-wasm/
+        files: ^examples/playground/miden-wasm/.*\.rs$
       - id: cargo
         name: Cargo check --all-targets --no-default-features
         args: ['+stable', 'check', '--all-targets', '--no-default-features']
-        files: ^examples/playground/miden-wasm/src/
+        files: ^examples/playground/miden-wasm/.*\.rs$
       - id: cargo
         name: Cargo check --all-targets --all-features
         args: ['+stable', 'check', '--all-targets', '--all-features']
-        files: ^examples/playground/miden-wasm/
+        files: ^examples/playground/miden-wasm/.*\.rs$
       # Unlike fmt, clippy will not be automatically applied
       - id: cargo
         name: Cargo clippy
@@ -47,4 +47,4 @@ repos:
             '--deny',
             'warnings'
           ]
-        files: ^examples/playground/miden-wasm/src/
+        files: ^examples/playground/miden-wasm/.*\.rs$
