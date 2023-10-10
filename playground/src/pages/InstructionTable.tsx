@@ -1,14 +1,14 @@
-import { Fragment, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import gfm from "remark-gfm";
-import math from "remark-math";
-import katex from "rehype-katex";
-import { assemblerInstructions } from "../data/instructions";
+import { Fragment, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+import math from 'remark-math';
+import katex from 'rehype-katex';
+import { assemblerInstructions } from '../data/instructions';
 
-import "katex/dist/katex.min.css";
+import 'katex/dist/katex.min.css';
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 /** TODO:
@@ -16,23 +16,25 @@ function classNames(...classes: string[]) {
  * or use react table (https://react-table.tanstack.com/docs/overview)`
  */
 export default function InstructionTable() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 pt-6 pb-20">
       <div className="flex justify-between flex-col gap-2 sm:flex-row sm:gap-6 sm:items-center">
         <div>
-          <h1 className="text-base font-semibold text-transform: uppercase">Instructions</h1>
+          <h1 className="text-base font-semibold text-transform: uppercase">
+            Instructions
+          </h1>
           <div className="mt-1 sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <p className="text-sm text-gray-700">
-                A list of all Miden assembly instructions. If you want to learn more
-                about Miden Assembly and the Miden VM you can read the
+                A list of all Miden assembly instructions. If you want to learn
+                more about Miden Assembly and the Miden VM you can read the
                 <a
                   href="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main/"
                   className="text-blue-600 hover:text-blue-800"
                 >
-                  {" "}
+                  {' '}
                   Miden Assembly documentation
                 </a>
                 .
@@ -98,7 +100,9 @@ export default function InstructionTable() {
                   {assemblerInstructions
                     .filter((instructionClass) =>
                       instructionClass.instructions.some((instruction) =>
-                        instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase())
+                        instruction.instruction
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase())
                       )
                     )
                     .map((instructionClass) => (
@@ -113,61 +117,63 @@ export default function InstructionTable() {
                           </th>
                         </tr>
                         {instructionClass.instructions
-                          .filter(instruction => instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase()))
-                          .map(
-                            (instruction, instructionIdx) => (
-                              <tr
-                                key={instruction.instruction}
-                                className={classNames(
-                                  instructionIdx === 0
-                                    ? "border-gray-300"
-                                    : "border-gray-200",
-                                  "border-t"
-                                )}
-                              >
-                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                                  <ReactMarkdown
-                                    remarkPlugins={[math]}
-                                    rehypePlugins={[katex]}
-                                  >
-                                    {instruction.instruction}
-                                  </ReactMarkdown>
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                                  <ReactMarkdown
-                                    remarkPlugins={[math, gfm]}
-                                    rehypePlugins={[katex]}
-                                  >
-                                    {instruction.stackInput}
-                                  </ReactMarkdown>
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                                  <ReactMarkdown
-                                    remarkPlugins={[math, gfm]}
-                                    rehypePlugins={[katex]}
-                                  >
-                                    {instruction.stackOutput}
-                                  </ReactMarkdown>
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                                  <ReactMarkdown
-                                    remarkPlugins={[math, gfm]}
-                                    rehypePlugins={[katex]}
-                                  >
-                                    {instruction.cycles}
-                                  </ReactMarkdown>
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
-                                  <ReactMarkdown
-                                    remarkPlugins={[math, gfm]}
-                                    rehypePlugins={[katex]}
-                                  >
-                                    {instruction.notes}
-                                  </ReactMarkdown>
-                                </td>
-                              </tr>
-                            )
-                          )}
+                          .filter((instruction) =>
+                            instruction.instruction
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase())
+                          )
+                          .map((instruction, instructionIdx) => (
+                            <tr
+                              key={instruction.instruction}
+                              className={classNames(
+                                instructionIdx === 0
+                                  ? 'border-gray-300'
+                                  : 'border-gray-200',
+                                'border-t'
+                              )}
+                            >
+                              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                                <ReactMarkdown
+                                  remarkPlugins={[math]}
+                                  rehypePlugins={[katex]}
+                                >
+                                  {instruction.instruction}
+                                </ReactMarkdown>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                <ReactMarkdown
+                                  remarkPlugins={[math, gfm]}
+                                  rehypePlugins={[katex]}
+                                >
+                                  {instruction.stackInput}
+                                </ReactMarkdown>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                <ReactMarkdown
+                                  remarkPlugins={[math, gfm]}
+                                  rehypePlugins={[katex]}
+                                >
+                                  {instruction.stackOutput}
+                                </ReactMarkdown>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                <ReactMarkdown
+                                  remarkPlugins={[math, gfm]}
+                                  rehypePlugins={[katex]}
+                                >
+                                  {instruction.cycles}
+                                </ReactMarkdown>
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-black">
+                                <ReactMarkdown
+                                  remarkPlugins={[math, gfm]}
+                                  rehypePlugins={[katex]}
+                                >
+                                  {instruction.notes}
+                                </ReactMarkdown>
+                              </td>
+                            </tr>
+                          ))}
                       </Fragment>
                     ))}
                 </tbody>
