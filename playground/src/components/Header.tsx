@@ -7,7 +7,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 const navigation = [
   {
     name: 'Documentation',
-    href: 'https://wiki.polygon.technology/docs/miden/user_docs/assembly/main'
+    href: 'https://0xpolygonmiden.github.io/miden-vm/intro/main.html'
   },
   {
     name: 'Developer Tools',
