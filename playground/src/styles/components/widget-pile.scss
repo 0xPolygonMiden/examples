@@ -13,11 +13,15 @@
 
     
     &.expanded {
-        height: 100svh;
+        height: clamp(100px, 100vh - 200px, 100svh);
         width: 100vw;
         position: absolute;
         top: 0px;
         left: 0;
         z-index: 200;
+
+        .window-body {
+            height: calc(100svh - 100px);
+        }
     }
 }

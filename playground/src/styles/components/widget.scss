@@ -52,11 +52,19 @@
     .widget-body,
     .widget-footer {
         position: relative;
-        height: auto;      
+        // height: 100%;      
         max-height: 1000px; 
         overflow: auto;
-        max-height: 400px;
+        max-height: 100svh;
         overflow: auto;
+        display:flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: fontSize(tiny);
+        align-items: flex-start;
+        align-content: flex-start;
+        justify-content: flex-start;
+
     }
 
     &.collapsed {

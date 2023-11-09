@@ -1,0 +1,16 @@
+{
+    "theme": "light",
+    "language": "en",
+    "widgets": {
+        "explainer": { "name": "Explainer", "enabled": false, "nav": true},
+        "editor": { "name": "Test & Experiment", "enabled": true, "nav": true },
+        "instructions": { "name": "Instructions", "enabled": false, "nav": true }
+    },
+    "widgetPiles": [
+        [ "editor" ],
+        [ "instructions", "explainer"]
+    ],
+    "inputs":"{\"operand_stack\": [\"0\"],\"advice_stack\": [\"0\"]}",
+    "code": "# This is a basic program that pushes 1 and 2 onto the stack and adds them.\n# The result is then pushed onto the stack.\n\nbegin\n  push.1\n  push.2\n  add\nend",
+    "showPopovers": true
+} 

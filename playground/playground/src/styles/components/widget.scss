@@ -1,0 +1,107 @@
+.widget {
+    border-bottom: 1px solid color(border);
+
+    .widget-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        border-bottom: 1px solid color(border);
+
+        min-height: fontSize(huge);
+        padding: padding(tiny);
+
+        .widget-header-name {
+            display: inline-block;
+            font-size: fontSize(regular);
+            margin-right: fontSize(regular);
+            margin-left: fontSize(regular);
+        }
+
+        .widget-header-collapsible {
+            display: inline-block;
+            cursor: pointer;
+            font-size: fontSize(small);
+            
+            i {
+                color: color(secondary);
+            }
+        }
+
+
+        .widget-header-panels {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: fontSize(tiny);
+            max-height: 1000px;
+
+            &.hidden {
+                max-height: 0px;
+                opacity: 0;
+            }
+
+        }
+
+    }
+
+    .widget-body,
+    .widget-footer {
+        position: relative;
+        height: auto;      
+        max-height: 1000px; 
+        overflow: auto;
+        max-height: 400px;
+        overflow: auto;
+    }
+
+    &.collapsed {
+        border-width: 0px;
+
+        .widget-body,
+        .widget-footer {
+            max-height: 0px;
+            overflow: hidden;
+        }
+
+        .widget-header .widget-header-panels,
+        .widget-header .widget-header-toggle-panels {
+            max-height: 0px;
+            opacity: 0;
+        }
+    }
+
+    &.hidden {
+        // display: none;
+        max-height: 0px;
+        opacity: 0;
+    }
+
+    &.expanded {
+        height: 100svh;
+        width: 100vw;
+        position: absolute;
+        top: 0px;
+        left: 0;
+        z-index: 200;
+
+        .widget-body {
+            height: 100%;
+        }
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100vw;
+            height: 100vh;
+            background-color:  var(--color-bg-secondary);
+            z-index: -1;
+        }
+    }
+}

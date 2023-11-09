@@ -1,0 +1,37 @@
+@import 'functions';
+@import 'variables';
+@import 'config';
+@import 'defaults';
+@import 'global';
+
+
+
+@import 'layouts/main';
+
+@import 'components/config-window';
+@import 'components/dialog';
+@import 'components/popover';
+@import 'components/header';
+@import 'components/nav';
+@import 'components/panel';
+@import 'components/widget-pile';
+@import 'components/widget';
+@import 'components/debugger';
+@import 'components/storage';
+
+@import 'pages/coding-environment';
+
+
+
+//TODO - Should be in a separate file
+.input-output {
+    div {
+        padding: padding(small);
+        border-bottom: 1px solid color(border);
+    }
+}
+
+.cm-scroller {
+    overflow: auto !important;
+    min-height: 400px;
+}

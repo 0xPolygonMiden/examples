@@ -276,3 +276,11 @@ input[type="text"] {
     font-size: fontSize(small);
 }
 
+
+.markdown {
+    overflow: auto;
+    padding: padding(regular);
+    img {
+        max-width: 100%;
+    }   
+}

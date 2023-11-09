@@ -1,28 +1,10 @@
 import { useState, useContext } from 'react';
 import Popover from './Popover';
-import { ConfigContext } from '../contexts/ConfigProvider';
-
-const popovers = [
-    {
-        title: 'Run',
-        elementId: 'runbtn',
-        children: <p>Run your code, stay set and fat.</p>,
-    },
-    {
-        title: 'Debug',
-        elementId: 'debugbtn',
-        children: <p>Debug your code and have a great day.</p>,
-    },
-    {
-        title: 'Toggle Instructions',
-        elementId: 'show-instructions',
-        children: <p>Toggle the instructions. You know you'll need them.</p>,
-
-    }
-]
+import useSettings from '../hooks/useSettings';
+import popovers from '../data/popovers.json';
 
 const PopoverManager = () => {
-    const {showPopovers,disablePopovers} = useContext(ConfigContext);
+    const { showPopovers, disablePopovers } = useSettings();
     const [id, setId] = useState(0);
     const [hide, setHide] = useState(!showPopovers);
 
@@ -36,7 +18,7 @@ const PopoverManager = () => {
             setId(total);
             handleLast();
         }
-    }
+    }   
 
     const handlePrevious = () => {
         setId(id - 1);
@@ -51,7 +33,9 @@ const PopoverManager = () => {
     }
     const handleLast = () => {
         setId(-1);
-        disablePopovers();
+        if(disablePopovers){
+            disablePopovers();
+        }
     }
 
     return <>

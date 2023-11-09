@@ -1,0 +1,12 @@
+[
+    {
+        "title": "Run",
+        "elementId": "runbtn",
+        "children": "Run your code! Stay set and fat."
+    },
+    {
+        "title": "Debug",
+        "elementId": "debugbtn",
+        "children": "Debug your code and have a great day."
+    }
+]

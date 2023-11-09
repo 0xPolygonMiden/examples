@@ -1,22 +1,11 @@
 import { Children, ReactNode, cloneElement, useContext, useState } from "react";
-import { ConfigContext } from "../contexts/ConfigProvider";
+import WidgetProps from "../types/WidgetProps";
 
-type WidgetProps = {
-    children?: ReactNode,
-    name?: string,
-    collapsible?: boolean,
-    collapsed?: boolean,
-    onToggleCollapsed?: () => void,
-    hidden?: boolean,
-    expandable?: boolean,
-    expanded?: boolean,
-}
-
-const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: WidgetProps) => {
+const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed, className, style}: WidgetProps) => {
     const [panelsVisible, setPanelsVisible] = useState(true);
 
     return <>
-        <div className="widget-header">
+        <div className={"widget-header " + className} style={style}>
             <div className="widget-header-utils">
                 <h2 className="widget-header-name">{name}</h2>
                 {
@@ -42,26 +31,25 @@ const Header = ({ children, name, collapsible, collapsed , onToggleCollapsed}: W
     </>;
 };
 
-const Body = ({ children }: WidgetProps) => {
+const Body = ({ children, className, style }: WidgetProps) => {
     return <>
-        <div className={`widget-body`}>
+        <div className={"widget-body " + className} style={style}>
             {children}
         </div>
     </>;
 };
 
 
-const Footer = ({ children }: WidgetProps) => {
+const Footer = ({ children, className, style }: WidgetProps) => {
     return <>
-        <div className={`widget-footer`}>
+        <div className={"widget-footer " + className} style={style}>
             {children}
         </div>
     </>
 }
 
-const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true, hidden = false, expandable = false, expanded = false }: WidgetProps) => {
+const Widget = ({ children, name = "Widget", collapsible = true, collapsed = true, hidden = false, expandable = false, expanded = false , className, style }: WidgetProps) => {
     const [collapsedState, setCollapsedState] = useState(collapsed);
-    const {widgets} = useContext(ConfigContext);
 
     const toggleCollapsed = () => setCollapsedState(!collapsedState);
     

@@ -1,25 +1,19 @@
-import { useContext } from "react";
-import { ConfigContext } from "../contexts/ConfigProvider";
+import { Fragment } from "react";
+import useWidgets from "../hooks/useWidgets";
+import NavButton from "./NavButton";
 
 const Nav = () => {
-    const {setWidget, widgets} = useContext(ConfigContext);
+    const { widgets } = useWidgets();
     return <>
         <nav>
-            <a 
-                className={widgets.editor.visible ? "active" : ""}
-                onClick={() => setWidget("editor", {
-                    visible: !widgets.editor.visible
-            })}>
-                Test & Experiment
-            </a>
-            <a 
-                id="show-instructions"
-                className={widgets.instructions.visible ? "active" : ""}
-                onClick={() => setWidget("instructions", {
-                    visible: !widgets.instructions.visible
-            })}>
-                Instructions
-            </a>
+            {Object.keys(widgets).map((widgetKey, index) => {
+                if(!widgets[widgetKey].nav) return <></>;
+
+                const widget = widgets[widgetKey];
+                return <Fragment key={index}>
+                    <NavButton widgetName={widgetKey} text={widget.name} />
+                </Fragment>
+            })}
         </nav>
     </>;
 };

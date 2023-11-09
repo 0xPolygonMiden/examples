@@ -20,11 +20,9 @@ const Popover = ({ title, enabled = false, elementId, children, onClickPrevious,
         const el = (document as any).getElementById(elementId);
 
         if (!el) {
-            console.log(
+            console.error(
                 `Popover with title "${title}" and elementId "${elementId}" could not find the element with id "${elementId}".`
             );
-
-            console.log(el);
             return;
         }
 
@@ -80,7 +78,7 @@ const Popover = ({ title, enabled = false, elementId, children, onClickPrevious,
                 </div>
             </div>
             <div className="body">
-                {children}
+                <p>{children}</p>
             </div>
         </div>
     </>;

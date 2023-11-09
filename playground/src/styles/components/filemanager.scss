@@ -1,0 +1,56 @@
+.filemanager {
+    padding: padding(regular);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: padding(regular);
+    
+    .card.selected {
+        box-shadow: 0 0 2px 0 hsla(0, 0%, 0%, 0.25);
+    }
+
+    .card,
+    .go-back {
+        display:flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 80px;
+        
+        border: 0px;
+        box-shadow: none;
+
+        &:hover {
+            box-shadow: 0 0 2px 0 hsla(0, 0%, 0%, 0.75);
+        }
+    }
+    .icon:not(.go-back .icon) img {
+        width: 50px;
+        height: 50px;
+        fill: white;
+    }
+
+    .card-file {
+        border: 1px solid hsla(0, 0%, 0%, 0.05);
+        overflow-x: hidden;
+    }
+
+    .go-back {
+        justify-content: center;
+
+        i, .icon{
+            font-size: 20px;
+        }
+
+    }
+
+    .icon {
+        text-align: center;
+        cursor: pointer;
+    }
+}
+
+.breadcrumbs {
+    padding: padding(regular);
+    font-size: fontSizes(small);
+}
