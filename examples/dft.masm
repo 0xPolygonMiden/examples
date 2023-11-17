@@ -107,44 +107,43 @@ end
 #! 3: j (counter)
 #! 4: result (partial result of the computation)
 proc.f_k.5
-    loc_store.0                                # store k
-    loc_store.1                                # store root_of_unity
-    loc_store.2                                # store n
-    push.0                                     # Prepare j = 0
-    loc_store.3                                # Set j = 0
-    push.0                                     # Prepare result = 0
-    loc_store.4                                # Set result = 0
+    # preserve k, root_of_unity and n
+    loc_store.0 loc_store.1 loc_store.2
+    # => [v_0, ..., v_{n-1}, ...]
 
-    # Stack here: [v0, ..., v{n-1}, ...]
+    # preserve j=0 and result=0
+    push.0 loc_store.3 push.0 loc_store.4
+    # => [v0, ..., v{n-1}, ...]
 
-    push.1                                     # push 1 to enter the loop
+    # Push 1 to enter the loop
+    push.1
+    # => [v0, ..., v{n-1}, ...]
+
     while.true
+        # prepare stack to compute `root_of_unity^(jk)`
+        loc_load.1 loc_load.0 loc_load.3
+        # => [j, k , root_of_unity, v{j}, ..., v{n-1}]
+
         # compute `root_of_unity^(jk)`
-        loc_load.1                             # stack: [root_of_unity, v{j}, ..., v{n-1}]
-        loc_load.0                             # stack: [k , root_of_unity, v{j}, ..., v{n-1}]
-        loc_load.3                             # stack: [j, k , root_of_unity, v{j}, ..., v{n-1}]
-        mul                                    # stack: [j*k , root_of_unity, v{j}, ..., v{n-1}]
-        exp                                    # stack: [root_of_unity^(jk), v{j}, ..., v{n-1}]
-        mul                                    # stack: [v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
+        mul exp mul
+        # => [v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
 
         # update result
-        loc_load.4                             # stack: [result, v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
-        add                                    # stack: [result + v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
-        loc_store.4                            # stack: [v{j+1}, ..., v{n-1}]
+        loc_load.4 add loc_store.4
+        # => [v{j+1}, ..., v{n-1}]
 
-        # Increment j
-        loc_load.3                             # stack: [j, v{j+1}, ..., v{n-1}]
-        add.1                                  # stack: [j+1, v{j+1}, ..., v{n-1}]
-        dup                                    # stack: [j+1, j+1, v{j+1}, ..., v{n-1}]
-        loc_store.3                            # stack: [j+1, v{j+1}, ..., v{n-1}]
+        # Increment j and leave a copy on stack
+        loc_load.3 add.1 dup loc_store.3
+        # => [j+1, v{j+1}, ..., v{n-1}]
 
         # Check if we're done looping
-        loc_load.2                             # stack: [n, j+1, v{j+1}, ..., v{n-1}]
-        neq                                    # stack: [1 or 0, v{j+1}, ..., v{n-1}]
+        loc_load.2 neq
+        # => [0 or 1, v{j+1}, ..., v{n-1}]
     end
 
     # Return result
-    loc_load.4                                 # load result
+    loc_load.4
+    # => [ f_k ]
 end
 
 # Stores an array to `INPUT_ARR_LOC`, where an "array" is a list of elements prefixed by their length.
