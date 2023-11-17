@@ -237,54 +237,62 @@ end
 #! 1: root_of_unity
 #! 2: k
 proc.main.3
-    # Initialize memory
+    # Initialize memory local `n`
+    dup loc_store.0
+    # => [n, v0, ..., v{n-1}]
+
+    # Initialize memory `RESULT_ARR_LOC` with length of array
+    dup mem_store.RESULT_ARR_LOC
+    # => [n, v0, ..., v{n-1}]
+
+    # Initialize memory local `root_of_unity
+    dup exec.log2 exec.get_root_of_unity loc_store.1
+    # => [n, v0, ..., v{n-1}]
+
+    # Store array
+    exec.store_array
+    # => [ ]
+
     # Note: k is initialized to 0 by the VM
-    dup                                      # stack: [n, n, v0, ..., v{n-1}]
-    loc_store.0                              # stack: [n, v0, ..., v{n-1}]
-    dup                                      # stack: [n, n, v0, ..., v{n-1}]
-    mem_store.RESULT_ARR_LOC                 # stack: [n, v0, ..., v{n-1}]
-    dup                                      # stack: [n, n, v0, ..., v{n-1}]
-    exec.log2                                # stack: [log2(n), n, v0, ..., v{n-1}]
-    exec.get_root_of_unity                   # stack: [root_of_unity, n v0, ..., v{n-1}]
-    loc_store.1                              # stack: [n, v0, ..., v{n-1}]
-    exec.store_array                         # stack: []
 
     # Prepare stack for loop
-    push.1                                 # push 1 so that we enter the loop
+    push.1
+    # => [ 1 ]
 
     while.true
-        # prepare call to `proc.f_k`
-        push.INPUT_ARR_LOC                         # stack: [INPUT_ARR_LOC]
-        exec.retrieve_array                  # stack: [n, v0, ..., v{n-1}]
-        loc_load.1                           # stack: [root_of_unity, n, v0, ..., v{n-1}]
-        loc_load.2                           # stack: [k, root_of_unity, n, v0, ..., v{n-1}]
+        # Retrieve input array
+        push.INPUT_ARR_LOC exec.retrieve_array
+        # => [n, v0, ..., v{n-1}]
+
+        # Retrieve `root_of_unity` and `k`
+        loc_load.1 loc_load.2
+        # => [k, root_of_unity, n, v0, ..., v{n-1}]
 
         # call `proc.f_k`
-        exec.f_k                             # stack: [f_k]
+        exec.f_k
+        # => [ f_k ]
 
-        # Store `f_k` at `RESULT_ARR_LOC + k + 1`
-        push.RESULT_ARR_LOC                  # stack: [RESULT_ARR_LOC, f_k]
-        loc_load.2                           # stack: [k, RESULT_ARR_LOC, f_k]
-        add                                  # stack: [RESULT_ARR_LOC + k, f_k]
-        add.1                                # stack: [RESULT_ARR_LOC + k + 1, f_k]
-        mem_store                            # stack: []
+        # Prepare pointer to store `f_k`
+        push.RESULT_ARR_LOC loc_load.2 add add.1
+        # => [RESULT_ARR_LOC + k + 1, f_k]
 
-        # Load, increment k, and store 
-        loc_load.2                            # stack: [k]
-        add.1                                 # stack: [k+1]
-        dup                                   # stack: [k+1, k+1]
-        loc_store.2                           # stack: [k+1]
+        # Store `f_k`
+        mem_store
+        # => [ ]
 
-        # Check if we're done
-        loc_load.0                            # stack: [n, k+1]
-        neq                                   # stack: [1 or 0]
+        # Load, increment k, and store. Keep a copy on the stack
+        loc_load.2 add.1 dup loc_store.2
+        # => [k+1]
+
+        # Check if we're done by comparing `k+1` with `n`
+        loc_load.0 neq
+        # => [1 or 0]
     end
+    # => [ ]
 
-    # stack: []
-
-    push.RESULT_ARR_LOC                       # stack: [RESULT_ARR_LOC]
-    exec.retrieve_array                       # stack: [n, f0, ..., f{n-1}]
-    drop                                      # stack: [f0, ..., f{n-1}]
+    # Return result array
+    push.RESULT_ARR_LOC exec.retrieve_array drop
+    # => [f0, ..., f{n-1}]
 end
 
 begin
