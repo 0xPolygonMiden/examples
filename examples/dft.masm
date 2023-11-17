@@ -31,44 +31,45 @@ const.RESULT_ARR_LOC=3221225472
 #! Input: [n]
 #! Output: [log2(n)] if n is supported, otherwise halts
 proc.log2
-    dup                                        # stack: [n, n]
-    eq.1                                       # stack: [0 or 1, n]
+    # check if n == 1
+    dup eq.1
+    # => [0 or 1, n]
+
     if.true
         # n == 1
-        drop                                   # stack: []
-        push.0                                 # stack: [0]
+        drop push.0
+        # => stack: [0]
     else
-        dup                                    # stack: [n, n]
-        eq.2                                   # stack: [0 or 1, n]
+        # check if n == 2
+        dup eq.2
+        # => [0 or 1, n]
         if.true
-            # n == 2
-            drop                               # stack: []
-            push.1                             # stack: [1]
+            drop push.1
+            # => [1]
         else
-            dup                                # stack: [n, n]
-            eq.4                               # stack: [0 or 1, n]
+            # check if n == 4
+            dup eq.4
+            # => [0 or 1, n]
             if.true
-                # n == 4
-                drop                           # stack: []
-                push.2                         # stack: [2]
+                drop push.2
+                # => [2]
             else
-                dup                            # stack: [n, n]
-                eq.8                           # stack: [0 or 1, n]
+                # check if n == 8
+                dup eq.8
+                # => [0 or 1, n]
                 if.true
-                    # n == 8
-                    drop                       # stack: []
-                    push.3                     # stack: [3]
+                    drop push.3
+                    # => [3]
                 else
-                    dup                        # stack: [n, n]
-                    eq.16                      # stack: [0 or 1, n]
+                    # check if n == 16
+                    dup eq.16
+                    # => [0 or 1, n]
                     if.true
-                        # n == 16
-                        drop                       # stack: []
-                        push.4                     # stack: [4]
+                        drop push.4
+                        # => [4]
                     else
                         # n unsupported; halt
-                        push.1
-                        assertz
+                        push.1 assertz
                     end
                 end
             end
