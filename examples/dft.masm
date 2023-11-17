@@ -86,11 +86,13 @@ end
 #! Equivalent to Winterfell's implementation: 
 #! https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/traits.rs#L254-L259
 proc.get_root_of_unity
-    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY     # stack: [TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY, log2_n]
-    movup.2                                     # stack: [log2_n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
-    sub                                         # stack: [TWO_ADICITY - log2_n, TWO_ADIC_ROOT_OF_UNITY]
-    pow2                                        # stack: [2^(TWO_ADICITY - log2_n), TWO_ADIC_ROOT_OF_UNITY]
-    exp                                         # stack: [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - log2_n))]
+    # prepare stack
+    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY movup.2
+    # => [log2_n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
+
+    # compute root of unity
+    sub pow2 exp
+    # => [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - log2_n))]
 end
 
 #! Computes the kth element of the "frequency domain" (i.e. of the transformed list).
