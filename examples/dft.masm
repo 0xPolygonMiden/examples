@@ -152,38 +152,36 @@ end
 # Input: [n, v0, ..., v{n-1}, ...]
 # Output: [...]
 proc.store_array
-    # Store n
-    dup
-    mem_store.INPUT_ARR_LOC
+    # Store n and keep a copy on the stack
+    dup mem_store.INPUT_ARR_LOC
+    # => [n, v0, ..., v{n-1}, ...]
 
     # Prepare stack for loop
     push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
+    # [ 1, i=0, n, v0, ..., v{n-1}]
 
     while.true
-        # stack: [i, n, v{i}, ..., v{n-1}]
+        # => [i, n, v{i}, ..., v{n-1}]
 
         # Setup write offset
         # Note: we write at location i + (INPUT_ARR_LOC + 1), since the element at INPUT_ARR_LOC is `n`
         # (i.e. the array starts at address `INPUT_ARR_LOC + 1`)
-        movup.2                               # stack: [v{i}, i, n, v{i+1}, ..., v{n-1}]
-        dup.1                                 # stack: [i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        push.INPUT_ARR_LOC                          # stack: [INPUT_ARR_LOC, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        add.1                                 # stack: [INPUT_ARR_LOC+1, i, v{i}, i, n, v{i+1}, ..., v{n-1}]
-        add                                   # stack: [i+INPUT_ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
+        movup.2 dup.1 push.INPUT_ARR_LOC add.1 add
+        # => [i+INPUT_ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
 
         # Write v{i}
-        mem_store                             # stack: [i, n, v{i+1}, ..., v{n-1}]
+        mem_store
+        # => [i, n, v{i+1}, ..., v{n-1}]
 
         # Increment i and check if we're done
-        add.1                                 # stack: [i+1, n, v{i+1}, ..., v{n-1}]
-        dup.1                                 # stack: [n, i+1, n, v{i+1}, ..., v{n-1}]
-        dup.1                                 # stack: [i+1, n, i+1, n, v{i+1}, ..., v{n-1}]
-        neq                                   # stack: [1 or 0, i+1, n, v{i+1}, ..., v{n-1}]
+        add.1 dup.1 dup.1 neq
+        # => [1 or 0, i+1, n, v{i+1}, ..., v{n-1}]
     end
 
-    # stack: [n, n, ...]
-    drop                                      # stack: [n, ...]
-    drop                                      # stack: [...]
+    # => [n, n, ...]
+
+    drop drop
+    # [ ]
 end
 
 #! Retrieves an array previously stored with `proc.store_array`.
