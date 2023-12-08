@@ -1,0 +1,151 @@
+proc.init
+    # init `swapped`
+    mem_store.0
+
+    # init `i`
+    push.3
+    mem_store.1
+
+    # init `j`
+    push.4
+    mem_store.2
+
+    # push advice_tape elements to the stack
+    adv_push.6
+
+    # push elements from stack to memory
+    mem_store.3
+    mem_store.4
+    mem_store.5
+    mem_store.6
+    mem_store.7
+    mem_store.8
+end
+
+proc.notSwapped
+    push.0
+    mem_store.0
+end
+
+proc.swapped
+    push.1
+    mem_store.0 
+end
+
+proc.resetCounters
+    mem_load.2
+    eq.9
+    if.true
+        push.4
+        mem_store.2
+        push.3
+        mem_store.1
+        exec.notSwapped
+    end
+end
+
+proc.incrementCounters
+    # load `i`, increment and store
+    mem_load.1
+    add.1
+    mem_store.1
+
+    # load `j`, increment and store
+    mem_load.2
+    add.1
+    mem_store.2
+end
+
+proc.loadValues
+    # load `j`
+    mem_load.2
+
+    # load value `b` at index mem[j]
+    mem_load
+
+    # load `i`
+    mem_load.1
+
+    # load value `a` at index mem[i]
+    mem_load
+end
+
+proc.storeValues
+    # load `i`
+    mem_load.1
+
+    # store value `a` at index mem[i]
+    mem_store
+
+    # load `j`
+    mem_load.2
+
+    # store value `b` at index mem[j]
+    mem_store
+end
+
+proc.loadAndSort
+    # load values `a` and `b`
+    exec.loadValues
+
+    # compare and swap
+    dup.1
+    dup.1
+    lt
+    if.true
+        swap
+        exec.swapped
+        exec.storeValues
+    else
+        exec.storeValues
+    end
+
+    # Increment counters
+    exec.incrementCounters
+end
+
+proc.sorted
+    # if ((i == 8 && j == 9) && (swapped == 0)) {
+    #   push.0  
+    # } else {
+    #   push.1   
+    # }
+    # load `i` and load `j` and check if they are 8 and 9
+    mem_load.1
+    eq.8
+    mem_load.2
+    eq.9
+    and
+    mem_load.0
+    not
+    and
+    if.true
+        push.0
+    else
+        push.1
+    end
+end
+
+begin
+    exec.init
+
+    push.1
+    while.true
+        exec.resetCounters
+        exec.loadAndSort
+        exec.sorted
+    end
+
+    mem_load.8
+    mem_load.7
+    mem_load.6
+    mem_load.5
+    mem_load.4
+    mem_load.3
+end
+
+# "advice_stack": ["0", "99", "12", "1", "9", "4"]
+# "advice_stack": ["6", "3", "4", "5", "9", "2"]
+# "advice_stack": ["7", "1", "8", "4", "3", "5"]
+# "advice_stack": ["2", "6", "10", "3", "8", "9"]
+# "advice_stack": ["5", "11", "3", "7", "2", "4"]
