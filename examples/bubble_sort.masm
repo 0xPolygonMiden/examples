@@ -351,12 +351,12 @@ begin
     # Initialise the VM
     exec.initialise
     
-    # Loop over the array and sort recursively
+    # Loop over the array and sort repeatedly
     while.true
         # If looping has been done over the whole array reset counters to start over from the beginning
         exec.resetCounters
 
-        # Sort elements two-by-two recursively
+        # Sort elements two-by-two repeatedly
         exec.sort
 
         # Check if the array is sorted if so then stop looping
