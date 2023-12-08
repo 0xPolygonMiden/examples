@@ -1,25 +1,77 @@
+# Bubble Sort - but provable
+
 proc.init
-    # init `swapped`
+    # init `swapped` boolean
+    push.0
     mem_store.0
 
-    # init `i`
-    push.3
+    # init `i` index
+    push.5
     mem_store.1
 
-    # init `j`
-    push.4
+    # init `j` index
+    push.6
     mem_store.2
 
-    # push advice_tape elements to the stack
-    adv_push.6
-
-    # push elements from stack to memory
+    # init `g` counter
+    push.0
     mem_store.3
+
+    # init `adv` length
     mem_store.4
-    mem_store.5
-    mem_store.6
-    mem_store.7
-    mem_store.8
+
+    # loop out advice_stack elements
+    push.1
+    while.true
+        adv_push.1
+        mem_load.3
+        add.1
+        dup
+        mem_store.3
+        mem_load.4
+        eq
+        if.true
+            push.0
+            push.0
+            mem_store.3
+        else
+            push.1
+        end
+    end
+
+    push.1
+    while.true
+        # push 5 to the stack
+        push.5
+
+        # load `g` counter
+        mem_load.3
+
+        # add both values
+        add
+
+        # store element at that mem[i]
+        mem_store
+
+        # increment `g` by 1
+        mem_load.3
+        add.1
+        mem_store.3
+
+        # Check if all elements have been pushed
+        mem_load.3
+        mem_load.4
+
+        # Stop loop if `g` == `adv`
+        eq
+        if.true
+            push.0
+            push.0
+            mem_store.3
+        else
+            push.1
+        end
+    end
 end
 
 proc.notSwapped
@@ -128,20 +180,6 @@ end
 
 begin
     exec.init
-
-    push.1
-    while.true
-        exec.resetCounters
-        exec.loadAndSort
-        exec.sorted
-    end
-
-    mem_load.8
-    mem_load.7
-    mem_load.6
-    mem_load.5
-    mem_load.4
-    mem_load.3
 end
 
 # "advice_stack": ["0", "99", "12", "1", "9", "4"]
