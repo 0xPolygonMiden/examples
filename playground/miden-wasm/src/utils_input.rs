@@ -227,7 +227,7 @@ impl Inputs {
         Self {
             stack_inputs: StackInputs::new(vec![Felt::ZERO]),
             advice_provider: MemAdviceProvider::default(),
-            stack_outputs: StackOutputs::new(vec![], vec![]),
+            stack_outputs: StackOutputs::new(vec![], vec![]).unwrap(),
         }
     }
 
@@ -249,7 +249,7 @@ impl Inputs {
         let outputs = StackOutputs::new(
             outputs_as_json.stack_output,
             outputs_as_json.overflow_addrs.unwrap_or(vec![]),
-        );
+        ).unwrap();
 
         self.stack_outputs = outputs;
 
