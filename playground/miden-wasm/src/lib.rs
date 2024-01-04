@@ -1,8 +1,8 @@
-mod transaction;
 mod utils_debug;
 mod utils_input;
 mod utils_program;
-use miden_vm::{ExecutionProof, ProofOptions};
+use miden_vm::{ExecutionProof, ProvingOptions, DefaultHost, MemAdviceProvider};
+use miden_air::ExecutionOptions;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -28,10 +28,16 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
         .deserialize_inputs(inputs_frontend)
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+
+    let execution_options = ExecutionOptions::new(None, 64 as u32)
+        .map_err(|err| format!("{err}"))?;
+
     let trace = miden_vm::execute(
         &program.program.unwrap(),
         inputs.stack_inputs,
-        inputs.advice_provider,
+        host,
+        execution_options,
     )
     .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
@@ -59,13 +65,15 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outpu
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
-    let proof_options = ProofOptions::default();
+    let proof_options = ProvingOptions::default();
+
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
     let stack_input_cloned = inputs.stack_inputs.clone();
     let (output, proof) = miden_vm::prove(
         &program.program.unwrap(),
         stack_input_cloned,
-        inputs.advice_provider,
+        host,
         proof_options,
     )
     .map_err(|err| format!("Failed to prove execution - {:?}", err))?;

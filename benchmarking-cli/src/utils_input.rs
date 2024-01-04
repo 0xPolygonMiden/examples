@@ -193,7 +193,7 @@ impl Inputs {
         Self {
             stack_inputs: StackInputs::new(vec![]),
             advice_provider: MemAdviceProvider::default(),
-            stack_outputs: StackOutputs::new(vec![], vec![]),
+            stack_outputs: StackOutputs::new(vec![], vec![]).unwrap(),
         }
     }
 
@@ -252,7 +252,7 @@ fn test_parse_output() {
     }"#;
 
     let mut inputs: Inputs = Inputs::new();
-    inputs.deserialize_outputs(output_str).unwrap();
+    inputs.deserialize_inputs(output_str).unwrap();
 
     let output: StackOutputs = inputs.stack_outputs;
 

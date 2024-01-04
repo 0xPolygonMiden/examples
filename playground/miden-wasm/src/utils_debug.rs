@@ -1,6 +1,6 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
-use miden_vm::{math::StarkField, VmState, VmStateIterator, Word};
+use miden_vm::{math::StarkField, VmState, VmStateIterator, Word, DefaultHost, MemAdviceProvider};
 use wasm_bindgen::prelude::*;
 
 // This is the main struct that will be exported to JS
@@ -49,10 +49,12 @@ impl DebugExecutor {
         let mut inputs = Inputs::new();
         inputs.deserialize_inputs(inputs_frontend).unwrap();
 
+        let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+
         let mut vm_state_iter = miden_vm::execute_iter(
             &program.program.unwrap(),
             inputs.stack_inputs,
-            inputs.advice_provider,
+            host,
         );
 
         let vm_state = vm_state_iter
