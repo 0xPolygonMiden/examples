@@ -97,7 +97,7 @@ proc.read_stack_to_memory
     drop                                    # [r, ...]
 end
 
-#! Perform binary searching of value in ascending ordered array in stack.
+#! Performs binary searching of value in ascending ordered array in stack.
 #! Input: [n, v[0], v[1], ..., v[n - 1], v],
 #!     where:
 #!         `n` is number of elements in the array,
@@ -181,7 +181,7 @@ proc.test_gaps_left_not_found
     assert_eq   # Expect insertion index is `2`
 end
 
-#! Run tests.
+#! Runs tests.
 proc.run_tests
     call.test_empty
     call.test_solid
