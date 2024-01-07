@@ -1,0 +1,212 @@
+#! This example code performs binary searching for a given value in an ascending ordered array.
+#!
+#! Input must be provided through the operands stack.
+#! For input and output see documentation for `proc.binary_search_stack`.
+#!
+#! If input values are omitted or n = 0, tests will run.
+
+const.STARTING_MEMORY_ADDRESS=0
+
+#! Reads `n` values (`v[0], v[1], ..., v[n - 1]`) from the stack into the memory starting from address `a`.
+#! Input: [a, n, v[0], v[1], ..., v[n - 1], ...]
+#! Output: [r, ...] where `r` is a next vacant memory address, thus array occupies addresses `[a..r)` in the memory
+proc.read_stack_to_memory
+    u32assert2                              # [a, n, v[0], v[1], ...]
+    dup.1                                   # [n, a, c, v[0], v[1], ...]
+    neq.0                                   # [n != 0, a, n, v[0], v[1], ...]
+    while.true                              # [a, n, v[i], v[i + 1], ...]
+        swap.2                              # [v[i], n, a, v[i + 1], ...]
+        dup.2                               # [a, v[i], n, a, v[i + 1], ...]
+        mem_store                           # [n, a, v[i + 1], ...]
+        u32wrapping_sub.1                   # [n', a, v[i + 1], ...], n' = n - 1
+        swap                                # [a, n', v[i + 1], ...]
+        u32wrapping_add.1                   # [a', n', v[i + 1], ...], a' = a + 1
+        dup.1                               # [n', a', n', v[i + 1], ...]
+        neq.0                               # [n != 0, a, n, v[i + 1], ...], a = a', n = n'
+    end
+                                            # [r, 0, ...], r = a, remove unnecessary zero before returning:
+    swap                                    # [0, r, ...]
+    drop                                    # [r, ...]
+end
+
+#! Binary searches for value `v` in the memory addresses range [l..r), sorted in ascending order.
+#! Input: [l, r, v, ...]
+#! Output: [found (true/false), address] where `found` is searching result (`true`/`false`),
+#!         `address` is an address of value (if it was found), or an address where value should be inserted.
+proc.binary_search
+    # Check if `l < r` then start search, otherwise prepare "not found" result and exit
+    u32assert2                              # [l, r, v, ...]
+    dup                                     # [l, l, r, v, ...]
+    dup.2                                   # [r, l, l, r, v, ...]
+    u32lt                                   # [l < r, l, r, v, ...]
+    if.true                                 # [l, r, v, ...]
+        push.1                              # [1, l, r, v, ...]
+    else                                    # [l, r, v, ...]
+        # Push "not found" flag and flag to skip the loop
+        push.0.0                            # [0, 0, address, r, v, ...], address = l
+    end
+    while.true                              # [l, r, v, ...]
+        # Calculate middle address `m`
+        dup.1                               # [r, l, r, v, ...]
+        dup.1                               # [l, r, l, r, v, ...]
+        u32wrapping_sub                     # [n, l, r, v, ...], n = r - l
+        u32div.2                            # [n / 2, l, r, v, ...]
+        dup.1                               # [l, n / 2, l, r, v, ...]
+        u32wrapping_add                     # [m, l, r, v, ...], m = l + n / 2
+
+        dup                                 # [m, m, l, r, v, ...]
+        mem_load                            # [memory[m], m, l, r, v, ...]
+
+        dup                                 # [memory[m], memory[m], m, l, r, v, ...]
+        dup.5                               # [v, memory[m], memory[m], m, l, r, v, ...]
+        eq                                  # [memory[m] == v, memory[m], m, l, r, v, ...]
+        if.true                             # [memory[m], m, l, r, v, ...]
+            drop                            # [m, l, r, v, ...]
+            swap                            # [l, m, r, v, ...]
+            drop                            # [m, r, v, ...]
+            # Prepare "found" flag and exit the loop
+            push.1.0                        # [0, 1, address, r, v, ...], address = m
+        else                                # [memory[m], m, l, r, v, ...]
+            dup.4                           # [v, memory[m], m, l, r, v, ...]
+            u32lt                           # [memory[m] < v, m, l, r, v, ...]
+            if.true                         # [m, l, r, v, ...]
+                u32wrapping_add.1           # [m + 1, l, r, v, ...]
+                swap                        # [old l, l, r, v, ...], l = m + 1
+            else                            # [m, l, r, v, ...]
+                swap.2                      # [old r, l, r, v, ...], r = m
+            end
+            drop                            # [l, r, v, ...]
+
+            dup.1                           # [r, l, r, v, ...]
+            dup.1                           # [l, r, l, r, v, ...]
+            eq                              # [l == r, l, r, v, ...]
+            if.true                         # [l, r, v, ...]
+                # Add "not found" flag and exit the loop
+                push.0.0                    # [0, 0, address, r, v, ...], address = l
+            else                            # [l, r, v, ...]
+                # Continue the loop
+                push.1                      # [1, l, r, v, ...]
+            end
+        end
+    end
+    # [found, address, r, v, ...]
+    # Cleanup 2 values after address:
+    swap.2                                  # [r, address, found, v, ...]
+    drop                                    # [address, found, v, ...]
+    swap.2                                  # [v, found, address, ...]
+    drop                                    # [found, address, ...]
+end
+
+#! Converts memory address in result of `binary_search` procedure to index in array.
+#! Input: [found, address, ...]
+#! Output: [found, index, ...], where `index` is element index in array
+proc.convert_result_address_to_index
+    swap                                    # [address, found, ...]
+    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, address, found, ...]
+    u32wrapping_sub                         # [index, found, ...], index = address - STARTING_MEMORY_ADDRESS
+    swap                                    # [found, index, ...]
+end
+
+#! Perform binary searching of value in ascending ordered array in stack.
+#! Input: [n, v[0], v[1], ..., v[n - 1], v],
+#!     where:
+#!         `n` is number of elements in the array,
+#!         `v[0]`, `v[1]`, ..., `v[n - 1]` are array elements,
+#!         `v` is value to search
+#! Output: [found, index] where `found` is searching result (`true`/`false`),
+#!         index `[0, n)` of `v`, if `v` was found; otherwise index in array, where `v` should be inserted.
+proc.binary_search_stack
+    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, n, v[0], v[1], ..., v[n - 1], v, ...]
+    exec.read_stack_to_memory               # [r, v, ...]
+
+    push.STARTING_MEMORY_ADDRESS            # [l, r, v, ...], l = STARTING_MEMORY_ADDRESS
+    exec.binary_search                      # [address, ...] if found, otherwise [0xFFFFFFFF, address, ...]
+
+    exec.convert_result_address_to_index    # [index, ...] if found, otherwise [0xFFFFFFFF, index, ...]
+end
+
+proc.test_empty
+    push.5.0
+    exec.binary_search_stack
+    assertz     # Expect "not found"
+    assertz     # Expect insertion index is `0`
+end
+
+proc.test_solid
+    push.4.5.4.3.2.1.5
+    exec.binary_search_stack
+    assert      # Expect "found"
+    push.3
+    assert_eq   # Expect index is `3`
+end
+
+proc.test_first
+    push.12.50.44.36.23.12.5
+    exec.binary_search_stack
+    assert      # Expect "found"
+    push.0
+    assert_eq   # Expect index is `0`
+end
+
+proc.test_last
+    push.50.50.44.36.23.12.5
+    exec.binary_search_stack
+    assert      # Expect "found"
+    push.4
+    assert_eq   # Expect index is `4`
+end
+
+proc.test_gaps_right_found
+    push.44.50.44.36.23.12.5
+    exec.binary_search_stack
+    assert      # Expect "found"
+    push.3
+    assert_eq   # Expect index is `3`
+end
+
+proc.test_gaps_left_found
+    push.23.50.44.36.23.12.5
+    exec.binary_search_stack
+    assert      # Expect "found"
+    push.1
+    assert_eq   # Expect index is `1`
+end
+
+proc.test_gaps_right_not_found
+    push.40.50.44.36.23.12.5
+    exec.binary_search_stack
+    assertz     # Expect "not found"
+    push.3
+    assert_eq   # Expect insertion index is `3`
+end
+
+proc.test_gaps_left_not_found
+    push.30.50.44.36.23.12.5
+    exec.binary_search_stack
+    assertz     # Expect "not found"
+    push.2
+    assert_eq   # Expect insertion index is `2`
+end
+
+#! Run tests.
+proc.run_tests
+    call.test_empty
+    call.test_solid
+    call.test_first
+    call.test_last
+    call.test_gaps_right_found
+    call.test_gaps_left_found
+    call.test_gaps_right_not_found
+    call.test_gaps_left_not_found
+end
+
+begin
+    dup                                     # [n, n, ...]
+    neq.0                                   # [n != 0, n, ...]
+    if.true                                 # [n, v[0], v[1], ..., v[n - 1], v, ...]
+        exec.binary_search_stack            # [found, index]
+    else                                    # [0, ...]
+        exec.run_tests
+    end
+end
+
