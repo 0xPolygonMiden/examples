@@ -7,28 +7,6 @@
 
 const.STARTING_MEMORY_ADDRESS=0
 
-#! Reads `n` values (`v[0], v[1], ..., v[n - 1]`) from the stack into the memory starting from address `a`.
-#! Input: [a, n, v[0], v[1], ..., v[n - 1], ...]
-#! Output: [r, ...] where `r` is a next vacant memory address, thus array occupies addresses `[a..r)` in the memory
-proc.read_stack_to_memory
-    u32assert2                              # [a, n, v[0], v[1], ...]
-    dup.1                                   # [n, a, c, v[0], v[1], ...]
-    neq.0                                   # [n != 0, a, n, v[0], v[1], ...]
-    while.true                              # [a, n, v[i], v[i + 1], ...]
-        swap.2                              # [v[i], n, a, v[i + 1], ...]
-        dup.2                               # [a, v[i], n, a, v[i + 1], ...]
-        mem_store                           # [n, a, v[i + 1], ...]
-        u32wrapping_sub.1                   # [n', a, v[i + 1], ...], n' = n - 1
-        swap                                # [a, n', v[i + 1], ...]
-        u32wrapping_add.1                   # [a', n', v[i + 1], ...], a' = a + 1
-        dup.1                               # [n', a', n', v[i + 1], ...]
-        neq.0                               # [n != 0, a, n, v[i + 1], ...], a = a', n = n'
-    end
-                                            # [r, 0, ...], r = a, remove unnecessary zero before returning:
-    swap                                    # [0, r, ...]
-    drop                                    # [r, ...]
-end
-
 #! Binary searches for value `v` in the memory addresses range [l..r), sorted in ascending order.
 #! Input: [l, r, v, ...]
 #! Output: [found (true/false), address] where `found` is searching result (`true`/`false`),
@@ -97,14 +75,26 @@ proc.binary_search
     drop                                    # [found, address, ...]
 end
 
-#! Converts memory address in result of `binary_search` procedure to index in array.
-#! Input: [found, address, ...]
-#! Output: [found, index, ...], where `index` is element index in array
-proc.convert_result_address_to_index
-    swap                                    # [address, found, ...]
-    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, address, found, ...]
-    u32wrapping_sub                         # [index, found, ...], index = address - STARTING_MEMORY_ADDRESS
-    swap                                    # [found, index, ...]
+#! Reads `n` values (`v[0], v[1], ..., v[n - 1]`) from the stack into the memory starting from address `a`.
+#! Input: [a, n, v[0], v[1], ..., v[n - 1], ...]
+#! Output: [r, ...] where `r` is a next vacant memory address, thus array occupies addresses `[a..r)` in the memory
+proc.read_stack_to_memory
+    u32assert2                              # [a, n, v[0], v[1], ...]
+    dup.1                                   # [n, a, c, v[0], v[1], ...]
+    neq.0                                   # [n != 0, a, n, v[0], v[1], ...]
+    while.true                              # [a, n, v[i], v[i + 1], ...]
+        swap.2                              # [v[i], n, a, v[i + 1], ...]
+        dup.2                               # [a, v[i], n, a, v[i + 1], ...]
+        mem_store                           # [n, a, v[i + 1], ...]
+        u32wrapping_sub.1                   # [n', a, v[i + 1], ...], n' = n - 1
+        swap                                # [a, n', v[i + 1], ...]
+        u32wrapping_add.1                   # [a', n', v[i + 1], ...], a' = a + 1
+        dup.1                               # [n', a', n', v[i + 1], ...]
+        neq.0                               # [n != 0, a, n, v[i + 1], ...], a = a', n = n'
+    end
+                                            # [r, 0, ...], r = a, remove unnecessary zero before returning:
+    swap                                    # [0, r, ...]
+    drop                                    # [r, ...]
 end
 
 #! Perform binary searching of value in ascending ordered array in stack.
@@ -120,9 +110,12 @@ proc.binary_search_stack
     exec.read_stack_to_memory               # [r, v, ...]
 
     push.STARTING_MEMORY_ADDRESS            # [l, r, v, ...], l = STARTING_MEMORY_ADDRESS
-    exec.binary_search                      # [address, ...] if found, otherwise [0xFFFFFFFF, address, ...]
+    exec.binary_search                      # [found, address, ...]
 
-    exec.convert_result_address_to_index    # [index, ...] if found, otherwise [0xFFFFFFFF, index, ...]
+    swap                                    # [address, found, ...]
+    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, address, found, ...]
+    u32wrapping_sub                         # [index, found, ...], index = address - STARTING_MEMORY_ADDRESS
+    swap                                    # [found, index, ...]
 end
 
 proc.test_empty
