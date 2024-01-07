@@ -3,11 +3,12 @@
 #! Input must be provided through the operands stack.
 #! For input and output see documentation for `proc.binary_search_stack`.
 #!
-#! If input values are omitted or n = 0, tests will run.
+#! If input values are omitted or `n = 0`, tests will run.
 
 const.STARTING_MEMORY_ADDRESS=0
 
 #! Binary searches for value `v` in the memory addresses range [l..r), sorted in ascending order.
+#!
 #! Input: [l, r, v, ...]
 #! Output: [found (true/false), address] where `found` is searching result (`true`/`false`),
 #!         `address` is an address of value (if it was found), or an address where value should be inserted.
@@ -76,6 +77,7 @@ proc.binary_search
 end
 
 #! Reads `n` values (`v[0], v[1], ..., v[n - 1]`) from the stack into the memory starting from address `a`.
+#!
 #! Input: [a, n, v[0], v[1], ..., v[n - 1], ...]
 #! Output: [r, ...] where `r` is a next vacant memory address, thus array occupies addresses `[a..r)` in the memory
 proc.read_stack_to_memory
@@ -98,11 +100,12 @@ proc.read_stack_to_memory
 end
 
 #! Performs binary searching of value in ascending ordered array in stack.
+#!
 #! Input: [n, v[0], v[1], ..., v[n - 1], v],
-#!     where:
-#!         `n` is number of elements in the array,
-#!         `v[0]`, `v[1]`, ..., `v[n - 1]` are array elements,
-#!         `v` is value to search
+#!        where:
+#!            `n` is number of elements in the array,
+#!            `v[0]`, `v[1]`, ..., `v[n - 1]` are array elements,
+#!            `v` is value to search
 #! Output: [found, index] where `found` is searching result (`true`/`false`),
 #!         index `[0, n)` of `v`, if `v` was found; otherwise index in array, where `v` should be inserted.
 proc.binary_search_stack
