@@ -17,7 +17,7 @@ proc.binary_search
     u32assert2                              # [l, r, v, ...]
     dup                                     # [l, l, r, v, ...]
     dup.2                                   # [r, l, l, r, v, ...]
-    u32lt                                   # [l < r, l, r, v, ...]
+    u32checked_lt                           # [l < r, l, r, v, ...]
     if.true                                 # [l, r, v, ...]
         push.1                              # [1, l, r, v, ...]
     else                                    # [l, r, v, ...]
@@ -29,7 +29,7 @@ proc.binary_search
         dup.1                               # [r, l, r, v, ...]
         dup.1                               # [l, r, l, r, v, ...]
         u32wrapping_sub                     # [n, l, r, v, ...], n = r - l
-        u32div.2                            # [n / 2, l, r, v, ...]
+        u32checked_div.2                    # [n / 2, l, r, v, ...]
         dup.1                               # [l, n / 2, l, r, v, ...]
         u32wrapping_add                     # [m, l, r, v, ...], m = l + n / 2
 
@@ -47,7 +47,7 @@ proc.binary_search
             push.1.0                        # [0, 1, address, r, v, ...], address = m
         else                                # [memory[m], m, l, r, v, ...]
             dup.4                           # [v, memory[m], m, l, r, v, ...]
-            u32lt                           # [memory[m] < v, m, l, r, v, ...]
+            u32checked_lt                   # [memory[m] < v, m, l, r, v, ...]
             if.true                         # [m, l, r, v, ...]
                 u32wrapping_add.1           # [m + 1, l, r, v, ...]
                 swap                        # [old l, l, r, v, ...], l = m + 1
