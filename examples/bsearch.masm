@@ -1,123 +1,123 @@
-#! This example code performs binary searching for a given value in an ascending ordered array.
+#! This example code performs binary searching for addr given value in an ascending ordered array.
 #!
 #! Input must be provided through the operands stack.
 #! For input and output see documentation for `proc.binary_search_stack`.
 #!
-#! If input values are omitted or `n = 0`, tests will run.
+#! If input values are omitted or `count = 0`, tests will run.
 
 const.STARTING_MEMORY_ADDRESS=0
 
-#! Binary searches for value `v` in the memory addresses range [l..r), sorted in ascending order.
+#! Binary searches for value `val` in the memory addresses range [start..end), sorted in ascending order.
 #!
-#! Input: [l, r, v, ...]
-#! Output: [found (true/false), address] where `found` is searching result (`true`/`false`),
-#!         `address` is an address of value (if it was found), or an address where value should be inserted.
+#! Input: [start, end, val, ...]
+#! Output: [found (true/false), addr] where `found` is searching result (`true`/`false`),
+#!         `addr` is an address of value (if it was found), or an address where value should be inserted.
 proc.binary_search
-    # Check if `l < r` then start search, otherwise prepare "not found" result and exit
-    u32assert2                              # [l, r, v, ...]
-    dup                                     # [l, l, r, v, ...]
-    dup.2                                   # [r, l, l, r, v, ...]
-    u32checked_lt                           # [l < r, l, r, v, ...]
-    if.true                                 # [l, r, v, ...]
-        push.1                              # [1, l, r, v, ...]
-    else                                    # [l, r, v, ...]
+    # Check if `start < end` then start search, otherwise prepare "not found" result and exit
+    u32assert2                              # [start, end, val, ...]
+    dup                                     # [start, start, end, val, ...]
+    dup.2                                   # [end, start, start, end, val, ...]
+    u32checked_lt                           # [start < end, start, end, val, ...]
+    if.true                                 # [start, end, val, ...]
+        push.1                              # [1, start, end, val, ...]
+    else                                    # [start, end, val, ...]
         # Push "not found" flag and flag to skip the loop
-        push.0.0                            # [0, 0, address, r, v, ...], address = l
+        push.0.0                            # [0, 0, addr, end, val, ...], addr = start
     end
-    while.true                              # [l, r, v, ...]
-        # Calculate middle address `m`
-        dup.1                               # [r, l, r, v, ...]
-        dup.1                               # [l, r, l, r, v, ...]
-        u32wrapping_sub                     # [n, l, r, v, ...], n = r - l
-        u32checked_div.2                    # [n / 2, l, r, v, ...]
-        dup.1                               # [l, n / 2, l, r, v, ...]
-        u32wrapping_add                     # [m, l, r, v, ...], m = l + n / 2
+    while.true                              # [start, end, val, ...]
+        # Calculate middle address `middle`
+        dup.1                               # [end, start, end, val, ...]
+        dup.1                               # [start, end, start, end, val, ...]
+        u32wrapping_sub                     # [count, start, end, val, ...], count = end - start
+        u32checked_div.2                    # [count / 2, start, end, val, ...]
+        dup.1                               # [start, count / 2, start, end, val, ...]
+        u32wrapping_add                     # [middle, start, end, val, ...], middle = start + count / 2
 
-        dup                                 # [m, m, l, r, v, ...]
-        mem_load                            # [memory[m], m, l, r, v, ...]
+        dup                                 # [middle, middle, start, end, val, ...]
+        mem_load                            # [memory[middle], middle, start, end, val, ...]
 
-        dup                                 # [memory[m], memory[m], m, l, r, v, ...]
-        dup.5                               # [v, memory[m], memory[m], m, l, r, v, ...]
-        eq                                  # [memory[m] == v, memory[m], m, l, r, v, ...]
-        if.true                             # [memory[m], m, l, r, v, ...]
-            drop                            # [m, l, r, v, ...]
-            swap                            # [l, m, r, v, ...]
-            drop                            # [m, r, v, ...]
+        dup                                 # [memory[middle], memory[middle], middle, start, end, val, ...]
+        dup.5                               # [val, memory[middle], memory[middle], middle, start, end, val, ...]
+        eq                                  # [memory[middle] == val, memory[middle], middle, start, end, val, ...]
+        if.true                             # [memory[middle], middle, start, end, val, ...]
+            drop                            # [middle, start, end, val, ...]
+            swap                            # [start, middle, end, val, ...]
+            drop                            # [middle, end, val, ...]
             # Prepare "found" flag and exit the loop
-            push.1.0                        # [0, 1, address, r, v, ...], address = m
-        else                                # [memory[m], m, l, r, v, ...]
-            dup.4                           # [v, memory[m], m, l, r, v, ...]
-            u32checked_lt                   # [memory[m] < v, m, l, r, v, ...]
-            if.true                         # [m, l, r, v, ...]
-                u32wrapping_add.1           # [m + 1, l, r, v, ...]
-                swap                        # [old l, l, r, v, ...], l = m + 1
-            else                            # [m, l, r, v, ...]
-                swap.2                      # [old r, l, r, v, ...], r = m
+            push.1.0                        # [0, 1, addr, end, val, ...], addr = middle
+        else                                # [memory[middle], middle, start, end, val, ...]
+            dup.4                           # [val, memory[middle], middle, start, end, val, ...]
+            u32checked_lt                   # [memory[middle] < val, middle, start, end, val, ...]
+            if.true                         # [middle, start, end, val, ...]
+                u32wrapping_add.1           # [middle + 1, start, end, val, ...]
+                swap                        # [old start, start, end, val, ...], start = middle + 1
+            else                            # [middle, start, end, val, ...]
+                swap.2                      # [old end, start, end, val, ...], end = middle
             end
-            drop                            # [l, r, v, ...]
+            drop                            # [start, end, val, ...]
 
-            dup.1                           # [r, l, r, v, ...]
-            dup.1                           # [l, r, l, r, v, ...]
-            eq                              # [l == r, l, r, v, ...]
-            if.true                         # [l, r, v, ...]
+            dup.1                           # [end, start, end, val, ...]
+            dup.1                           # [start, end, start, end, val, ...]
+            eq                              # [start == end, start, end, val, ...]
+            if.true                         # [start, end, val, ...]
                 # Add "not found" flag and exit the loop
-                push.0.0                    # [0, 0, address, r, v, ...], address = l
-            else                            # [l, r, v, ...]
+                push.0.0                    # [0, 0, addr, end, val, ...], addr = start
+            else                            # [start, end, val, ...]
                 # Continue the loop
-                push.1                      # [1, l, r, v, ...]
+                push.1                      # [1, start, end, val, ...]
             end
         end
     end
-    # [found, address, r, v, ...]
-    # Cleanup 2 values after address:
-    swap.2                                  # [r, address, found, v, ...]
-    drop                                    # [address, found, v, ...]
-    swap.2                                  # [v, found, address, ...]
-    drop                                    # [found, address, ...]
+    # [found, addr, end, val, ...]
+    # Cleanup 2 values after `addr`:
+    swap.2                                  # [end, addr, found, val, ...]
+    drop                                    # [addr, found, val, ...]
+    swap.2                                  # [val, found, addr, ...]
+    drop                                    # [found, addr, ...]
 end
 
-#! Reads `n` values (`v[0], v[1], ..., v[n - 1]`) from the stack into the memory starting from address `a`.
+#! Reads `count` values (`arr[0], arr[1], ..., arr[count - 1]`) from the stack into the memory starting from address `addr`.
 #!
-#! Input: [a, n, v[0], v[1], ..., v[n - 1], ...]
-#! Output: [r, ...] where `r` is a next vacant memory address, thus array occupies addresses `[a..r)` in the memory
+#! Input: [addr, count, arr[0], arr[1], ..., arr[count - 1], ...]
+#! Output: [end, ...] where `end` is addr next vacant memory address, thus array occupies addresses `[addr..end)` in the memory
 proc.read_stack_to_memory
-    u32assert2                              # [a, n, v[0], v[1], ...]
-    dup.1                                   # [n, a, c, v[0], v[1], ...]
-    neq.0                                   # [n != 0, a, n, v[0], v[1], ...]
-    while.true                              # [a, n, v[i], v[i + 1], ...]
-        swap.2                              # [v[i], n, a, v[i + 1], ...]
-        dup.2                               # [a, v[i], n, a, v[i + 1], ...]
-        mem_store                           # [n, a, v[i + 1], ...]
-        u32wrapping_sub.1                   # [n', a, v[i + 1], ...], n' = n - 1
-        swap                                # [a, n', v[i + 1], ...]
-        u32wrapping_add.1                   # [a', n', v[i + 1], ...], a' = a + 1
-        dup.1                               # [n', a', n', v[i + 1], ...]
-        neq.0                               # [n != 0, a, n, v[i + 1], ...], a = a', n = n'
+    u32assert2                              # [addr, count, arr[0], arr[1], ...]
+    dup.1                                   # [count, addr, c, arr[0], arr[1], ...]
+    neq.0                                   # [count != 0, addr, count, arr[0], arr[1], ...]
+    while.true                              # [addr, count, arr[i], arr[i + 1], ...]
+        swap.2                              # [arr[i], count, addr, arr[i + 1], ...]
+        dup.2                               # [addr, arr[i], count, addr, arr[i + 1], ...]
+        mem_store                           # [count, addr, arr[i + 1], ...]
+        u32wrapping_sub.1                   # [count', addr, arr[i + 1], ...], count' = count - 1
+        swap                                # [addr, count', arr[i + 1], ...]
+        u32wrapping_add.1                   # [addr', count', arr[i + 1], ...], addr' = addr + 1
+        dup.1                               # [count', addr', count', arr[i + 1], ...]
+        neq.0                               # [count != 0, addr, count, arr[i + 1], ...], addr = addr', count = count'
     end
-                                            # [r, 0, ...], r = a, remove unnecessary zero before returning:
-    swap                                    # [0, r, ...]
-    drop                                    # [r, ...]
+                                            # [end, 0, ...], end = addr, remove unnecessary zero before returning:
+    swap                                    # [0, end, ...]
+    drop                                    # [end, ...]
 end
 
 #! Performs binary searching of value in ascending ordered array in stack.
 #!
-#! Input: [n, v[0], v[1], ..., v[n - 1], v],
+#! Input: [count, arr[0], arr[1], ..., arr[count - 1], val],
 #!        where:
-#!            `n` is number of elements in the array,
-#!            `v[0]`, `v[1]`, ..., `v[n - 1]` are array elements,
-#!            `v` is value to search
+#!            `count` is number of elements in the array,
+#!            `arr[0]`, `arr[1]`, ..., `arr[count - 1]` are array elements,
+#!            `val` is value to search.
 #! Output: [found, index] where `found` is searching result (`true`/`false`),
-#!         index `[0, n)` of `v`, if `v` was found; otherwise index in array, where `v` should be inserted.
+#!         index `[0, count)` of `val`, if `val` was found; otherwise index in array, where `val` should be inserted.
 proc.binary_search_stack
-    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, n, v[0], v[1], ..., v[n - 1], v, ...]
-    exec.read_stack_to_memory               # [r, v, ...]
+    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, count, arr[0], arr[1], ..., arr[count - 1], val, ...]
+    exec.read_stack_to_memory               # [end, val, ...]
 
-    push.STARTING_MEMORY_ADDRESS            # [l, r, v, ...], l = STARTING_MEMORY_ADDRESS
-    exec.binary_search                      # [found, address, ...]
+    push.STARTING_MEMORY_ADDRESS            # [start, end, val, ...], start = STARTING_MEMORY_ADDRESS
+    exec.binary_search                      # [found, addr, ...]
 
-    swap                                    # [address, found, ...]
-    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, address, found, ...]
-    u32wrapping_sub                         # [index, found, ...], index = address - STARTING_MEMORY_ADDRESS
+    swap                                    # [addr, found, ...]
+    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, addr, found, ...]
+    u32wrapping_sub                         # [index, found, ...], index = addr - STARTING_MEMORY_ADDRESS
     swap                                    # [found, index, ...]
 end
 
@@ -197,9 +197,9 @@ proc.run_tests
 end
 
 begin
-    dup                                     # [n, n, ...]
-    neq.0                                   # [n != 0, n, ...]
-    if.true                                 # [n, v[0], v[1], ..., v[n - 1], v, ...]
+    dup                                     # [count, count, ...]
+    neq.0                                   # [count != 0, count, ...]
+    if.true                                 # [count, arr[0], arr[1], ..., arr[count - 1], val, ...]
         exec.binary_search_stack            # [found, index]
     else                                    # [0, ...]
         exec.run_tests
