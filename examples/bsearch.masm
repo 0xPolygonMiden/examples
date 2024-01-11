@@ -13,68 +13,95 @@ const.STARTING_MEMORY_ADDRESS=0
 #! Output: [found (true/false), addr] where `found` indicates the result (`true`/`false`),
 #!         `addr` is an address in memory of value (if it was found), or an address where value should be inserted.
 proc.binary_search
-    # Check if `start < end` then start search, otherwise prepare "not found" result and exit
-    u32assert2                              # [start, end, val, ...]
-    dup                                     # [start, start, end, val, ...]
-    dup.2                                   # [end, start, start, end, val, ...]
-    u32checked_lt                           # [start < end, start, end, val, ...]
-    if.true                                 # [start, end, val, ...]
-        push.1                              # [1, start, end, val, ...]
-    else                                    # [start, end, val, ...]
-        # Push "not found" flag and flag to skip the loop
-        push.0.0                            # [0, 0, addr, end, val, ...], addr = start
+    # check that `start` and `end` fit to `u32` type
+    u32assert2
+    # => [start, end, val, ...]
+
+    # check if `start < end`
+    dup dup.2 u32checked_lt
+    # => [start < end, start, end, val, ...]
+
+    if.true
+        # push the `1` flag to begin searching
+        push.1
+        # => [1, start, end, val, ...]
+    else
+        # push "not found" flag and flag to skip the loop
+        push.0.0
+        # => [0, 0, addr, end, val, ...], addr = start
     end
-    while.true                              # [start, end, val, ...]
-        # Calculate middle address `middle`
-        dup.1                               # [end, start, end, val, ...]
-        dup.1                               # [start, end, start, end, val, ...]
-        u32wrapping_sub                     # [count, start, end, val, ...], count = end - start
-        # calculate half of the array. If `count` is odd, the result's fraction will be discarded
-        u32checked_div.2                    # [count / 2, start, end, val, ...]
-        dup.1                               # [start, count / 2, start, end, val, ...]
-        u32wrapping_add                     # [middle, start, end, val, ...], middle = start + count / 2
 
-        dup                                 # [middle, middle, start, end, val, ...]
-        mem_load                            # [memory[middle], middle, start, end, val, ...]
+    while.true
+        # => [start, end, val, ...]
 
-        dup                                 # [memory[middle], memory[middle], middle, start, end, val, ...]
-        dup.5                               # [val, memory[middle], memory[middle], middle, start, end, val, ...]
-        eq                                  # [memory[middle] == val, memory[middle], middle, start, end, val, ...]
-        if.true                             # [memory[middle], middle, start, end, val, ...]
-            drop                            # [middle, start, end, val, ...]
-            swap                            # [start, middle, end, val, ...]
-            drop                            # [middle, end, val, ...]
-            # Prepare "found" flag and exit the loop
-            push.1.0                        # [0, 1, addr, end, val, ...], addr = middle
-        else                                # [memory[middle], middle, start, end, val, ...]
-            dup.4                           # [val, memory[middle], middle, start, end, val, ...]
-            u32checked_lt                   # [memory[middle] < val, middle, start, end, val, ...]
-            if.true                         # [middle, start, end, val, ...]
-                u32wrapping_add.1           # [middle + 1, start, end, val, ...]
-                swap                        # [old start, start, end, val, ...], start = middle + 1
-            else                            # [middle, start, end, val, ...]
-                swap.2                      # [old end, start, end, val, ...], end = middle
+        # calculate middle address (if array has odd size, an integer floor will be taken)
+        dup.1 dup.1 u32wrapping_sub u32checked_div.2 dup.1 u32wrapping_add
+        # => [middle, start, end, val, ...], middle = start + (end - start) / 2
+
+        # read middle element from the memory
+        dup mem_load
+        # => [memory[middle], middle, start, end, val, ...]
+
+        # compare middle value with the searching value
+        dup dup.5 eq
+        # => [memory[middle] == val, memory[middle], middle, start, end, val, ...]
+
+        if.true
+            # => [memory[middle], middle, start, end, val, ...]
+
+            # value was found, drop a part of values (rest will be dropped in the end of procedure)
+            drop swap drop
+            # => [middle, end, val, ...]
+
+            # prepare "found" flag and exit the loop
+            push.1.0
+            # => [0, 1, addr, end, val, ...], addr = middle
+        else
+            # => [memory[middle], middle, start, end, val, ...]
+
+            # value wasn't found on this step, so we decide, where to go next
+            # is middle value less than `val`?
+            dup.4 u32checked_lt
+            # => [memory[middle] < val, middle, start, end, val, ...]
+
+            if.true
+                # => [middle, start, end, val, ...]
+
+                # less than `val`, so search right-side
+                u32wrapping_add.1 swap
+                # => [old start, start, end, val, ...], start = middle + 1
+            else
+                # => [middle, start, end, val, ...]
+
+                # greater than `val`, so search left-side
+                swap.2
+                # => [old end, start, end, val, ...], end = middle
             end
-            drop                            # [start, end, val, ...]
 
-            dup.1                           # [end, start, end, val, ...]
-            dup.1                           # [start, end, start, end, val, ...]
-            eq                              # [start == end, start, end, val, ...]
-            if.true                         # [start, end, val, ...]
-                # Add "not found" flag and exit the loop
-                push.0.0                    # [0, 0, addr, end, val, ...], addr = start
-            else                            # [start, end, val, ...]
-                # Continue the loop
-                push.1                      # [1, start, end, val, ...]
+            # drop the old value (`old start` or `old end`)
+            drop
+            # => [start, end, val, ...]
+
+            # check, if `start == end`
+            dup.1 dup.1 eq
+            # => [start == end, start, end, val, ...]
+
+            if.true
+                # add "not found" flag and exit the loop
+                push.0.0
+                # => [0, 0, addr, end, val, ...], addr = start
+            else
+                # continue the loop
+                push.1
+                # => [1, start, end, val, ...]
             end
         end
     end
-    # [found, addr, end, val, ...]
-    # Cleanup 2 values after `addr`:
-    swap.2                                  # [end, addr, found, val, ...]
-    drop                                    # [addr, found, val, ...]
-    swap.2                                  # [val, found, addr, ...]
-    drop                                    # [found, addr, ...]
+    # => [found, addr, end, val, ...]
+
+    # cleanup 2 values after `addr`:
+    swap.2 drop swap.2 drop
+    # => [found, addr, ...]
 end
 
 #! Writes `count` values (`arr[0], arr[1], ..., arr[count - 1]`) from the stack into the memory starting from address `addr`.
@@ -82,22 +109,29 @@ end
 #! Input: [addr, count, arr[0], arr[1], ..., arr[count - 1], ...]
 #! Output: [end, ...] where `end` is addr next vacant memory address, thus array occupies addresses `[addr..end)` in the memory
 proc.write_stack_to_memory
-    u32assert2                              # [addr, count, arr[0], arr[1], ...]
-    dup.1                                   # [count, addr, count, arr[0], arr[1], ...]
-    neq.0                                   # [count != 0, addr, count, arr[0], arr[1], ...]
-    while.true                              # [addr, count, arr[i], arr[i + 1], ...]
-        swap.2                              # [arr[i], count, addr, arr[i + 1], ...]
-        dup.2                               # [addr, arr[i], count, addr, arr[i + 1], ...]
-        mem_store                           # [count, addr, arr[i + 1], ...]
-        u32wrapping_sub.1                   # [count', addr, arr[i + 1], ...], count' = count - 1
-        swap                                # [addr, count', arr[i + 1], ...]
-        u32wrapping_add.1                   # [addr', count', arr[i + 1], ...], addr' = addr + 1
-        dup.1                               # [count', addr', count', arr[i + 1], ...]
-        neq.0                               # [count != 0, addr, count, arr[i + 1], ...], addr = addr', count = count'
+    # check that `addr` and `count` fit to `u32` type
+    u32assert2
+
+    # check if `count` doesn't equal to zero
+    dup.1 neq.0
+    # [count != 0, addr, count, arr[0], arr[1], ...]
+
+    while.true
+        # => [addr, count, arr[i], arr[i + 1], ...]
+
+        # save the `arr[i]` to the memory at `addr` address
+        swap.2 dup.2 mem_store
+        # => [count, addr, arr[i + 1], ...]
+
+        # decrease `count`, increase `addr`, check that `count` is not zero
+        u32wrapping_sub.1 swap u32wrapping_add.1 dup.1 neq.0
+        # => [count != 0, addr, count, arr[i + 1], ...], addr = addr', count = count'
     end
-                                            # [end, 0, ...], end = addr, remove unnecessary zero before returning:
-    swap                                    # [0, end, ...]
-    drop                                    # [end, ...]
+    # => [end, 0, ...], end = addr
+
+    # remove unnecessary zero before returning:
+    swap drop
+    # => [end, ...]
 end
 
 #! Performs binary searching of value in ascending ordered array in stack.
@@ -110,79 +144,111 @@ end
 #! Output: [found, index] where `found` indicates the result (`true`/`false`),
 #!         index `[0, count)` of `val`, if `val` was found; otherwise index in array, where `val` should be inserted.
 proc.binary_search_stack
-    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, count, arr[0], arr[1], ..., arr[count - 1], val, ...]
-    exec.write_stack_to_memory               # [end, val, ...]
+    # write array from stack to the memory starting at `STARTING_MEMORY_ADDRESS`
+    push.STARTING_MEMORY_ADDRESS exec.write_stack_to_memory
+    # => [end, val, ...]
 
-    push.STARTING_MEMORY_ADDRESS            # [start, end, val, ...], start = STARTING_MEMORY_ADDRESS
-    exec.binary_search                      # [found, addr, ...]
+    # execute binary searching on array in memory, starting at `STARTING_MEMORY_ADDRESS`
+    push.STARTING_MEMORY_ADDRESS exec.binary_search
+    # => [found, addr, ...]
 
-    swap                                    # [addr, found, ...]
-    push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, addr, found, ...]
-    u32wrapping_sub                         # [index, found, ...], index = addr - STARTING_MEMORY_ADDRESS
-    swap                                    # [found, index, ...]
+    # convert address in memory to index in array
+    swap push.STARTING_MEMORY_ADDRESS u32wrapping_sub swap
+    # => [found, index, ...]
 end
 
 proc.test_empty
     push.5.0
     exec.binary_search_stack
-    assertz     # Expect "not found"
-    assertz     # Expect insertion index is `0`
+
+    # expect "not found"
+    assertz
+
+    # expect insertion index is `0`
+    assertz
 end
 
 proc.test_solid
     push.4.5.4.3.2.1.5
     exec.binary_search_stack
-    assert      # Expect "found"
+
+    # expect "found"
+    assert
+
+    # expect index is `3`
     push.3
-    assert_eq   # Expect index is `3`
+    assert_eq
 end
 
 proc.test_first
     push.12.50.44.36.23.12.5
     exec.binary_search_stack
-    assert      # Expect "found"
+    # expect "found"
+    assert
+
+    # expect index is `0`
     push.0
-    assert_eq   # Expect index is `0`
+    assert_eq
 end
 
 proc.test_last
     push.50.50.44.36.23.12.5
     exec.binary_search_stack
-    assert      # Expect "found"
+
+    # expect "found"
+    assert
+
+    # expect index is `4`
     push.4
-    assert_eq   # Expect index is `4`
+    assert_eq
 end
 
 proc.test_gaps_right_found
     push.44.50.44.36.23.12.5
     exec.binary_search_stack
-    assert      # Expect "found"
+
+    # expect "found"
+    assert
+
+    # expect index is `3`
     push.3
-    assert_eq   # Expect index is `3`
+    assert_eq
 end
 
 proc.test_gaps_left_found
     push.23.50.44.36.23.12.5
     exec.binary_search_stack
-    assert      # Expect "found"
+
+    # expect "found"
+    assert
+
+    # expect index is `1`
     push.1
-    assert_eq   # Expect index is `1`
+    assert_eq
 end
 
 proc.test_gaps_right_not_found
     push.40.50.44.36.23.12.5
     exec.binary_search_stack
-    assertz     # Expect "not found"
+
+    # expect "not found"
+    assertz
+
+    # expect insertion index is `3`
     push.3
-    assert_eq   # Expect insertion index is `3`
+    assert_eq
 end
 
 proc.test_gaps_left_not_found
     push.30.50.44.36.23.12.5
     exec.binary_search_stack
-    assertz     # Expect "not found"
+
+    # expect "not found"
+    assertz
+
+    # expect insertion index is `2`
     push.2
-    assert_eq   # Expect insertion index is `2`
+    assert_eq
 end
 
 #! Runs tests.
@@ -198,11 +264,18 @@ proc.run_tests
 end
 
 begin
-    dup                                     # [count, count, ...]
-    neq.0                                   # [count != 0, count, ...]
-    if.true                                 # [count, arr[0], arr[1], ..., arr[count - 1], val, ...]
-        exec.binary_search_stack            # [found, index]
-    else                                    # [0, ...]
+    # check that `count` is not equal to zero
+    dup neq.0
+    # => [count != 0, count, ...]
+
+    if.true
+        # => [count, arr[0], arr[1], ..., arr[count - 1], val, ...]
+
+        exec.binary_search_stack
+        # => [found, index]
+    else
+        # => [0, ...]
+
         exec.run_tests
     end
 end
