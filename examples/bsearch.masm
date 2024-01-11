@@ -10,8 +10,8 @@ const.STARTING_MEMORY_ADDRESS=0
 #! Binary searches for value `val` in the memory addresses range [start..end), sorted in ascending order.
 #!
 #! Input: [start, end, val, ...]
-#! Output: [found (true/false), addr] where `found` is searching result (`true`/`false`),
-#!         `addr` is an address of value (if it was found), or an address where value should be inserted.
+#! Output: [found (true/false), addr] where `found` indicates the result (`true`/`false`),
+#!         `addr` is an address in memory of value (if it was found), or an address where value should be inserted.
 proc.binary_search
     # Check if `start < end` then start search, otherwise prepare "not found" result and exit
     u32assert2                              # [start, end, val, ...]
@@ -29,6 +29,7 @@ proc.binary_search
         dup.1                               # [end, start, end, val, ...]
         dup.1                               # [start, end, start, end, val, ...]
         u32wrapping_sub                     # [count, start, end, val, ...], count = end - start
+        # calculate half of the array. If `count` is odd, the result's fraction will be discarded
         u32checked_div.2                    # [count / 2, start, end, val, ...]
         dup.1                               # [start, count / 2, start, end, val, ...]
         u32wrapping_add                     # [middle, start, end, val, ...], middle = start + count / 2
@@ -76,13 +77,13 @@ proc.binary_search
     drop                                    # [found, addr, ...]
 end
 
-#! Reads `count` values (`arr[0], arr[1], ..., arr[count - 1]`) from the stack into the memory starting from address `addr`.
+#! Writes `count` values (`arr[0], arr[1], ..., arr[count - 1]`) from the stack into the memory starting from address `addr`.
 #!
 #! Input: [addr, count, arr[0], arr[1], ..., arr[count - 1], ...]
 #! Output: [end, ...] where `end` is addr next vacant memory address, thus array occupies addresses `[addr..end)` in the memory
-proc.read_stack_to_memory
+proc.write_stack_to_memory
     u32assert2                              # [addr, count, arr[0], arr[1], ...]
-    dup.1                                   # [count, addr, c, arr[0], arr[1], ...]
+    dup.1                                   # [count, addr, count, arr[0], arr[1], ...]
     neq.0                                   # [count != 0, addr, count, arr[0], arr[1], ...]
     while.true                              # [addr, count, arr[i], arr[i + 1], ...]
         swap.2                              # [arr[i], count, addr, arr[i + 1], ...]
@@ -106,11 +107,11 @@ end
 #!            `count` is number of elements in the array,
 #!            `arr[0]`, `arr[1]`, ..., `arr[count - 1]` are array elements,
 #!            `val` is value to search.
-#! Output: [found, index] where `found` is searching result (`true`/`false`),
+#! Output: [found, index] where `found` indicates the result (`true`/`false`),
 #!         index `[0, count)` of `val`, if `val` was found; otherwise index in array, where `val` should be inserted.
 proc.binary_search_stack
     push.STARTING_MEMORY_ADDRESS            # [STARTING_MEMORY_ADDRESS, count, arr[0], arr[1], ..., arr[count - 1], val, ...]
-    exec.read_stack_to_memory               # [end, val, ...]
+    exec.write_stack_to_memory               # [end, val, ...]
 
     push.STARTING_MEMORY_ADDRESS            # [start, end, val, ...], start = STARTING_MEMORY_ADDRESS
     exec.binary_search                      # [found, addr, ...]
