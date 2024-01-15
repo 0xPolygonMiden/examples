@@ -1,7 +1,8 @@
 mod utils_input;
 mod utils_program;
 use clap::Parser;
-use miden_vm::ProofOptions;
+use miden_vm::{ProvingOptions, DefaultHost, MemAdviceProvider};
+use miden_air::ExecutionOptions;
 use std::fs;
 use std::time::Instant;
 
@@ -73,12 +74,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let program_to_run = program.program.clone().unwrap();
 
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider.clone()));
+    
+    let execution_options = ExecutionOptions::new(None, 64)
+    .map_err(|err| format!("{err}"))?;
+
     // Execution time
     let now = Instant::now();
     let trace = miden_vm::execute(
         &program_to_run,
         inputs.stack_inputs.clone(),
-        inputs.advice_provider.clone(),
+        host,
+        execution_options,
     )
     .map_err(|err| format!("Failed to generate exection trace = {:?}", err))
     .unwrap();
@@ -87,16 +94,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Proving time
     let proof_options = if args.security == "high" {
-        ProofOptions::with_128_bit_security(false)
+        ProvingOptions::with_128_bit_security(false)
     } else {
-        ProofOptions::with_96_bit_security(false)
+        ProvingOptions::with_96_bit_security(false)
     };
+
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
     let now = Instant::now();
     let (output, proof) = miden_vm::prove(
         &program.program.unwrap(),
         inputs.stack_inputs.clone(),
-        inputs.advice_provider,
+        host,
         proof_options,
     )
     .expect("Proving failed");

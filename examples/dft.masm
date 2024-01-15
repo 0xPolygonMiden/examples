@@ -1,0 +1,300 @@
+# A program which computes the Discrete Fourier Transform (DFT) of the provided public inputs.
+# We only allow input sizes of a power of 2 for convenience of computing the primitive root of unity.
+# This program makes use of the fact that the modulus for the Miden VM's prime field is 2^64 - 2^32 + 1.
+#
+# See the corresponding Wikipedia article: https://en.wikipedia.org/wiki/Discrete_Fourier_transform_over_a_ring
+#
+# Expects the input stack to be
+# Input: [<length of list>, <ele 0>, <ele 1>, ...]
+# 
+# Ouputs the Discrete Fourier Transform of the original list, which is a list of the same length.
+# Output: [<ele 0'>, <ele 1'>, ...]
+#
+# Convention: inputs are always consumed by the callee
+
+# Root of unity for domain of 2^32 elements, taken from Winterfell. See:
+# https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/f64/mod.rs#L270
+const.TWO_ADIC_ROOT_OF_UNITY=7277203076849721926
+
+# This means there's a multiplicative subgroup of size 2^32 that exists in the field.
+# For more information about two-adicity, see https://cryptologie.net/article/559/whats-two-adicity/.
+const.TWO_ADICITY=32
+
+# Location where we will store the input array.
+# [0, 2^30) is global memory, so we store it at the beginning.
+const.INPUT_ARR_LOC=0
+
+# Location at 3 * 2^30, the first address "with no special meaning" in the root context
+const.RESULT_ARR_LOC=3221225472
+
+#! Computes log base 2. Only supports {1, 2, 4, 8, 16}.
+#! Input: [n]
+#! Output: [log2(n)] if n is supported, otherwise halts
+proc.log2
+    # check if n == 1
+    dup eq.1
+    # => [0 or 1, n]
+
+    if.true
+        # n == 1
+        drop push.0
+        # => stack: [0]
+    else
+        # check if n == 2
+        dup eq.2
+        # => [0 or 1, n]
+        if.true
+            drop push.1
+            # => [1]
+        else
+            # check if n == 4
+            dup eq.4
+            # => [0 or 1, n]
+            if.true
+                drop push.2
+                # => [2]
+            else
+                # check if n == 8
+                dup eq.8
+                # => [0 or 1, n]
+                if.true
+                    drop push.3
+                    # => [3]
+                else
+                    # check if n == 16
+                    dup eq.16
+                    # => [0 or 1, n]
+                    if.true
+                        drop push.4
+                        # => [4]
+                    else
+                        # n unsupported; halt
+                        push.1 assertz
+                    end
+                end
+            end
+        end
+
+    end
+end
+
+#! Computes the primitive root of unity for a subgroup of size 2^n.
+#!
+#! Input: [log2_n], log2 of the size of the input list (must be <= 32)
+#! Output: [root_of_unity], where `root_of_unity` is the primitive root of unity of order 2^n
+#!
+#! Equivalent to Winterfell's implementation: 
+#! https://github.com/facebook/winterfell/blob/4543689f73a2efb9d30927535de7b4efe7e1802d/math/src/field/traits.rs#L254-L259
+proc.get_root_of_unity
+    # prepare stack
+    push.TWO_ADIC_ROOT_OF_UNITY.TWO_ADICITY movup.2
+    # => [log2_n, TWO_ADICITY, TWO_ADIC_ROOT_OF_UNITY]
+
+    # compute root of unity
+    sub pow2 exp
+    # => [TWO_ADIC_ROOT_OF_UNITY^(2^(TWO_ADICITY - log2_n))]
+end
+
+#! Computes the kth element of the "frequency domain" (i.e. of the transformed list).
+#!
+#! Input: [k, root_of_unity, n, v_0, ..., v_{n-1}, ...]
+#! Output: [f_k, ...]
+#!
+#! Locals
+#! 0: k
+#! 1: root_of_unity
+#! 2: n (length of the list)
+#! 3: j (counter)
+#! 4: result (partial result of the computation)
+proc.f_k.5
+    # preserve k, root_of_unity and n
+    loc_store.0 loc_store.1 loc_store.2
+    # => [v_0, ..., v_{n-1}, ...]
+
+    # preserve j=0 and result=0
+    push.0 loc_store.3 push.0 loc_store.4
+    # => [v0, ..., v{n-1}, ...]
+
+    # Push 1 to enter the loop
+    push.1
+    # => [v0, ..., v{n-1}, ...]
+
+    while.true
+        # prepare stack to compute `root_of_unity^(jk)`
+        loc_load.1 loc_load.0 loc_load.3
+        # => [j, k , root_of_unity, v{j}, ..., v{n-1}]
+
+        # compute `root_of_unity^(jk)`
+        mul exp mul
+        # => [v{j} * root_of_unity^(jk), v{j+1}, ..., v{n-1}]
+
+        # update result
+        loc_load.4 add loc_store.4
+        # => [v{j+1}, ..., v{n-1}]
+
+        # Increment j and leave a copy on stack
+        loc_load.3 add.1 dup loc_store.3
+        # => [j+1, v{j+1}, ..., v{n-1}]
+
+        # Check if we're done looping
+        loc_load.2 neq
+        # => [0 or 1, v{j+1}, ..., v{n-1}]
+    end
+
+    # Return result
+    loc_load.4
+    # => [ f_k ]
+end
+
+# Stores an array to `INPUT_ARR_LOC`, where an "array" is a list of elements prefixed by their length.
+# The array is stored in the same order, that is [n, v0, ..., v{n-1}].
+# The inverse operation is `proc.retrieve_array`.
+# Input: [n, v0, ..., v{n-1}, ...]
+# Output: [...]
+proc.store_array
+    # Store n and keep a copy on the stack
+    dup mem_store.INPUT_ARR_LOC
+    # => [n, v0, ..., v{n-1}, ...]
+
+    # Prepare stack for loop
+    push.0.1                                  # pushes i=0, followed by 1 so that we enter the loop
+    # [ 1, i=0, n, v0, ..., v{n-1}]
+
+    while.true
+        # => [i, n, v{i}, ..., v{n-1}]
+
+        # Setup write offset
+        # Note: we write at location i + (INPUT_ARR_LOC + 1), since the element at INPUT_ARR_LOC is `n`
+        # (i.e. the array starts at address `INPUT_ARR_LOC + 1`)
+        movup.2 dup.1 push.INPUT_ARR_LOC add.1 add
+        # => [i+INPUT_ARR_LOC+1, v{i}, i, n, v{i+1}, ..., v{n-1}]
+
+        # Write v{i}
+        mem_store
+        # => [i, n, v{i+1}, ..., v{n-1}]
+
+        # Increment i and check if we're done
+        add.1 dup.1 dup.1 neq
+        # => [1 or 0, i+1, n, v{i+1}, ..., v{n-1}]
+    end
+
+    # => [n, n, ...]
+
+    drop drop
+    # [ ]
+end
+
+#! Retrieves an array previously stored with `proc.store_array`.
+#! Input: [array_loc], the memory location to retrieve the array
+#! Output: [n, v0, ..., v{n-1}]
+#!
+#! Locals
+#! 0: array_loc
+proc.retrieve_array.1
+    # Preserve array_loc
+    dup loc_store.0
+    # => [array_loc, ...]
+
+    # Load the length of the array
+    mem_load
+    # => [n, ...]
+
+    # Prepare stack for loop
+    push.0.1
+    # => [1, i=0, n, v0, ..., v{n-1}]
+
+    while.true
+        # => [i, n, v{i}, ..., v{n-1}]
+
+        # Setup read offset
+        # Note: we read at location `array_loc + n - i`, since the element at array_loc is `n`
+        # (i.e. the array starts at address `array_loc + 1`)
+        dup.1 dup.1 sub
+        # => [n - i, i, n, v{i+1}, ..., v{n-1}]
+        
+        # Setup read pointer
+        loc_load.0 add
+        # => [array_loc + n - i, i, n, v{i+1}, ..., v{n-1}]
+
+        # Read v{i} and put in its spot on the stack
+        mem_load movdn.2
+        # => [i, n, v{i}, v{i+1}, ..., v{n-1}]
+
+        # Increment i and check if we're done
+        add.1 dup.1 dup.1 neq
+        # => [1 or 0, i+1, n, v{i}, v{i+1}, ..., v{n-1}]
+    end
+    # => [n, n, v0, ..., v{n-1}]
+
+    drop
+    # => [n, v0, ..., v{n-1}]
+end
+
+#! Input: [n, v0, ..., v{n-1}]
+#!
+#! Locals
+#! 0: n
+#! 1: root_of_unity
+#! 2: k
+proc.main.3
+    # Initialize memory local `n`
+    dup loc_store.0
+    # => [n, v0, ..., v{n-1}]
+
+    # Initialize memory `RESULT_ARR_LOC` with length of array
+    dup mem_store.RESULT_ARR_LOC
+    # => [n, v0, ..., v{n-1}]
+
+    # Initialize memory local `root_of_unity
+    dup exec.log2 exec.get_root_of_unity loc_store.1
+    # => [n, v0, ..., v{n-1}]
+
+    # Store array
+    exec.store_array
+    # => [ ]
+
+    # Note: k is initialized to 0 by the VM
+
+    # Prepare stack for loop
+    push.1
+    # => [ 1 ]
+
+    while.true
+        # Retrieve input array
+        push.INPUT_ARR_LOC exec.retrieve_array
+        # => [n, v0, ..., v{n-1}]
+
+        # Retrieve `root_of_unity` and `k`
+        loc_load.1 loc_load.2
+        # => [k, root_of_unity, n, v0, ..., v{n-1}]
+
+        # call `proc.f_k`
+        exec.f_k
+        # => [ f_k ]
+
+        # Prepare pointer to store `f_k`
+        push.RESULT_ARR_LOC loc_load.2 add add.1
+        # => [RESULT_ARR_LOC + k + 1, f_k]
+
+        # Store `f_k`
+        mem_store
+        # => [ ]
+
+        # Load, increment k, and store. Keep a copy on the stack
+        loc_load.2 add.1 dup loc_store.2
+        # => [k+1]
+
+        # Check if we're done by comparing `k+1` with `n`
+        loc_load.0 neq
+        # => [1 or 0]
+    end
+    # => [ ]
+
+    # Return result array
+    push.RESULT_ARR_LOC exec.retrieve_array drop
+    # => [f0, ..., f{n-1}]
+end
+
+begin
+    exec.main
+end

@@ -1,15 +1,17 @@
-mod transaction;
 mod utils_debug;
 mod utils_input;
 mod utils_program;
-use miden_vm::{ExecutionProof, ProofOptions};
+use miden_vm::{ExecutionProof, ProvingOptions, DefaultHost, MemAdviceProvider};
+use miden_air::ExecutionOptions;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Deserialize, Serialize)]
 pub struct Outputs {
+    pub program_hash: String,
     pub stack_output: Vec<u64>,
+    pub cycles: Option<usize>,
     pub trace_len: Option<usize>,
     pub overflow_addrs: Option<Vec<u64>>,
     pub proof: Option<Vec<u8>>,
@@ -28,15 +30,23 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
         .deserialize_inputs(inputs_frontend)
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+
+    let execution_options = ExecutionOptions::new(None, 64 as u32)
+        .map_err(|err| format!("{err}"))?;
+
     let trace = miden_vm::execute(
         &program.program.unwrap(),
         inputs.stack_inputs,
-        inputs.advice_provider,
+        host,
+        execution_options,
     )
     .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
     let result = Outputs {
+        program_hash: program.program_info.unwrap().program_hash().to_string(),
         stack_output: trace.stack_outputs().stack().to_vec(),
+        cycles: Some(trace.trace_len_summary().trace_len()),
         trace_len: Some(trace.get_trace_len()),
         overflow_addrs: None,
         proof: None,
@@ -59,19 +69,23 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outpu
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
-    let proof_options = ProofOptions::default();
+    let proof_options = ProvingOptions::default();
+
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
     let stack_input_cloned = inputs.stack_inputs.clone();
     let (output, proof) = miden_vm::prove(
         &program.program.unwrap(),
         stack_input_cloned,
-        inputs.advice_provider,
+        host,
         proof_options,
     )
     .map_err(|err| format!("Failed to prove execution - {:?}", err))?;
 
     let result = Outputs {
+        program_hash: program.program_info.clone().unwrap().program_hash().to_string(),
         stack_output: output.stack().to_vec(),
+        cycles: None,
         trace_len: Some(proof.stark_proof().trace_length()),
         overflow_addrs: Some(output.overflow_addrs().to_vec()),
         proof: Some(proof.to_bytes()),
