@@ -48,26 +48,14 @@
 # The memory address at which the `swapped` boolean is stored
 const.SWAPPED_ADDRESS=0
 
-# The value initial value of the `swapped` variable
-const.SWAPPED=0
-
 # The memory address at which the `i_pointer` variable is stored
 const.I_POINTER_ADDRESS=1
-
-# The value initial value of the `i_pointer` variable
-const.I_POINTER=5
 
 # The memory address at which the `j_pointer` variable is stored
 const.J_POINTER_ADDRESS=2
 
-# The value initial value of the `j_pointer` variable
-const.J_POINTER=6
-
 # The memory address at which the `counter` variable is stored
 const.COUNTER_ADDRESS=3
-
-# The value initial value of the `counter` variable
-const.COUNTER=0
 
 # The memory address at which the `length` variable is stored
 const.LENGTH_ADDRESS=4
@@ -83,22 +71,22 @@ const.LENGTH_ADDRESS=4
 #!  n: is the count of elements to be sorted.  
 proc.initialise
     # initialise `swapped` boolean - initialised at 0 / false
-    push.SWAPPED
+    push.0
     push.SWAPPED_ADDRESS
     mem_store
 
     # initialise `i` index - initialised at 5 because mem[5] is the array start index
-    push.I_POINTER
+    push.5
     push.I_POINTER_ADDRESS
     mem_store
 
     # initialise `j` index - initialised at 6 because mem[6] is the second array index
-    push.J_POINTER
+    push.6
     push.J_POINTER_ADDRESS
     mem_store
 
     # initialise `counter` - initialised at 0
-    push.COUNTER
+    push.0
     push.COUNTER_ADDRESS
     mem_store
 
