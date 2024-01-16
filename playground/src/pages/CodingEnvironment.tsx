@@ -613,7 +613,7 @@ export default function CodingEnvironment(): JSX.Element {
                     : 'text-sm top-4'
                 }`}
               >
-                Input
+                Operand Stack
               </label>
 
               <div onClick={onInputPlusClick}>
