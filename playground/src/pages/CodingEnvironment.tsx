@@ -1,35 +1,53 @@
-import React, { useState } from "react";
-import { oneDark } from "@codemirror/theme-one-dark";
-import { eclipse } from "@uiw/codemirror-theme-eclipse";
-import ActionButton from "../components/ActionButton";
-import DropDown from "../components/DropDown";
-import MidenInputs from "../components/CodingEnvironment/MidenInputs";
-import MidenOutputs from "../components/CodingEnvironment/MidenOutputs";
-import MidenEditor from "../components/CodingEnvironment/MidenCode";
-import ProofModal from "../components/CodingEnvironment/ProofModal";
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { eclipse } from '@uiw/codemirror-theme-eclipse';
+import ActionButton from '../components/ActionButton';
+import DropDown from '../components/DropDown';
+import MidenInputs from '../components/CodingEnvironment/MidenInputs';
+import MidenOutputs from '../components/CodingEnvironment/MidenOutputs';
+import MidenEditor from '../components/CodingEnvironment/MidenCode';
+import ProofModal from '../components/CodingEnvironment/ProofModal';
+import InstructionTable from './InstructionTable';
+
 import init, {
   DebugExecutor,
   Outputs,
   run_program,
   prove_program,
   verify_program,
-} from "miden-wasm";
-import toast, { Toaster } from "react-hot-toast";
+  DebugCommand,
+  DebugOutput
+} from 'miden-wasm';
+import toast, { Toaster } from 'react-hot-toast';
 import {
   getExample,
   checkInputs,
   checkOutputs,
-} from "../utils/helper_functions";
-import { emptyOutput, exampleCode, exampleInput } from "../utils/constants";
+  formatDebuggerOutput,
+  formatMemory
+} from '../utils/helper_functions';
+import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { DocumentPlusIcon } from '@heroicons/react/24/outline';
+import { emptyOutput, exampleCode, exampleInput } from '../utils/constants';
+import ProgramInfo from './ProgramInfo';
+import ProofInfo from './ProofInfo';
+import DebugInfo from './DebugInfo';
+import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 
 export default function CodingEnvironment(): JSX.Element {
-
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isInstructionVisible, setIsInstructionVisible] = useState(true);
+  const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(false);
+  const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
+  const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
 
   /**
    * This sets the inputs to the default values.
    */
   const [inputs, setInputs] = React.useState(exampleInput);
+
+  const [inputStringValue, setInputStringValue] = React.useState(exampleInput);
 
   /**
    * This sets the code to the default values.
@@ -41,6 +59,8 @@ export default function CodingEnvironment(): JSX.Element {
    */
   const [output, setOutput] = React.useState(emptyOutput);
 
+  const [programInfo, setProgramInfo] = React.useState(emptyOutput);
+
   /**
    * This sets the proof to the default proof.
    */
@@ -51,9 +71,84 @@ export default function CodingEnvironment(): JSX.Element {
    */
   const [showDebug, setShowDebug] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState('');
 
-  /** Manages the display of the proof */
-  const [proofModalOpen, setProofModalOpen] = useState(false);
+  const [operandValue, setOperandValue] = useState('');
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [stackOutputValue, setStackOutputValue] = useState('');
+  const [runProgramOutput, setRunProgramOutput] = useState();
+  const [isOutputFocused, setIsOutputFocused] = useState(false);
+  const [isCodeUploaded, setIsCodeUploaded] = useState(false);
+  const [codeUploadContent, setCodeUploadContent] = useState('');
+
+  const [adviceValue, setAdviceValue] = useState('');
+  const [isAdviceFocused, setIsAdviceFocused] = useState(false);
+  const [isAdviceStackLayoutVisible, setIsAdviceStackVisible] = useState(false);
+
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+  };
+
+  const handleInputBlur = () => {
+    if (!operandValue) {
+      setIsInputFocused(false);
+    }
+  };
+
+  const handleOutputFocus = () => {
+    setIsOutputFocused(true);
+  };
+
+  const handleOutputBlur = () => {
+    if (!stackOutputValue) {
+      setIsOutputFocused(false);
+    }
+  };
+
+  const handleAdviceFocus = () => {
+    setIsAdviceFocused(true);
+  };
+
+  const handleAdviceBlur = () => {
+    if (!adviceValue) {
+      setIsAdviceFocused(false);
+    }
+  };
+
+  const handleCopyClick = () => {
+    navigator.clipboard
+      .writeText(code)
+      .then(() => {
+        // If the copying was successful
+        toast.success('Copied!');
+      })
+      .catch((err) => {
+        toast.error('Failed to copy');
+      });
+  };
+
+  const handleInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow numbers and commas
+    const regex = /^[0-9,]*$/;
+    const newValue = e.target.value;
+
+    if (regex.test(newValue)) {
+      setOperandValue(newValue);
+    }
+  };
+
+  const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow numbers and commas
+    const regex = /^[0-9,]*$/;
+    const newValue = e.target.value;
+
+    if (regex.test(newValue)) {
+      setAdviceValue(newValue);
+    }
+  };
 
   /**
    * This sets the debugExecutor such that we can store it for a session.
@@ -66,19 +161,46 @@ export default function CodingEnvironment(): JSX.Element {
     setDebugExecutor(null);
   }
 
+  function classNames(...classes: string[]) {
+    return classes.filter(Boolean).join(' ');
+  }
+
+  const executeDebug = async (command: DebugCommand, params?: bigint) => {
+    try {
+      if (!debugExecutor) {
+        throw new Error('debugExecutor is undefined');
+      }
+      if (typeof params !== 'undefined') {
+        const debugOutput: DebugOutput = debugExecutor.execute(command, params);
+        setOutput(formatDebuggerOutput(debugOutput));
+        console.log('memory', formatMemory(debugOutput.memory));
+        console.log('stack', debugOutput.stack);
+
+        setDebugOutput(debugOutput);
+      } else {
+        const debugOutput: DebugOutput = debugExecutor.execute(command);
+        console.log('memory', formatMemory(debugOutput.memory));
+        console.log('stack', debugOutput.stack);
+
+        setOutput(formatDebuggerOutput(debugOutput));
+        setDebugOutput(debugOutput);
+      }
+    } catch (error) {
+      setOutput('Error: Check the developer console for details.');
+    }
+  };
+
   /**
    * This handles a change in the selected example.
    * If a new example is selected using the dropdown, the inputs and
    * the code are updated.
    */
-  const [, setExample] = React.useState<string>();
   const handleSelectChange = async (exampleChange: string) => {
     disableDebug();
     setProof(null);
     const value = exampleChange;
     // set the current example to the selected one
-    setExample(value);
-    if (value === "addition") {
+    if (value === 'addition') {
       setInputs(exampleInput);
       setCode(exampleCode);
       setOutput(emptyOutput);
@@ -93,6 +215,158 @@ export default function CodingEnvironment(): JSX.Element {
     setOutput(emptyOutput);
   };
 
+  const handleCodeUpload: React.ChangeEventHandler<HTMLInputElement> = (
+    event
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null;
+
+    setCodeUploadContent('');
+
+    if (
+      file &&
+      (file.type === 'application/json' || file.type === 'text/plain')
+    ) {
+      const reader = new FileReader();
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const text = e.target?.result;
+        console.log('Uploaded on load');
+
+        if (typeof text === 'string') {
+          console.log('Uploaded sucess111');
+
+          // Check if the file content is valid JSON
+          try {
+            JSON.parse(text);
+            setCodeUploadContent(text);
+            setAdviceValue('');
+            setOperandValue('');
+
+            setInputStringValue(text);
+
+            hideAllRightSideLayout();
+
+            console.log('Uploaded sucess');
+
+            setIsCodeUploaded(true);
+          } catch (error) {
+            console.error('Invalid JSON file.');
+            toast.error('Invalid content uploaded');
+          }
+        }
+      };
+
+      reader.onerror = (e) => {
+        toast.error('Error reading file');
+        // console.error('Error reading file', e);
+      };
+
+      reader.readAsText(file);
+
+      event.target.value = '';
+    } else {
+      toast.error('Only txt or json files are supported');
+      // console.error('Unsupported file type.');
+    }
+  };
+
+  const hideAllRightSideLayout = () => {
+    setIsInstructionVisible(false);
+    setIsProgramInfoVisible(false);
+    setShowDebug(false);
+    setIsProofInfoVisible(false);
+    setIsCodeUploaded(false);
+  };
+
+  useEffect(() => {
+    let inputString;
+
+    if (isCodeUploaded) {
+      console.log('code is uploaded return');
+      return;
+    }
+
+    let operandParts = '[]';
+    if (operandValue) {
+      operandParts = operandValue
+        .toString()
+        .split(',')
+        .map((value) => `"${value}"`)
+        .toString();
+    }
+
+    if (adviceValue) {
+      // If adviceValue is not empty
+
+      const adviceParts = adviceValue
+        .toString()
+        .split(',')
+        .map((value) => `"${value}"`)
+        .toString();
+
+      inputString = `{
+        "operand_stack": [${operandParts}],
+        "advice_stack": [${adviceParts}]
+    }`;
+    } else {
+      // If adviceValue is empty
+      inputString = `{
+        "operand_stack": [${operandParts}],
+        "advice_stack": []
+    }`;
+    }
+
+    setInputStringValue(inputString);
+  }, [operandValue, adviceValue]);
+
+  useEffect(() => {
+    setInputStringValue(codeUploadContent);
+  }, [codeUploadContent]);
+
+  const handleDocumentClick = () => {
+    // Trigger the file input click event
+
+    if (fileInputRef) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  useEffect(() => {
+    console.log('inputs effect', inputs);
+    if (!inputs) {
+      return;
+    }
+
+    try {
+      const inputCheck = checkInputs(inputs);
+      if (!inputCheck.isValid) {
+        return;
+      }
+      const inputObject = JSON.parse(inputs);
+      if (inputObject.operand_stack) {
+        setOperandValue(inputObject.operand_stack);
+      }
+
+      if (inputObject.advice_stack) {
+        setAdviceValue(inputObject.advice_stack);
+        setIsAdviceStackVisible(true);
+      }
+    } catch (error: any) {
+      console.log('Inputs must be a valid JSON object: ${error.message}');
+    }
+  }, [inputs]);
+
+  const onInputPlusClick = () => {
+    setIsAdviceStackVisible(!isAdviceStackLayoutVisible);
+    setAdviceValue('');
+    setIsAdviceFocused(false);
+  };
+
+  const onInstructionClick = () => {
+    hideAllRightSideLayout();
+    setIsInstructionVisible(!isInstructionVisible);
+  };
+
   /**
    * This runs the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
@@ -100,26 +374,41 @@ export default function CodingEnvironment(): JSX.Element {
   const runProgram = async () => {
     setIsProcessing(true);
     disableDebug();
-    init().then(() => {
-      setProof(null);
-      const inputCheck = checkInputs(inputs);
-      if (!inputCheck.isValid) {
-        setOutput(inputCheck.errorMessage);
-        toast.error("Execution failed");
-        return;
-      }
-      try {
-        const start = Date.now();
-        const { stack_output, trace_len }: Outputs = run_program(code, inputs);
-        setOutput(`{
-"stack_output" : [${stack_output.toString()}],
-"trace_len" : ${trace_len}
-}`);
-        toast.success(`Execution successful in ${Date.now() - start} ms`);
-      } catch (error) {
-        setOutput(`Error: ${error}`);
-      }
-    }).finally(() => setIsProcessing(false));
+    init()
+      .then(() => {
+        setProof(null);
+
+        const inputCheck = checkInputs(inputStringValue);
+
+        console.log('input string', inputStringValue);
+        if (!inputCheck.isValid) {
+          setOutput(inputCheck.errorMessage);
+          toast.error('Execution failed');
+          return;
+        }
+        try {
+          const start = Date.now();
+
+          const { stack_output, trace_len }: Outputs = run_program(
+            code,
+            inputStringValue
+          );
+
+          hideAllRightSideLayout();
+
+          setStackOutputValue(stack_output.toString());
+          setOutput(`{
+            "stack_output" : [${stack_output.toString()}],
+            "trace_len" : ${trace_len}
+            }`);
+          setProgramInfo(`Trace_len: ${trace_len}`);
+          setIsProgramInfoVisible(true);
+          toast.success(`Execution successful in ${Date.now() - start} ms`);
+        } catch (error) {
+          setOutput(`Error: ${error}`);
+        }
+      })
+      .finally(() => setIsProcessing(false));
   };
 
   /**
@@ -129,39 +418,50 @@ export default function CodingEnvironment(): JSX.Element {
   const proveProgram = async () => {
     setIsProcessing(true);
     disableDebug();
-    toast.loading("Proving ...", { id: "provingToast" });
-    init().then(() => {
-      setProof(null);
-      const inputCheck = checkInputs(inputs);
-      if (!inputCheck.isValid) {
-        setOutput(inputCheck.errorMessage);
-        toast.error("Proving failed");
-        return;
-      }
-      try {
-        const start = Date.now();
-        const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
-          prove_program(code, inputs);
-        const overflow = overflow_addrs ? overflow_addrs.toString() : "[]";
-        setOutput(`{
-"stack_output" : [${stack_output.toString()}],
-"overflow_addrs" : [${overflow}],
-"trace_len" : ${trace_len}
-}`);
+    toast.loading('Proving ...', { id: 'provingToast' });
+    init()
+      .then(() => {
+        setProof(null);
 
-        toast.success(`Proving successful in ${Date.now() - start} ms`, {
-          id: "provingToast",
-        });
-
-        // Store the proof if it exists
-        if (proof) {
-          setProof(proof);
+        const inputCheck = checkInputs(inputStringValue);
+        if (!inputCheck.isValid) {
+          setOutput(inputCheck.errorMessage);
+          toast.error('Proving failed');
+          return;
         }
-      } catch (error) {
-        setOutput(`Error: ${error}`);
-        toast.error("Proving failed");
-      }
-    }).finally(() => setIsProcessing(false));
+        try {
+          const start = Date.now();
+          const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
+            prove_program(code, inputStringValue);
+          const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
+          setProgramInfo(`Trace_len : ${trace_len}`);
+
+          setOutput(`{
+            "stack_output" : [${stack_output.toString()}],
+            "overflow_addrs" : [${overflow}],
+            "trace_len" : ${trace_len}
+            }`);
+
+          toast.success(`Proving successful in ${Date.now() - start} ms`, {
+            id: 'provingToast'
+          });
+
+          // Store the proof if it exists
+
+          hideAllRightSideLayout();
+
+          if (proof) {
+            setProof(proof);
+            setIsProofInfoVisible(true);
+          }
+
+          setIsProgramInfoVisible(true);
+        } catch (error) {
+          setOutput(`Error: ${error}`);
+          toast.error('Proving failed');
+        }
+      })
+      .finally(() => setIsProcessing(false));
   };
 
   /**
@@ -174,13 +474,17 @@ export default function CodingEnvironment(): JSX.Element {
       const inputCheck = checkInputs(inputs);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
-        toast.error("Debugging failed");
+        toast.error('Debugging failed');
         return;
       }
       try {
+        hideAllRightSideLayout();
+
         setShowDebug(true);
         setDebugExecutor(new DebugExecutor(code, inputs));
-        setOutput("Debugging session started");
+        setOutput('Debugging session started');
+
+        setDebugOutput(null);
       } catch (error) {
         setOutput(`Error: ${error}`);
       }
@@ -197,67 +501,247 @@ export default function CodingEnvironment(): JSX.Element {
     disableDebug();
     init().then(() => {
       if (!proof) {
-        setOutput("There is no proof to verify. \nDid you prove the program?");
-        toast.error("Verification failed");
+        setOutput('There is no proof to verify. \nDid you prove the program?');
+        toast.error('Verification failed');
         return;
       }
       const inputCheck = checkInputs(inputs);
       const outputCheck = checkOutputs(output);
       if (!inputCheck.isValid) {
         setOutput(inputCheck.errorMessage);
-        toast.error("Verification failed");
+        toast.error('Verification failed');
         return;
       } else if (!outputCheck.isValid) {
         setOutput(outputCheck.errorMessage);
-        toast.error("Verification failed");
+        toast.error('Verification failed');
         return;
       }
       try {
         const start = Date.now();
         const result = verify_program(code, inputs, output, proof);
         toast.success(
-          "Verification successful in " +
-          (Date.now() - start) +
-          " ms with a security level of " +
-          result +
-          "bits."
+          'Verification successful in ' +
+            (Date.now() - start) +
+            ' ms with a security level of ' +
+            result +
+            'bits.'
         );
       } catch (error) {
         setOutput(`Error: ${error}`);
-        toast.error("Verification failed");
+        toast.error('Verification failed');
       }
     });
   };
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 bg-primary h-screen w-full">
       <Toaster />
-      <div className="bg-gray-100 sticky top-0 z-10 px-4 sm:px-6 lg:px-8 py-6 grid lg:grid-cols-6 sm:grid-cols-3 grid-cols-2 gap-4 content-center">
-        <DropDown onExampleValueChange={handleSelectChange} />
-        <ActionButton label="Run" onClick={runProgram} disabled={isProcessing} />
-        <ActionButton label="Debug" onClick={startDebug} disabled={isProcessing} />
-        <ActionButton label="Prove" onClick={proveProgram} disabled={isProcessing} />
-        <ActionButton
-          label="Verify"
-          onClick={verifyProgram}
-          disabled={isProcessing || !proof}
-        />
-        <ActionButton
-          label="Show Proof"
-          onClick={() => setProofModalOpen(true)}
-          disabled={isProcessing || !proof}
-        />
-        <ProofModal proof={proof} open={proofModalOpen} setOpen={setProofModalOpen} />
-        {/* <OverlayButton label="Show Proof" disabled={!proof} proof={proof} /> */}
+      <div className="bg-secondary-main w-full flex items-center py-6 px-16">
+        <h1 className="flex text-sm items-center font-semibold text-white">
+          TEST & EXPERIMENT
+        </h1>
+
+        <h1
+          className={classNames(
+            'flex text-sm ml-8 items-center font-semibold cursor-pointer',
+            isInstructionVisible
+              ? 'text-white'
+              : 'text-secondary-1 hover:text-white'
+          )}
+          onClick={onInstructionClick}
+        >
+          INSTRUCTIONS
+        </h1>
       </div>
-      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MidenInputs value={inputs} onChange={setInputs} theme={oneDark} />
-          <MidenOutputs value={output} onChange={setOutput} theme={eclipse} showDebug={showDebug} debugExecutor={debugExecutor} />
+
+      <div className="flex lg:px-4 pt-4 w-full h-full">
+        <div className="flex flex-col h-screen w-1/2 mr-4">
+          <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+            <div className="h-14 flex items-center py-3 px-4">
+              <DropDown onExampleValueChange={handleSelectChange} />
+              <button
+                className="flex items-center ml-auto text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                onClick={runProgram}
+                disabled={isProcessing}
+              >
+                Run
+                <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
+              </button>
+
+              <button
+                className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                onClick={startDebug}
+                disabled={isProcessing}
+              >
+                Debug
+              </button>
+
+              <button
+                className="flex items-center mx-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                onClick={proveProgram}
+                disabled={isProcessing}
+              >
+                Prove
+              </button>
+            </div>
+
+            <div className="h-px bg-secondary-4 mb-4"></div>
+            <MidenEditor
+              value={code}
+              showDebug={showDebug}
+              onChange={setCode}
+              handleCopyClick={handleCopyClick}
+              executeDebug={executeDebug}
+            />
+          </div>
+
+          <div className="flex mt-5">
+            <div className="flex justify-center items-baseline relative grow border-none">
+              <input
+                type="text"
+                value={operandValue}
+                onChange={(e) => setOperandValue(e.target.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+              />
+              <label
+                htmlFor="input"
+                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                  isInputFocused || operandValue
+                    ? 'text-xs top-0 text-green'
+                    : 'text-sm top-4'
+                }`}
+              >
+                Input
+              </label>
+
+              <div onClick={onInputPlusClick}>
+                <PlusIcon
+                  className={classNames(
+                    'h-6 w-6 ml-1.5 hover:cursor-pointer',
+                    isAdviceStackLayoutVisible
+                      ? 'fill-green'
+                      : 'fill-secondary-6'
+                  )}
+                />
+              </div>
+
+              <div onClick={handleDocumentClick}>
+                <input
+                  type="file"
+                  accept=".txt,.json"
+                  onChange={handleCodeUpload}
+                  style={{ display: 'none' }}
+                  ref={fileInputRef}
+                />
+
+                <DocumentPlusIcon
+                  className={classNames(
+                    'h-6 w-6 ml-1.5 hover:cursor-pointer',
+                    isCodeUploaded ? 'fill-green' : 'fill-secondary-6'
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="h-px bg-secondary-4 mb-4"></div>
+
+          {isAdviceStackLayoutVisible && (
+            <div>
+              <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
+                <input
+                  type="text"
+                  value={adviceValue}
+                  onChange={(e) => setAdviceValue(e.target.value)}
+                  onFocus={handleAdviceFocus}
+                  onBlur={handleAdviceBlur}
+                  className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+                />
+                <label
+                  htmlFor="advicestack"
+                  className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                    isAdviceFocused || adviceValue
+                      ? 'text-xs top-0 text-green'
+                      : 'text-sm top-4'
+                  }`}
+                >
+                  Advice Stack
+                </label>
+              </div>
+              <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+            </div>
+          )}
+
+          <div>
+            <div className="flex justify-center items-baseline relative grow border-none">
+              <input
+                type="text"
+                value={stackOutputValue}
+                onChange={(e) => setStackOutputValue(e.target.value)}
+                onFocus={handleOutputFocus}
+                onBlur={handleOutputBlur}
+                disabled
+                className="bg-transparent w-full text-green pt-4 pb-2 pl-16 outline-none border-none"
+              />
+              <label
+                htmlFor="input"
+                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                  isOutputFocused || stackOutputValue
+                    ? 'text-xs top-0 text-green'
+                    : 'text-sm top-4'
+                }`}
+              >
+                Output
+              </label>
+            </div>
+            <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+          </div>
         </div>
-      </div>
-      <div className="px-4 sm:px-6 lg:px-8 pt-6 box-border">
-        <MidenEditor value={code} onChange={setCode} theme={oneDark} />
+
+        <div className="flex flex-col w-1/2 gap-y-6">
+          {isInstructionVisible && (
+            <div className="h-4/6 rounded-xl border overflow-y-scroll border-secondary-4">
+              <InstructionTable />
+            </div>
+          )}
+
+          {isProgramInfoVisible && (
+            <div className="flex">
+              <ProgramInfo programInfo={programInfo} />
+            </div>
+          )}
+
+          {isProofInfoVisible && (
+            <div className="flex">
+              <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
+            </div>
+          )}
+
+          {showDebug && (
+            <div className="flex">
+              <DebugInfo
+                proofText={proof}
+                debugOutput={debugOutput}
+                verifyProgram={verifyProgram}
+              />
+            </div>
+          )}
+          {showDebug && debugOutput && (
+            <div className="flex">
+              <MemoryInfo debugOutput={debugOutput} />
+            </div>
+          )}
+
+          {isCodeUploaded && (
+            <div className="h-3/6 flex">
+              <MidenInputs
+                value={codeUploadContent}
+                onChange={setCodeUploadContent}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
