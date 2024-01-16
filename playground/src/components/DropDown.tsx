@@ -1,23 +1,24 @@
-import { Fragment, useState } from "react";
-import { Listbox, Transition } from "@headlessui/react";
+import { Fragment, useState } from 'react';
+import { Listbox, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const examples = [
-  "addition",
-  "advice_provider",
-  "catalan",
-  "collatz",
-  "comparison",
-  "conditional",
-  "fibonacci",
-  "game_of_life_4x4",
-  "matrix_multiplication",
-  "nprime",
-  "shamir_secret_share",
-  "standard_library"
+  'addition',
+  'advice_provider',
+  'catalan',
+  'collatz',
+  'comparison',
+  'conditional',
+  'fibonacci',
+  'game_of_life_4x4',
+  'matrix_multiplication',
+  'nprime',
+  'shamir_secret_share',
+  'standard_library'
 ];
 
 function classExamples(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 type DropDownProps = {
@@ -25,7 +26,7 @@ type DropDownProps = {
 };
 
 export default function DropDown({
-  onExampleValueChange,
+  onExampleValueChange
 }: DropDownProps): JSX.Element {
   const [selected, setSelected] = useState(examples[0]);
 
@@ -39,24 +40,13 @@ export default function DropDown({
     >
       {({ open }) => (
         <>
-          <div className="relative" role="listbox" data-testid="listbox">
-            <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
-              <span className="block truncate">{selected.replace(/_/g, " ")}</span>
+          <div className="relative w-40" role="listbox" data-testid="listbox">
+            <Listbox.Button className="relative w-full cursor-default rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
+              <span className="block truncate capitalize">
+                {selected.replace(/_/g, ' ')}
+              </span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                  />
-                </svg>
+                <ChevronDownIcon className="h-3 w-3 fill-accent-1 stroke-2" />
               </span>
             </Listbox.Button>
 
@@ -76,8 +66,8 @@ export default function DropDown({
                     key={example}
                     className={({ active }) =>
                       classExamples(
-                        active ? "text-white bg-violet-600" : "text-gray-900",
-                        "relative cursor-default select-none py-2 pl-3 pr-9"
+                        active ? 'text-white bg-violet-600' : 'text-gray-900',
+                        'relative cursor-default select-none py-2 pl-3 pr-9'
                       )
                     }
                     value={example}
@@ -87,18 +77,18 @@ export default function DropDown({
                       <>
                         <span
                           className={classExamples(
-                            selected ? "font-semibold" : "font-normal",
-                            "block truncate"
+                            selected ? 'font-semibold' : 'font-normal',
+                            'block truncate'
                           )}
                         >
-                          {example.replace(/_/g, " ")}
+                          {example.replace(/_/g, ' ')}
                         </span>
 
                         {selected ? (
                           <span
                             className={classExamples(
-                              active ? "text-white" : "text-violet-600",
-                              "absolute inset-y-0 right-0 flex items-center pr-4"
+                              active ? 'text-white' : 'text-violet-600',
+                              'absolute inset-y-0 right-0 flex items-center pr-4'
                             )}
                           >
                             <svg
