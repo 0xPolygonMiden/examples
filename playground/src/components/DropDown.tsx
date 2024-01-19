@@ -42,9 +42,7 @@ export default function DropDown({
         <>
           <div className="relative w-40" role="listbox" data-testid="listbox">
             <Listbox.Button className="relative w-full cursor-default rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
-              <span className="block truncate capitalize">
-                {selected.replace(/_/g, ' ')}
-              </span>
+              <span className="block truncate capitalize">{selected}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronDownIcon className="h-3 w-3 fill-accent-1 stroke-2" />
               </span>
@@ -57,10 +55,7 @@ export default function DropDown({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options
-                className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                role="options"
-              >
+              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {examples.map((example) => (
                   <Listbox.Option
                     key={example}
@@ -81,7 +76,7 @@ export default function DropDown({
                             'block truncate'
                           )}
                         >
-                          {example.replace(/_/g, ' ')}
+                          {example}
                         </span>
 
                         {selected ? (

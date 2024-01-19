@@ -1,4 +1,4 @@
 # Ignore artifacts:
 build
 coverage
-miden-wasm
+src/utils/helper_functions.tsx

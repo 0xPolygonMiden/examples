@@ -1,6 +1,6 @@
 use miden_vm::{
     crypto::{MerkleStore, MerkleTree, SimpleSmt},
-    math::{Felt, FieldElement},
+    math::Felt,
     utils::collections::BTreeMap,
     AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs, Word,
 };
@@ -144,13 +144,13 @@ impl InputFile {
         for data in merkle_data {
             match data {
                 MerkleData::MerkleTree(data) => {
-                    let leaves = Self::parse_merkle_tree(data)?;
+                    let leaves = parse_merkle_tree(data)?;
                     let merkle_tree = MerkleTree::new(leaves)
                         .map_err(|e| format!("failed to add merkle tree to merkle store - {e}"))?;
                     merkle_store.extend(merkle_tree.inner_nodes());
                 }
                 MerkleData::SparseMerkleTree(data) => {
-                    let entries = Self::parse_sparse_merkle_tree(data)?;
+                    let entries = parse_sparse_merkle_tree(data)?;
                     // TODO: Support variable depth
                     let smt =
                         SimpleSmt::with_leaves(SimpleSmt::MAX_DEPTH, entries).map_err(|e| {
@@ -162,40 +162,6 @@ impl InputFile {
         }
 
         Ok(Some(merkle_store))
-    }
-
-    /// Parse and return merkle tree leaves.
-    fn parse_merkle_tree(tree: &[String]) -> Result<Vec<Word>, String> {
-        tree.iter()
-            .map(|v| {
-                let leaf = Self::parse_word(v)?;
-                Ok(leaf)
-            })
-            .collect()
-    }
-
-    /// Parse and return sparse merkle tree entries.
-    fn parse_sparse_merkle_tree(tree: &[(u64, String)]) -> Result<Vec<(u64, Word)>, String> {
-        tree.iter()
-            .map(|(index, v)| {
-                let leaf = Self::parse_word(v)?;
-                Ok((*index, leaf))
-            })
-            .collect()
-    }
-
-    /// Parse a `Word` from a hex string.
-    pub fn parse_word(word_hex: &str) -> Result<Word, String> {
-        let mut word_data = [0u8; 32];
-        hex::decode_to_slice(word_hex, &mut word_data)
-            .map_err(|e| format!("failed to decode `Word` from hex {word_hex} - {e}"))?;
-        let mut word = Word::default();
-        for (i, value) in word_data.chunks(8).enumerate() {
-            word[i] = Felt::try_from(value).map_err(|e| {
-                format!("failed to convert `Word` data {word_hex} (element {i}) to Felt - {e}")
-            })?;
-        }
-        Ok(word)
     }
 
     /// Parse and return the stack inputs for the program.
@@ -225,7 +191,7 @@ pub struct Inputs {
 impl Inputs {
     pub fn new() -> Self {
         Self {
-            stack_inputs: StackInputs::new(vec![Felt::ZERO]),
+            stack_inputs: StackInputs::new(vec![]),
             advice_provider: MemAdviceProvider::default(),
             stack_outputs: StackOutputs::new(vec![], vec![]).unwrap(),
         }
@@ -240,21 +206,40 @@ impl Inputs {
         }
         Ok(())
     }
+}
 
-    // Parse the outputs as str and return a vector of u64
-    pub fn deserialize_outputs(&mut self, outputs_as_str: &str) -> Result<(), String> {
-        let outputs_as_json: Outputs =
-            serde_json::from_str(outputs_as_str).map_err(|e| e.to_string())?;
+/// Parse and return merkle tree leaves.
+fn parse_merkle_tree(tree: &[String]) -> Result<Vec<Word>, String> {
+    tree.iter()
+        .map(|v| {
+            let leaf = parse_word(v)?;
+            Ok(leaf)
+        })
+        .collect()
+}
 
-        let outputs = StackOutputs::new(
-            outputs_as_json.stack_output,
-            outputs_as_json.overflow_addrs.unwrap_or(vec![]),
-        ).unwrap();
+/// Parse and return sparse merkle tree entries.
+fn parse_sparse_merkle_tree(tree: &[(u64, String)]) -> Result<Vec<(u64, Word)>, String> {
+    tree.iter()
+        .map(|(index, v)| {
+            let leaf = parse_word(v)?;
+            Ok((*index, leaf))
+        })
+        .collect()
+}
 
-        self.stack_outputs = outputs;
-
-        Ok(())
+/// Parse a `Word` from a hex string.
+pub fn parse_word(word_hex: &str) -> Result<Word, String> {
+    let mut word_data = [0u8; 32];
+    hex::decode_to_slice(word_hex, &mut word_data)
+        .map_err(|e| format!("failed to decode `Word` from hex {word_hex} - {e}"))?;
+    let mut word = Word::default();
+    for (i, value) in word_data.chunks(8).enumerate() {
+        word[i] = Felt::try_from(value).map_err(|e| {
+            format!("failed to convert `Word` data {word_hex} (element {i}) to Felt - {e}")
+        })?;
     }
+    Ok(word)
 }
 
 #[test]
@@ -267,7 +252,7 @@ fn test_parse_output() {
     }"#;
 
     let mut inputs: Inputs = Inputs::new();
-    inputs.deserialize_outputs(output_str).unwrap();
+    inputs.deserialize_inputs(output_str).unwrap();
 
     let output: StackOutputs = inputs.stack_outputs;
 

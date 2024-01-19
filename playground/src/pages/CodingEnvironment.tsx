@@ -33,6 +33,7 @@ import ProgramInfo from './ProgramInfo';
 import ProofInfo from './ProofInfo';
 import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
+import ExplainerPage from './Explainer';
 
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -70,6 +71,7 @@ export default function CodingEnvironment(): JSX.Element {
    * Determines when to show the debug menu
    */
   const [showDebug, setShowDebug] = useState(false);
+  const [isHelpVisible, setIsHelpVisible] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -365,6 +367,12 @@ export default function CodingEnvironment(): JSX.Element {
   const onInstructionClick = () => {
     hideAllRightSideLayout();
     setIsInstructionVisible(!isInstructionVisible);
+    setIsHelpVisible(false);
+  };
+
+  const onHelpClick = () => {
+    setIsHelpVisible(!isHelpVisible);
+    setIsInstructionVisible(false);
   };
 
   /**
@@ -424,6 +432,8 @@ export default function CodingEnvironment(): JSX.Element {
         setProof(null);
 
         const inputCheck = checkInputs(inputStringValue);
+        console.log('input string', inputStringValue);
+
         if (!inputCheck.isValid) {
           setOutput(inputCheck.errorMessage);
           toast.error('Proving failed');
@@ -534,7 +544,7 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   return (
-    <div className="pb-4 bg-primary h-screen w-full">
+    <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
         <h1 className="flex text-sm items-center font-semibold text-white">
@@ -552,197 +562,215 @@ export default function CodingEnvironment(): JSX.Element {
         >
           INSTRUCTIONS
         </h1>
+
+        <h1
+          className={classNames(
+            'flex text-sm ml-8 items-center font-semibold cursor-pointer',
+            isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
+          )}
+          onClick={onHelpClick}
+        >
+          HELP
+        </h1>
       </div>
 
-      <div className="flex lg:px-4 pt-4 w-full h-full">
-        <div className="flex flex-col h-screen w-1/2 mr-4">
-          <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
-            <div className="h-14 flex items-center py-3 px-4">
-              <DropDown onExampleValueChange={handleSelectChange} />
-              <button
-                className="flex items-center ml-auto text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                onClick={runProgram}
-                disabled={isProcessing}
-              >
-                Run
-                <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
-              </button>
+      {isHelpVisible && (
+        <div className="flex bg-secondary-3 lg:px-4 pt-4 w-full h-full overflow-scroll">
+          <ExplainerPage />
+        </div>
+      )}
 
-              <button
-                className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                onClick={startDebug}
-                disabled={isProcessing}
-              >
-                Debug
-              </button>
+      {!isHelpVisible && (
+        <div className="flex lg:px-4 pt-4 w-full h-full overflow-y-hidden">
+          <div className="flex flex-col h-full w-1/2 mr-4">
+            <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+              <div className="h-14 flex items-center py-3 px-4">
+                <DropDown onExampleValueChange={handleSelectChange} />
+                <button
+                  className="flex items-center ml-auto text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={runProgram}
+                  disabled={isProcessing}
+                >
+                  Run
+                  <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
+                </button>
 
-              <button
-                className="flex items-center mx-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                onClick={proveProgram}
-                disabled={isProcessing}
-              >
-                Prove
-              </button>
-            </div>
+                <button
+                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={startDebug}
+                  disabled={isProcessing}
+                >
+                  Debug
+                </button>
 
-            <div className="h-px bg-secondary-4 mb-4"></div>
-            <MidenEditor
-              value={code}
-              showDebug={showDebug}
-              onChange={setCode}
-              handleCopyClick={handleCopyClick}
-              executeDebug={executeDebug}
-            />
-          </div>
+                <button
+                  className="flex items-center mx-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={proveProgram}
+                  disabled={isProcessing}
+                >
+                  Prove
+                </button>
+              </div>
 
-          <div className="flex mt-5">
-            <div className="flex justify-center items-baseline relative grow border-none">
-              <input
-                type="text"
-                value={operandValue}
-                onChange={(e) => setOperandValue(e.target.value)}
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-                className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+              <div className="h-px bg-secondary-4 mb-4"></div>
+              <MidenEditor
+                value={code}
+                showDebug={showDebug}
+                onChange={setCode}
+                handleCopyClick={handleCopyClick}
+                executeDebug={executeDebug}
               />
-              <label
-                htmlFor="input"
-                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                  isInputFocused || operandValue
-                    ? 'text-xs top-0 text-green'
-                    : 'text-sm top-4'
-                }`}
-              >
-                Operand Stack
-              </label>
-
-              <div onClick={onInputPlusClick}>
-                <PlusIcon
-                  className={classNames(
-                    'h-6 w-6 ml-1.5 hover:cursor-pointer',
-                    isAdviceStackLayoutVisible
-                      ? 'fill-green'
-                      : 'fill-secondary-6'
-                  )}
-                />
-              </div>
-
-              <div onClick={handleDocumentClick}>
-                <input
-                  type="file"
-                  accept=".txt,.json"
-                  onChange={handleCodeUpload}
-                  style={{ display: 'none' }}
-                  ref={fileInputRef}
-                />
-
-                <DocumentPlusIcon
-                  className={classNames(
-                    'h-6 w-6 ml-1.5 hover:cursor-pointer',
-                    isCodeUploaded ? 'fill-green' : 'fill-secondary-6'
-                  )}
-                />
-              </div>
             </div>
-          </div>
-          <div className="h-px bg-secondary-4 mb-4"></div>
 
-          {isAdviceStackLayoutVisible && (
-            <div>
-              <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
+            <div className="flex mt-5">
+              <div className="flex justify-center items-baseline relative grow border-none">
                 <input
                   type="text"
-                  value={adviceValue}
-                  onChange={(e) => setAdviceValue(e.target.value)}
-                  onFocus={handleAdviceFocus}
-                  onBlur={handleAdviceBlur}
+                  value={operandValue}
+                  onChange={(e) => setOperandValue(e.target.value)}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                   className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
                 />
                 <label
-                  htmlFor="advicestack"
+                  htmlFor="input"
                   className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                    isAdviceFocused || adviceValue
+                    isInputFocused || operandValue
                       ? 'text-xs top-0 text-green'
                       : 'text-sm top-4'
                   }`}
                 >
-                  Advice Stack
+                  Operand Stack
+                </label>
+
+                <div onClick={onInputPlusClick}>
+                  <PlusIcon
+                    className={classNames(
+                      'h-6 w-6 ml-1.5 hover:cursor-pointer',
+                      isAdviceStackLayoutVisible
+                        ? 'fill-green'
+                        : 'fill-secondary-6'
+                    )}
+                  />
+                </div>
+
+                <div onClick={handleDocumentClick}>
+                  <input
+                    type="file"
+                    accept=".txt,.json"
+                    onChange={handleCodeUpload}
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
+                  />
+
+                  <DocumentPlusIcon
+                    className={classNames(
+                      'h-6 w-6 ml-1.5 hover:cursor-pointer',
+                      isCodeUploaded ? 'fill-green' : 'fill-secondary-6'
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="h-px bg-secondary-4 mb-4"></div>
+
+            {isAdviceStackLayoutVisible && (
+              <div>
+                <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
+                  <input
+                    type="text"
+                    value={adviceValue}
+                    onChange={(e) => setAdviceValue(e.target.value)}
+                    onFocus={handleAdviceFocus}
+                    onBlur={handleAdviceBlur}
+                    className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+                  />
+                  <label
+                    htmlFor="advicestack"
+                    className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                      isAdviceFocused || adviceValue
+                        ? 'text-xs top-0 text-green'
+                        : 'text-sm top-4'
+                    }`}
+                  >
+                    Advice Stack
+                  </label>
+                </div>
+                <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+              </div>
+            )}
+
+            <div>
+              <div className="flex justify-center items-baseline relative grow border-none">
+                <input
+                  type="text"
+                  value={stackOutputValue}
+                  onChange={(e) => setStackOutputValue(e.target.value)}
+                  onFocus={handleOutputFocus}
+                  onBlur={handleOutputBlur}
+                  disabled
+                  className="bg-transparent w-full text-green pt-4 pb-2 pl-16 outline-none border-none"
+                />
+                <label
+                  htmlFor="input"
+                  className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                    isOutputFocused || stackOutputValue
+                      ? 'text-xs top-0 text-green'
+                      : 'text-sm top-4'
+                  }`}
+                >
+                  Output
                 </label>
               </div>
               <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
             </div>
-          )}
+          </div>
 
-          <div>
-            <div className="flex justify-center items-baseline relative grow border-none">
-              <input
-                type="text"
-                value={stackOutputValue}
-                onChange={(e) => setStackOutputValue(e.target.value)}
-                onFocus={handleOutputFocus}
-                onBlur={handleOutputBlur}
-                disabled
-                className="bg-transparent w-full text-green pt-4 pb-2 pl-16 outline-none border-none"
-              />
-              <label
-                htmlFor="input"
-                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                  isOutputFocused || stackOutputValue
-                    ? 'text-xs top-0 text-green'
-                    : 'text-sm top-4'
-                }`}
-              >
-                Output
-              </label>
-            </div>
-            <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+          <div className="flex flex-col w-1/2 gap-y-6">
+            {isInstructionVisible && (
+              <div className="h-4/6 rounded-xl border overflow-y-scroll border-secondary-4">
+                <InstructionTable />
+              </div>
+            )}
+
+            {isProgramInfoVisible && (
+              <div className="flex">
+                <ProgramInfo programInfo={programInfo} />
+              </div>
+            )}
+
+            {isProofInfoVisible && (
+              <div className="flex">
+                <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
+              </div>
+            )}
+
+            {showDebug && (
+              <div className="flex">
+                <DebugInfo
+                  proofText={proof}
+                  debugOutput={debugOutput}
+                  verifyProgram={verifyProgram}
+                />
+              </div>
+            )}
+            {showDebug && debugOutput && (
+              <div className="flex">
+                <MemoryInfo debugOutput={debugOutput} />
+              </div>
+            )}
+
+            {isCodeUploaded && (
+              <div className="h-3/6 flex">
+                <MidenInputs
+                  value={codeUploadContent}
+                  onChange={setCodeUploadContent}
+                />
+              </div>
+            )}
           </div>
         </div>
-
-        <div className="flex flex-col w-1/2 gap-y-6">
-          {isInstructionVisible && (
-            <div className="h-4/6 rounded-xl border overflow-y-scroll border-secondary-4">
-              <InstructionTable />
-            </div>
-          )}
-
-          {isProgramInfoVisible && (
-            <div className="flex">
-              <ProgramInfo programInfo={programInfo} />
-            </div>
-          )}
-
-          {isProofInfoVisible && (
-            <div className="flex">
-              <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
-            </div>
-          )}
-
-          {showDebug && (
-            <div className="flex">
-              <DebugInfo
-                proofText={proof}
-                debugOutput={debugOutput}
-                verifyProgram={verifyProgram}
-              />
-            </div>
-          )}
-          {showDebug && debugOutput && (
-            <div className="flex">
-              <MemoryInfo debugOutput={debugOutput} />
-            </div>
-          )}
-
-          {isCodeUploaded && (
-            <div className="h-3/6 flex">
-              <MidenInputs
-                value={codeUploadContent}
-                onChange={setCodeUploadContent}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

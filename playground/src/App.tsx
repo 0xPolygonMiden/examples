@@ -6,7 +6,7 @@ import ExplainerPage from './pages/Explainer';
 
 function App() {
   return (
-    <main className="bg-primary w-full h-full">
+    <main className="w-full h-screen">
       <HashRouter>
         <Header />
         <Routes>

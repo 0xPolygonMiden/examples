@@ -12,7 +12,7 @@ import { IoMdHelpCircleOutline } from 'react-icons/io';
 const navigation = [
   {
     name: 'Documentation',
-    href: 'https://wiki.polygon.technology/docs/miden/user_docs/assembly/main'
+    href: 'https://0xpolygonmiden.github.io/miden-vm/intro/main.html'
   },
   {
     name: 'Developer Tools',
@@ -64,7 +64,7 @@ const Header = () => {
 
           <a
             key="Documentation"
-            href="https://wiki.polygon.technology/docs/miden/user_docs/assembly/main"
+            href="https://0xpolygonmiden.github.io/miden-vm/intro/main.html"
             target="_blank"
             rel="noopener noreferrer"
             className="text-base font-semibold leading-6 text-secondary-2 hover:text-white"

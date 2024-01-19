@@ -1,3 +1,4 @@
+// prettier-ignore-file
 import * as yup from 'yup';
 import type { DebugOutput } from 'miden-wasm';
 
@@ -157,7 +158,7 @@ export const checkInputs = (inputString: string): checkedData => {
 
 const outputSchema = yup.object().shape({
   stack_output: yup.array().of(yup.number().integer().min(0)).required(),
-  overflow_addrs: yup.array().of(yup.number().integer().min(0)).required(),
+  overflow_addrs: yup.array().of(yup.number().integer().min(0)).notRequired(),
   trace_len: yup.number().integer().min(0).optional()
 });
 
@@ -190,8 +191,7 @@ Did you prove the program first?`;
       stripUnknown: false
     });
     return { isValid: true, errorMessage: '' };
-  } catch (error: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return {
       isValid: false,
       errorMessage: `Invalid outputs: ${error.message}`

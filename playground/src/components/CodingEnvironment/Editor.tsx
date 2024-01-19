@@ -1,8 +1,4 @@
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import {
-  DocumentDuplicateIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline';
 
 type EditorProps = {
   height: string;
@@ -12,7 +8,7 @@ type EditorProps = {
 };
 
 const Editor = (props: EditorProps): JSX.Element => (
-  <div className="flex">
+  <dl className="mt-3 grid grid-cols-1">
     <CodeMirror
       value={props.value}
       height={props.height}
@@ -30,21 +26,9 @@ const Editor = (props: EditorProps): JSX.Element => (
         autocompletion: true,
         highlightActiveLine: true
       }}
-      className="flex overflow-auto pr-3"
+      className="overflow-hidden rounded-lg bg-white p-2 shadow sm:p-3"
     />
-
-    <div className="flex-col">
-      <DocumentDuplicateIcon
-        className="h-6 w-6 stroke-white"
-        aria-hidden="true"
-      />
-
-      <DocumentTextIcon
-        className="h-6 w-6 stroke-white mt-3"
-        aria-hidden="true"
-      />
-    </div>
-  </div>
+  </dl>
 );
 
 export default Editor;

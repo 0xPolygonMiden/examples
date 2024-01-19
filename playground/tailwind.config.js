@@ -22,7 +22,7 @@ module.exports = {
       }
     },
     palette: {
-      mode: 'light',
+      mode: 'dark',
       primary: {
         main: '#7b3fe4'
       },

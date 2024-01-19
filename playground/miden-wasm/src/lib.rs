@@ -1,14 +1,17 @@
 mod utils_debug;
 mod utils_input;
 mod utils_program;
-use miden_vm::{ExecutionProof, ProofOptions};
+use miden_vm::{ExecutionProof, ProvingOptions, DefaultHost, MemAdviceProvider};
+use miden_air::ExecutionOptions;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-extern crate console_error_panic_hook;
 
 #[wasm_bindgen(getter_with_clone)]
-#[derive(serde::Deserialize, serde::Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Outputs {
+    pub program_hash: String,
     pub stack_output: Vec<u64>,
+    pub cycles: Option<usize>,
     pub trace_len: Option<usize>,
     pub overflow_addrs: Option<Vec<u64>>,
     pub proof: Option<Vec<u8>>,
@@ -17,8 +20,6 @@ pub struct Outputs {
 /// Runs the Miden VM with the given inputs
 #[wasm_bindgen]
 pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
-    console_error_panic_hook::set_once();
-
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
         .compile_program()
@@ -29,15 +30,23 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
         .deserialize_inputs(inputs_frontend)
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+
+    let execution_options = ExecutionOptions::new(None, 64 as u32)
+        .map_err(|err| format!("{err}"))?;
+
     let trace = miden_vm::execute(
         &program.program.unwrap(),
         inputs.stack_inputs,
-        inputs.advice_provider,
+        host,
+        execution_options,
     )
     .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
     let result = Outputs {
+        program_hash: program.program_info.unwrap().program_hash().to_string(),
         stack_output: trace.stack_outputs().stack().to_vec(),
+        cycles: Some(trace.trace_len_summary().trace_len()),
         trace_len: Some(trace.get_trace_len()),
         overflow_addrs: None,
         proof: None,
@@ -49,8 +58,6 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
 /// Proves the program with the given inputs
 #[wasm_bindgen]
 pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs, JsValue> {
-    console_error_panic_hook::set_once();
-
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
         .compile_program()
@@ -62,19 +69,23 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outpu
         .map_err(|err| format!("Failed to deserialize inputs - {:?}", err))?;
 
     // default (96 bits of security)
-    let proof_options = ProofOptions::with_96_bit_security();
+    let proof_options = ProvingOptions::default();
+
+    let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
     let stack_input_cloned = inputs.stack_inputs.clone();
     let (output, proof) = miden_vm::prove(
         &program.program.unwrap(),
         stack_input_cloned,
-        inputs.advice_provider,
+        host,
         proof_options,
     )
     .map_err(|err| format!("Failed to prove execution - {:?}", err))?;
 
     let result = Outputs {
+        program_hash: program.program_info.clone().unwrap().program_hash().to_string(),
         stack_output: output.stack().to_vec(),
+        cycles: None,
         trace_len: Some(proof.stark_proof().trace_length()),
         overflow_addrs: Some(output.overflow_addrs().to_vec()),
         proof: Some(proof.to_bytes()),
@@ -99,8 +110,6 @@ pub fn verify_program(
     outputs_frontend: &str,
     proof: Vec<u8>,
 ) -> Result<u32, JsValue> {
-    console_error_panic_hook::set_once();
-
     // we need to get the program info from the program
     let mut program = utils_program::MidenProgram::new(code_frontend, utils_program::DEBUG_OFF);
     program
@@ -130,6 +139,9 @@ pub fn verify_program(
     Ok(result)
 }
 
+// TESTS
+// ================================================================================================
+
 /// Basic tests for the Rust part
 /// Tests are run with `cargo test`
 #[test]
@@ -145,7 +157,7 @@ fn test_run_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 }
 
 #[test]
@@ -165,7 +177,7 @@ fn test_run_program_with_std_lib() {
         output.stack_output,
         vec![0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 }
 
 #[test]
@@ -289,6 +301,27 @@ fn test_debug_program() {
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
     assert_eq!(output.memory, Vec::<u64>::new());
+
+    let mut debug_executor_with_breakpoint = utils_debug::DebugExecutor::new(
+        "begin
+            push.1 push.2 breakpoint add
+        end",
+        "",
+    )
+    .unwrap();
+    let output = debug_executor_with_breakpoint.execute(utils_debug::DebugCommand::PlayAll, None);
+
+    // we test if it plays all the way to the end
+    assert_eq!(output.clk, 5);
+    assert_eq!(output.op, Some("Noop".to_string()));
+    assert_eq!(output.instruction, Some("\"breakpoint\"".to_string()));
+    assert_eq!(output.num_of_operations, Some(0));
+    assert_eq!(output.operation_index, Some(1));
+    assert_eq!(
+        output.stack,
+        vec![2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    );
+    assert_eq!(output.memory, Vec::<u64>::new());
 }
 
 #[test]
@@ -305,7 +338,7 @@ fn test_prove_program() {
         output.stack_output,
         vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    assert_eq!(output.trace_len, Some(1024));
+    assert_eq!(output.trace_len, Some(64));
 
     // for the proof we have [0, 1] as overflow_addrs
     assert!(output.overflow_addrs.is_some());

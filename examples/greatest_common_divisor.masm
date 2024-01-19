@@ -1,0 +1,23 @@
+#! Program to calculate the greatest common divisor of two 32-bit integers.
+#! After execution completes, the top value in the stack should be the calculated GCD.
+
+begin
+    # Check for the smaller integer of the two 32-bit numbers
+    dup.1 dup.1                 # [a, b, a, b]
+    u32checked_lt               # [1, a, b] or [0, a, b]
+
+    # Sort them in ascending order
+    cswap                       # [b, a]; for simplicity lets assume b < a
+
+    # Begin the conditional loop. Condition being the mod of the top two values is not 0
+    push.1                      # [1, b, a], to start the loop
+    while.true                  # [rn, rn-1, ..., r0, b, a]; for first iteration stack is [b, a]
+        dup.1 dup.1             # [rn, rn-1, rn, rn-1, ..., r0, b, a]
+        
+        # Calculate the mod of the integers to check if whether the smaller one is gcd
+        u32unchecked_mod        # [rn+1, rn, rn-1, ..., b, a]; 
+        dup                     # [rn+1, rn+1, ..., b, a]
+        neq.0                   # [0 != rn+1, rn+1, ..., b, a]
+    end
+    drop                        # drop the top value, which'll be 0 from the stack to expose gcd at the top
+end

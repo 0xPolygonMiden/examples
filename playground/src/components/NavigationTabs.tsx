@@ -1,25 +1,24 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 type TabType = {
   name: string;
   href: string;
   current: boolean;
-}
+};
 
 /** Names and links for the navigation tabs within the playground */
 const tabs: TabType[] = [
   { name: 'Instruction Set', href: '/instruction-set', current: false },
   { name: 'Playground', href: '/examples', current: true },
-  { name: 'Help', href: '/explainer', current: false },
-]
+  { name: 'Help', href: '/explainer', current: false }
+];
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(' ');
 }
 
 const NavigationTabs = () => {
-
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Playground');
 
@@ -32,7 +31,7 @@ const NavigationTabs = () => {
     e.preventDefault();
     const name = e.target.value;
     setActiveTab(name);
-    const href = tabs.find((tab) => tab.name == name)?.href || "#";
+    const href = tabs.find((tab) => tab.name == name)?.href || '#';
     navigate(href);
   };
 

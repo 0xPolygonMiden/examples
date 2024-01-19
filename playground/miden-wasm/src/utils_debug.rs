@@ -1,6 +1,6 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
-use miden_vm::{math::StarkField, VmState, VmStateIterator, Word};
+use miden_vm::{math::StarkField, VmState, VmStateIterator, Word, DefaultHost, MemAdviceProvider};
 use wasm_bindgen::prelude::*;
 
 // This is the main struct that will be exported to JS
@@ -43,19 +43,18 @@ impl DebugExecutor {
     /// Returns an error if the command cannot be parsed.
     #[wasm_bindgen(constructor)]
     pub fn new(code_frontend: &str, inputs_frontend: &str) -> Result<DebugExecutor, String> {
-        // Todo: remove this once we have a better way to handle panics in wasm
-        console_error_panic_hook::set_once();
-
         let mut program = MidenProgram::new(code_frontend, DEBUG_ON);
         program.compile_program().unwrap();
 
         let mut inputs = Inputs::new();
         inputs.deserialize_inputs(inputs_frontend).unwrap();
 
+        let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+
         let mut vm_state_iter = miden_vm::execute_iter(
             &program.program.unwrap(),
             inputs.stack_inputs,
-            inputs.advice_provider,
+            host,
         );
 
         let vm_state = vm_state_iter
@@ -78,6 +77,9 @@ impl DebugExecutor {
             DebugCommand::PlayAll => {
                 while let Some(new_vm_state) = self.next_vm_state() {
                     self.vm_state = new_vm_state;
+                    if self.should_break() {
+                        break;
+                    }
                 }
                 self.vm_state_to_output()
             }
@@ -86,6 +88,9 @@ impl DebugExecutor {
                     match self.next_vm_state() {
                         Some(next_vm_state) => {
                             self.vm_state = next_vm_state;
+                            if self.should_break() {
+                                break;
+                            }
                         }
                         None => break,
                     }
@@ -95,6 +100,9 @@ impl DebugExecutor {
             DebugCommand::RewindAll => {
                 while let Some(new_vm_state) = self.prev_vm_state() {
                     self.vm_state = new_vm_state;
+                    if self.should_break() {
+                        break;
+                    }
                 }
                 self.vm_state_to_output()
             }
@@ -103,6 +111,9 @@ impl DebugExecutor {
                     match self.prev_vm_state() {
                         Some(new_vm_state) => {
                             self.vm_state = new_vm_state;
+                            if self.should_break() {
+                                break;
+                            }
                         }
                         None => break,
                     }
@@ -156,6 +167,15 @@ impl DebugExecutor {
         };
 
         output
+    }
+
+    /// Returns `true` if the current state should break.
+    fn should_break(&self) -> bool {
+        self.vm_state
+            .asmop
+            .as_ref()
+            .map(|asm| asm.should_break())
+            .unwrap_or(false)
     }
 }
 
