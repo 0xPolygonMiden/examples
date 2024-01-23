@@ -7,10 +7,10 @@ import type { DebugOutput } from 'miden-wasm';
  */
 export async function getExample(example: string) {
   const inputs = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/next/examples/${example}.inputs`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
   );
   const masm = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/next/examples/${example}.masm`
+    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`
   );
   return [(await inputs).text(), (await masm).text()];
 }
@@ -141,8 +141,7 @@ export const checkInputs = (inputString: string): checkedData => {
   let input: JSON;
   try {
     input = JSON.parse(inputString);
-  } catch (error: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     const errorMessage = `Inputs must be a valid JSON object: ${error.message}`;
     return { isValid: false, errorMessage: errorMessage };
   }
@@ -150,8 +149,7 @@ export const checkInputs = (inputString: string): checkedData => {
   try {
     inputSchema.validateSync(input, { strict: true, stripUnknown: false });
     return { isValid: true, errorMessage: '' };
-  } catch (error: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     return { isValid: false, errorMessage: `Invalid inputs: ${error.message}` };
   }
 };
@@ -177,8 +175,7 @@ export function checkOutputs(jsonString: string): checkedData {
   let jsonOutput!: JSON;
   try {
     jsonOutput = JSON.parse(jsonString);
-  } catch (e: any) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     const errorMessage = `Miden VM Outputs need to be a valid JSON object:
 ${e.message}
 Did you prove the program first?`;
