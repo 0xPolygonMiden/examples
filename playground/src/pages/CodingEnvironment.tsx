@@ -34,6 +34,7 @@ import ProofInfo from './ProofInfo';
 import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 import ExplainerPage from './Explainer';
+import OutputInfo from './OutputInfo';
 
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -81,9 +82,10 @@ export default function CodingEnvironment(): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [stackOutputValue, setStackOutputValue] = useState('');
+  const [isStackOutputVisible, setIsStackOutputVisible] = useState(false);
   const [runProgramOutput, setRunProgramOutput] = useState();
   const [isOutputFocused, setIsOutputFocused] = useState(false);
-  const [isCodeUploaded, setIsCodeUploaded] = useState(false);
+  const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
   const [codeUploadContent, setCodeUploadContent] = useState('');
 
   const [adviceValue, setAdviceValue] = useState('');
@@ -201,6 +203,7 @@ export default function CodingEnvironment(): JSX.Element {
     disableDebug();
     setProof(null);
     const value = exampleChange;
+
     // set the current example to the selected one
     if (value === 'addition') {
       setInputs(exampleInput);
@@ -217,73 +220,18 @@ export default function CodingEnvironment(): JSX.Element {
     setOutput(emptyOutput);
   };
 
-  const handleCodeUpload: React.ChangeEventHandler<HTMLInputElement> = (
-    event
-  ) => {
-    const file = event.target.files ? event.target.files[0] : null;
-
-    setCodeUploadContent('');
-
-    if (
-      file &&
-      (file.type === 'application/json' || file.type === 'text/plain')
-    ) {
-      const reader = new FileReader();
-
-      reader.onload = (e: ProgressEvent<FileReader>) => {
-        const text = e.target?.result;
-        console.log('Uploaded on load');
-
-        if (typeof text === 'string') {
-          console.log('Uploaded sucess111');
-
-          // Check if the file content is valid JSON
-          try {
-            JSON.parse(text);
-            setCodeUploadContent(text);
-            setAdviceValue('');
-            setOperandValue('');
-
-            setInputStringValue(text);
-
-            hideAllRightSideLayout();
-
-            console.log('Uploaded sucess');
-
-            setIsCodeUploaded(true);
-          } catch (error) {
-            console.error('Invalid JSON file.');
-            toast.error('Invalid content uploaded');
-          }
-        }
-      };
-
-      reader.onerror = (e) => {
-        toast.error('Error reading file');
-        // console.error('Error reading file', e);
-      };
-
-      reader.readAsText(file);
-
-      event.target.value = '';
-    } else {
-      toast.error('Only txt or json files are supported');
-      // console.error('Unsupported file type.');
-    }
-  };
-
   const hideAllRightSideLayout = () => {
     setIsInstructionVisible(false);
     setIsProgramInfoVisible(false);
     setShowDebug(false);
     setIsProofInfoVisible(false);
-    setIsCodeUploaded(false);
+    setIsStackOutputVisible(false);
   };
 
   useEffect(() => {
     let inputString;
 
-    if (isCodeUploaded) {
+    if (isCodeEditorVisible) {
       console.log('code is uploaded return');
       return;
     }
@@ -325,14 +273,6 @@ export default function CodingEnvironment(): JSX.Element {
     setInputStringValue(codeUploadContent);
   }, [codeUploadContent]);
 
-  const handleDocumentClick = () => {
-    // Trigger the file input click event
-
-    if (fileInputRef) {
-      fileInputRef.current?.click();
-    }
-  };
-
   useEffect(() => {
     console.log('inputs effect', inputs);
     if (!inputs) {
@@ -362,6 +302,7 @@ export default function CodingEnvironment(): JSX.Element {
     setIsAdviceStackVisible(!isAdviceStackLayoutVisible);
     setAdviceValue('');
     setIsAdviceFocused(false);
+    // setIsCodeEditorVisible(false);
   };
 
   const onInstructionClick = () => {
@@ -397,10 +338,8 @@ export default function CodingEnvironment(): JSX.Element {
         try {
           const start = Date.now();
 
-          const { stack_output, trace_len }: Outputs = run_program(
-            code,
-            inputStringValue
-          );
+          const { program_hash, stack_output, cycles, trace_len }: Outputs =
+            run_program(code, inputStringValue);
 
           hideAllRightSideLayout();
 
@@ -409,8 +348,11 @@ export default function CodingEnvironment(): JSX.Element {
             "stack_output" : [${stack_output.toString()}],
             "trace_len" : ${trace_len}
             }`);
-          setProgramInfo(`Trace_len: ${trace_len}`);
+          setProgramInfo(
+            `Program Hash: ${program_hash}\nCycles: ${cycles}\nTrace_len: ${trace_len}`
+          );
           setIsProgramInfoVisible(true);
+          setIsStackOutputVisible(true);
           toast.success(`Execution successful in ${Date.now() - start} ms`);
         } catch (error) {
           setOutput(`Error: ${error}`);
@@ -441,11 +383,20 @@ export default function CodingEnvironment(): JSX.Element {
         }
         try {
           const start = Date.now();
-          const { stack_output, trace_len, overflow_addrs, proof }: Outputs =
-            prove_program(code, inputStringValue);
+          const {
+            program_hash,
+            cycles,
+            stack_output,
+            trace_len,
+            overflow_addrs,
+            proof
+          }: Outputs = prove_program(code, inputStringValue);
           const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
-          setProgramInfo(`Trace_len : ${trace_len}`);
-
+          setProgramInfo(
+            `Program Hash: ${program_hash}
+            Cycles: ${cycles}
+            Trace_len: ${trace_len}`
+          );
           setOutput(`{
             "stack_output" : [${stack_output.toString()}],
             "overflow_addrs" : [${overflow}],
@@ -543,11 +494,25 @@ export default function CodingEnvironment(): JSX.Element {
     });
   };
 
+  const onJSONEditorClick = () => {
+    setIsCodeEditorVisible(true);
+  };
+
+  const onFormEditorClick = () => {
+    setIsCodeEditorVisible(false);
+  };
+
   return (
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <h1 className="flex text-sm items-center font-semibold text-white">
+        <h1
+          onClick={onInstructionClick}
+          className={classNames(
+            'flex text-sm items-center font-semibold cursor-pointer',
+            !isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
+          )}
+        >
           TEST & EXPERIMENT
         </h1>
 
@@ -622,114 +587,128 @@ export default function CodingEnvironment(): JSX.Element {
               />
             </div>
 
-            <div className="flex mt-5">
-              <div className="flex justify-center items-baseline relative grow border-none">
-                <input
-                  type="text"
-                  value={operandValue}
-                  onChange={(e) => setOperandValue(e.target.value)}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                  className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                />
-                <label
-                  htmlFor="input"
-                  className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                    isInputFocused || operandValue
-                      ? 'text-xs top-0 text-green'
-                      : 'text-sm top-4'
-                  }`}
-                >
-                  Operand Stack
-                </label>
+            <div className="mt-5">
+              <div className="flex w-full h-56 rounded-xl bg-secondary-main grow overflow-hidden border border-secondary-4">
+                <div className="flex flex-col h-54 w-full">
+                  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-white items-center">
+                    <h1 className="pl-5 text-left text-base font-semibold">
+                      Inputs
+                    </h1>
 
-                <div onClick={onInputPlusClick}>
-                  <PlusIcon
-                    className={classNames(
-                      'h-6 w-6 ml-1.5 hover:cursor-pointer',
-                      isAdviceStackLayoutVisible
-                        ? 'fill-green'
-                        : 'fill-secondary-6'
+                    <div className="flex ml-auto mr-5">
+                      <h1
+                        onClick={onFormEditorClick}
+                        className={classNames(
+                          'text-left mr-3 text-base font-semibold cursor-pointer',
+                          !isCodeEditorVisible
+                            ? 'text-white'
+                            : 'text-secondary-6'
+                        )}
+                      >
+                        FORM
+                      </h1>
+
+                      <h1
+                        onClick={onJSONEditorClick}
+                        className={classNames(
+                          'text-left text-secondary-6 text-base font-semibold cursor-pointer',
+                          isCodeEditorVisible
+                            ? 'text-white'
+                            : 'text-secondary-6'
+                        )}
+                      >
+                        JSON
+                      </h1>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-secondary-4"></div>
+
+                  <div className="flex w-full overflow-auto ">
+                    {!isCodeEditorVisible && (
+                      <div className="flex flex-col w-full pt-4">
+                        <div className="flex justify-center items-baseline relative grow border-none">
+                          <input
+                            type="text"
+                            value={operandValue}
+                            onChange={(e) => setOperandValue(e.target.value)}
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                            className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+                          />
+                          <label
+                            htmlFor="input"
+                            className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                              isInputFocused || operandValue
+                                ? 'text-xs top-0 text-green'
+                                : 'text-sm top-4'
+                            }`}
+                          >
+                            Operand Stack
+                          </label>
+
+                          <PlusIcon
+                            onClick={onInputPlusClick}
+                            className={classNames(
+                              'h-6 w-6 ml-1.5 mr-3 hover:cursor-pointer',
+                              isAdviceStackLayoutVisible
+                                ? 'fill-green'
+                                : 'fill-secondary-6'
+                            )}
+                          />
+                        </div>
+
+                        <div className="h-px bg-secondary-4 mb-4"></div>
+
+                        {isAdviceStackLayoutVisible && (
+                          <div>
+                            <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
+                              <input
+                                type="text"
+                                value={adviceValue}
+                                onChange={(e) => setAdviceValue(e.target.value)}
+                                onFocus={handleAdviceFocus}
+                                onBlur={handleAdviceBlur}
+                                className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
+                              />
+                              <label
+                                htmlFor="advicestack"
+                                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
+                                  isAdviceFocused || adviceValue
+                                    ? 'text-xs top-0 text-green'
+                                    : 'text-sm top-4'
+                                }`}
+                              >
+                                Advice Stack
+                              </label>
+                            </div>
+                            <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+                          </div>
+                        )}
+                      </div>
                     )}
-                  />
-                </div>
-
-                <div onClick={handleDocumentClick}>
-                  <input
-                    type="file"
-                    accept=".txt,.json"
-                    onChange={handleCodeUpload}
-                    style={{ display: 'none' }}
-                    ref={fileInputRef}
-                  />
-
-                  <DocumentPlusIcon
-                    className={classNames(
-                      'h-6 w-6 ml-1.5 hover:cursor-pointer',
-                      isCodeUploaded ? 'fill-green' : 'fill-secondary-6'
+                    {isCodeEditorVisible && (
+                      <MidenInputs
+                        value={codeUploadContent}
+                        onChange={setCodeUploadContent}
+                      />
                     )}
-                  />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="h-px bg-secondary-4 mb-4"></div>
-
-            {isAdviceStackLayoutVisible && (
-              <div>
-                <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
-                  <input
-                    type="text"
-                    value={adviceValue}
-                    onChange={(e) => setAdviceValue(e.target.value)}
-                    onFocus={handleAdviceFocus}
-                    onBlur={handleAdviceBlur}
-                    className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                  />
-                  <label
-                    htmlFor="advicestack"
-                    className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                      isAdviceFocused || adviceValue
-                        ? 'text-xs top-0 text-green'
-                        : 'text-sm top-4'
-                    }`}
-                  >
-                    Advice Stack
-                  </label>
-                </div>
-                <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
-              </div>
-            )}
-
-            <div>
-              <div className="flex justify-center items-baseline relative grow border-none">
-                <input
-                  type="text"
-                  value={stackOutputValue}
-                  onChange={(e) => setStackOutputValue(e.target.value)}
-                  onFocus={handleOutputFocus}
-                  onBlur={handleOutputBlur}
-                  disabled
-                  className="bg-transparent w-full text-green pt-4 pb-2 pl-16 outline-none border-none"
-                />
-                <label
-                  htmlFor="input"
-                  className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                    isOutputFocused || stackOutputValue
-                      ? 'text-xs top-0 text-green'
-                      : 'text-sm top-4'
-                  }`}
-                >
-                  Output
-                </label>
-              </div>
-              <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
             </div>
           </div>
 
           <div className="flex flex-col w-1/2 gap-y-6">
             {isInstructionVisible && (
-              <div className="h-4/6 rounded-xl border overflow-y-scroll border-secondary-4">
+              <div className="h-4/6 rounded-xl border relative overflow-y-scroll border-secondary-4">
                 <InstructionTable />
+              </div>
+            )}
+
+            {isStackOutputVisible && (
+              <div className="flex">
+                <OutputInfo output={stackOutputValue} />
               </div>
             )}
 
@@ -757,15 +736,6 @@ export default function CodingEnvironment(): JSX.Element {
             {showDebug && debugOutput && (
               <div className="flex">
                 <MemoryInfo debugOutput={debugOutput} />
-              </div>
-            )}
-
-            {isCodeUploaded && (
-              <div className="h-3/6 flex">
-                <MidenInputs
-                  value={codeUploadContent}
-                  onChange={setCodeUploadContent}
-                />
               </div>
             )}
           </div>
