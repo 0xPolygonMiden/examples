@@ -273,11 +273,11 @@ export default function CodingEnvironment(): JSX.Element {
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
       if (inputObject.operand_stack) {
-        setOperandValue(inputObject.operand_stack);
+        setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
       }
 
       if (inputObject.advice_stack) {
-        setAdviceValue(inputObject.advice_stack);
+        setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackVisible(true);
       }
     } catch (error: any) {
@@ -297,7 +297,14 @@ export default function CodingEnvironment(): JSX.Element {
     const regex = /^[0-9,]*$/;
     const newValue = e.target.value;
 
-    if (regex.test(newValue)) {
+    let diff = '';
+    for (let i = 0; i < newValue.length; i++) {
+      if (operandValue[i] !== newValue[i]) {
+        diff += newValue[i] || '';
+      }
+    }
+
+    if (regex.test(diff)) {
       setOperandValue(newValue);
     }
   };
@@ -307,7 +314,14 @@ export default function CodingEnvironment(): JSX.Element {
     const regex = /^[0-9,]*$/;
     const newValue = e.target.value;
 
-    if (regex.test(newValue)) {
+    let diff = '';
+    for (let i = 0; i < newValue.length; i++) {
+      if (adviceValue[i] !== newValue[i]) {
+        diff += newValue[i] || '';
+      }
+    }
+
+    if (regex.test(diff)) {
       setAdviceValue(newValue);
     }
   };
