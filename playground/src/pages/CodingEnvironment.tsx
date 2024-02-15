@@ -222,6 +222,7 @@ export default function CodingEnvironment(): JSX.Element {
       operandParts = operandValue
         .toString()
         .split(',')
+        .filter((value) => value !== '')
         .map((value) => value.trim())
         .map((value) => `"${value}"`)
         .toString();
@@ -233,6 +234,7 @@ export default function CodingEnvironment(): JSX.Element {
       const adviceParts = adviceValue
         .toString()
         .split(',')
+        .filter((value) => value !== '')
         .map((value) => value.trim())
         .map((value) => `"${value}"`)
         .toString();
@@ -271,11 +273,11 @@ export default function CodingEnvironment(): JSX.Element {
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
       if (inputObject.operand_stack) {
-        setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
+        setOperandValue(inputObject.operand_stack);
       }
 
       if (inputObject.advice_stack) {
-        setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
+        setAdviceValue(inputObject.advice_stack);
         setIsAdviceStackVisible(true);
       }
     } catch (error: any) {
@@ -288,6 +290,26 @@ export default function CodingEnvironment(): JSX.Element {
     setAdviceValue('');
     setIsAdviceFocused(false);
     // setIsCodeEditorVisible(false);
+  };
+
+  const handleOperandValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow numbers and commas
+    const regex = /^[0-9,]*$/;
+    const newValue = e.target.value;
+
+    if (regex.test(newValue)) {
+      setOperandValue(newValue);
+    }
+  };
+
+  const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Allow numbers and commas
+    const regex = /^[0-9,]*$/;
+    const newValue = e.target.value;
+
+    if (regex.test(newValue)) {
+      setAdviceValue(newValue);
+    }
   };
 
   const onInstructionClick = () => {
@@ -318,6 +340,9 @@ export default function CodingEnvironment(): JSX.Element {
         if (!inputCheck.isValid) {
           setOutput(inputCheck.errorMessage);
           toast.error('Execution failed');
+          hideAllRightSideLayout();
+          setProgramInfo(inputCheck.errorMessage);
+          setIsProgramInfoVisible(true);
           return;
         }
         try {
@@ -340,6 +365,9 @@ export default function CodingEnvironment(): JSX.Element {
           setIsStackOutputVisible(true);
           toast.success(`Execution successful in ${Date.now() - start} ms`);
         } catch (error) {
+          hideAllRightSideLayout();
+          setProgramInfo(`Error: ${error}`);
+          setIsProgramInfoVisible(true);
           setOutput(`Error: ${error}`);
         }
       })
@@ -363,6 +391,10 @@ export default function CodingEnvironment(): JSX.Element {
 
         if (!inputCheck.isValid) {
           setOutput(inputCheck.errorMessage);
+
+          hideAllRightSideLayout();
+          setProgramInfo(inputCheck.errorMessage);
+          setIsProgramInfoVisible(true);
           toast.error('Proving failed');
           return;
         }
@@ -404,7 +436,10 @@ export default function CodingEnvironment(): JSX.Element {
           setIsProgramInfoVisible(true);
         } catch (error) {
           setOutput(`Error: ${error}`);
-          toast.error('Proving failed');
+          hideAllRightSideLayout();
+          setProgramInfo(`Error: ${error}`);
+          setIsProgramInfoVisible(true);
+          toast.error(`Error: ${error}`);
         }
       })
       .finally(() => setIsProcessing(false));
@@ -616,7 +651,7 @@ export default function CodingEnvironment(): JSX.Element {
                           <input
                             type="text"
                             value={operandValue}
-                            onChange={(e) => setOperandValue(e.target.value)}
+                            onChange={handleOperandValueChange}
                             onFocus={handleInputFocus}
                             onBlur={handleInputBlur}
                             className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
@@ -651,7 +686,7 @@ export default function CodingEnvironment(): JSX.Element {
                               <input
                                 type="text"
                                 value={adviceValue}
-                                onChange={(e) => setAdviceValue(e.target.value)}
+                                onChange={handleAdviceValueChange}
                                 onFocus={handleAdviceFocus}
                                 onBlur={handleAdviceBlur}
                                 className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
