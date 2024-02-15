@@ -134,26 +134,6 @@ export default function CodingEnvironment(): JSX.Element {
       });
   };
 
-  const handleInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow numbers and commas
-    const regex = /^[0-9,]*$/;
-    const newValue = e.target.value;
-
-    if (regex.test(newValue)) {
-      setOperandValue(newValue);
-    }
-  };
-
-  const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow numbers and commas
-    const regex = /^[0-9,]*$/;
-    const newValue = e.target.value;
-
-    if (regex.test(newValue)) {
-      setAdviceValue(newValue);
-    }
-  };
-
   /**
    * This sets the debugExecutor such that we can store it for a session.
    */
@@ -274,7 +254,6 @@ export default function CodingEnvironment(): JSX.Element {
   }, [codeUploadContent]);
 
   useEffect(() => {
-    console.log('inputs effect', inputs);
     if (!inputs) {
       return;
     }
@@ -284,6 +263,9 @@ export default function CodingEnvironment(): JSX.Element {
       if (!inputCheck.isValid) {
         return;
       }
+
+      setAdviceValue('');
+      setOperandValue('');
       const inputObject = JSON.parse(inputs);
       if (inputObject.operand_stack) {
         setOperandValue(inputObject.operand_stack);
