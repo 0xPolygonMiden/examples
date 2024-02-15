@@ -24,7 +24,8 @@ import {
   checkInputs,
   checkOutputs,
   formatDebuggerOutput,
-  formatMemory
+  formatMemory,
+  formatBeautifyNumbersArray
 } from '../utils/helper_functions';
 import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { DocumentPlusIcon } from '@heroicons/react/24/outline';
@@ -221,6 +222,7 @@ export default function CodingEnvironment(): JSX.Element {
       operandParts = operandValue
         .toString()
         .split(',')
+        .map((value) => value.trim())
         .map((value) => `"${value}"`)
         .toString();
     }
@@ -231,6 +233,7 @@ export default function CodingEnvironment(): JSX.Element {
       const adviceParts = adviceValue
         .toString()
         .split(',')
+        .map((value) => value.trim())
         .map((value) => `"${value}"`)
         .toString();
 
@@ -268,11 +271,11 @@ export default function CodingEnvironment(): JSX.Element {
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
       if (inputObject.operand_stack) {
-        setOperandValue(inputObject.operand_stack);
+        setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
       }
 
       if (inputObject.advice_stack) {
-        setAdviceValue(inputObject.advice_stack);
+        setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackVisible(true);
       }
     } catch (error: any) {

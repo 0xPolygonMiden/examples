@@ -154,6 +154,18 @@ export const checkInputs = (inputString: string): checkedData => {
   }
 };
 
+export const formatBeautifyNumbersArray = (inputString: any) => {
+  try {
+    const inputArray = inputString.toString().split(',').map(Number);
+
+    const formattedOutput = inputArray.join(', ');
+
+    return formattedOutput;
+  } catch (exception) {
+    return inputString;
+  }
+};
+
 const outputSchema = yup.object().shape({
   stack_output: yup.array().of(yup.number().integer().min(0)).required(),
   overflow_addrs: yup.array().of(yup.number().integer().min(0)).notRequired(),

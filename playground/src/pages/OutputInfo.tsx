@@ -1,21 +1,11 @@
 import { useState } from 'react';
 
+import { formatBeautifyNumbersArray } from '../utils/helper_functions';
+
 import 'katex/dist/katex.min.css';
 
 type ProgramInfoProps = {
   output: string;
-};
-
-const formatBeautifyNumbersArray = (inputString: any) => {
-  try {
-    const inputArray = inputString.toString().split(',').map(Number);
-
-    const formattedOutput = inputArray.join(', ');
-
-    return formattedOutput;
-  } catch (exception) {
-    return inputString;
-  }
 };
 
 const OutputInfo = (props: ProgramInfoProps): JSX.Element => {
