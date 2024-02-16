@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import 'katex/dist/katex.min.css';
 
 type ProofInfoProps = {

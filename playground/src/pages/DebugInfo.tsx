@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { DebugOutput } from 'miden-wasm';
 
 import 'katex/dist/katex.min.css';
 
 type DebugInfoProps = {
-  proofText: Uint8Array | null;
   debugOutput: DebugOutput | null;
-  verifyProgram: () => void;
 };
 
 const DebugInfo = (props: DebugInfoProps): JSX.Element => {
@@ -81,7 +78,10 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
               <div className="grid grid-cols-8 gap-x-1 ml-4 w-full gap-y-4 mr-4">
                 {Array.from<bigint>(props.debugOutput.stack).map(
                   (item, index) => (
-                    <div className="relative flex justify-center items-baseline">
+                    <div
+                      key={index.toString()}
+                      className="relative flex justify-center items-baseline"
+                    >
                       <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
                         <span className="text-secondary-5">
                           {item.toString()}

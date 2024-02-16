@@ -1,12 +1,7 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { eclipse } from '@uiw/codemirror-theme-eclipse';
-import ActionButton from '../components/ActionButton';
+import React, { useEffect, useRef, useState } from 'react';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
-import MidenOutputs from '../components/CodingEnvironment/MidenOutputs';
 import MidenEditor from '../components/CodingEnvironment/MidenCode';
-import ProofModal from '../components/CodingEnvironment/ProofModal';
 import InstructionTable from './InstructionTable';
 
 import init, {
@@ -28,7 +23,6 @@ import {
   formatBeautifyNumbersArray
 } from '../utils/helper_functions';
 import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid';
-import { DocumentPlusIcon } from '@heroicons/react/24/outline';
 import { emptyOutput, exampleCode, exampleInput } from '../utils/constants';
 import ProgramInfo from './ProgramInfo';
 import ProofInfo from './ProofInfo';
@@ -75,23 +69,18 @@ export default function CodingEnvironment(): JSX.Element {
   const [showDebug, setShowDebug] = useState(false);
   const [isHelpVisible, setIsHelpVisible] = useState(false);
 
-  const [searchQuery, setSearchQuery] = useState('');
-
   const [operandValue, setOperandValue] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [stackOutputValue, setStackOutputValue] = useState('');
   const [isStackOutputVisible, setIsStackOutputVisible] = useState(false);
-  const [runProgramOutput, setRunProgramOutput] = useState();
-  const [isOutputFocused, setIsOutputFocused] = useState(false);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
   const [codeUploadContent, setCodeUploadContent] = useState('');
 
   const [adviceValue, setAdviceValue] = useState('');
   const [isAdviceFocused, setIsAdviceFocused] = useState(false);
-  const [isAdviceStackLayoutVisible, setIsAdviceStackVisible] = useState(false);
+  const [isAdviceStackLayoutVisible, setIsAdviceStackLayoutVisible] =
+    useState(false);
 
   const handleInputFocus = () => {
     setIsInputFocused(true);
@@ -100,16 +89,6 @@ export default function CodingEnvironment(): JSX.Element {
   const handleInputBlur = () => {
     if (!operandValue) {
       setIsInputFocused(false);
-    }
-  };
-
-  const handleOutputFocus = () => {
-    setIsOutputFocused(true);
-  };
-
-  const handleOutputBlur = () => {
-    if (!stackOutputValue) {
-      setIsOutputFocused(false);
     }
   };
 
@@ -278,7 +257,7 @@ export default function CodingEnvironment(): JSX.Element {
 
       if (inputObject.advice_stack) {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
-        setIsAdviceStackVisible(true);
+        setIsAdviceStackLayoutVisible(true);
       }
     } catch (error: any) {
       console.log('Inputs must be a valid JSON object: ${error.message}');
@@ -286,42 +265,41 @@ export default function CodingEnvironment(): JSX.Element {
   }, [inputs]);
 
   const onInputPlusClick = () => {
-    setIsAdviceStackVisible(!isAdviceStackLayoutVisible);
+    setIsAdviceStackLayoutVisible(!isAdviceStackLayoutVisible);
     setAdviceValue('');
     setIsAdviceFocused(false);
-    // setIsCodeEditorVisible(false);
   };
 
   const handleOperandValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Allow numbers and commas
-    const regex = /^[0-9,]*$/;
+    const regex = /^[0-9, ]*$/;
     const newValue = e.target.value;
 
-    let diff = '';
-    for (let i = 0; i < newValue.length; i++) {
-      if (operandValue[i] !== newValue[i]) {
-        diff += newValue[i] || '';
-      }
-    }
+    // let diff = '';
+    // for (let i = 0; i < newValue.length; i++) {
+    //   if (operandValue[i] !== newValue[i]) {
+    //     diff += newValue[i] || '';
+    //   }
+    // }
 
-    if (regex.test(diff)) {
+    if (regex.test(newValue)) {
       setOperandValue(newValue);
     }
   };
 
   const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Allow numbers and commas
-    const regex = /^[0-9,]*$/;
+    const regex = /^[0-9, ]*$/;
     const newValue = e.target.value;
 
-    let diff = '';
-    for (let i = 0; i < newValue.length; i++) {
-      if (adviceValue[i] !== newValue[i]) {
-        diff += newValue[i] || '';
-      }
-    }
+    // let diff = '';
+    // for (let i = 0; i < newValue.length; i++) {
+    //   if (adviceValue[i] !== newValue[i]) {
+    //     diff += newValue[i] || '';
+    //   }
+    // }
 
-    if (regex.test(diff)) {
+    if (regex.test(newValue)) {
       setAdviceValue(newValue);
     }
   };
@@ -540,37 +518,42 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <h1
-          onClick={onInstructionClick}
-          className={classNames(
-            'flex text-sm items-center font-semibold cursor-pointer',
-            !isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
-          )}
-        >
-          TEST & EXPERIMENT
-        </h1>
+        <div onClick={onInstructionClick}>
+          <h1
+            className={classNames(
+              'flex text-sm items-center font-semibold cursor-pointer',
+              !isHelpVisible
+                ? 'text-white'
+                : 'text-secondary-1 hover:text-white'
+            )}
+          >
+            TEST & EXPERIMENT
+          </h1>
+        </div>
 
-        <h1
-          className={classNames(
-            'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-            isInstructionVisible
-              ? 'text-white'
-              : 'text-secondary-1 hover:text-white'
-          )}
-          onClick={onInstructionClick}
-        >
-          INSTRUCTIONS
-        </h1>
+        <div onClick={onInstructionClick}>
+          <h1
+            className={classNames(
+              'flex text-sm ml-8 items-center font-semibold cursor-pointer',
+              isInstructionVisible
+                ? 'text-white'
+                : 'text-secondary-1 hover:text-white'
+            )}
+          >
+            INSTRUCTIONS
+          </h1>
+        </div>
 
-        <h1
-          className={classNames(
-            'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-            isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
-          )}
-          onClick={onHelpClick}
-        >
-          HELP
-        </h1>
+        <div onClick={onHelpClick}>
+          <h1
+            className={classNames(
+              'flex text-sm ml-8 items-center font-semibold cursor-pointer',
+              isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
+            )}
+          >
+            HELP
+          </h1>
+        </div>
       </div>
 
       {isHelpVisible && (
@@ -630,29 +613,31 @@ export default function CodingEnvironment(): JSX.Element {
                     </h1>
 
                     <div className="flex ml-auto mr-5">
-                      <h1
-                        onClick={onFormEditorClick}
-                        className={classNames(
-                          'text-left mr-3 text-base font-semibold cursor-pointer',
-                          !isCodeEditorVisible
-                            ? 'text-white'
-                            : 'text-secondary-6'
-                        )}
-                      >
-                        FORM
-                      </h1>
+                      <div onClick={onFormEditorClick}>
+                        <h1
+                          className={classNames(
+                            'text-left mr-3 text-base font-semibold cursor-pointer',
+                            !isCodeEditorVisible
+                              ? 'text-white'
+                              : 'text-secondary-6'
+                          )}
+                        >
+                          FORM
+                        </h1>
+                      </div>
 
-                      <h1
-                        onClick={onJSONEditorClick}
-                        className={classNames(
-                          'text-left text-secondary-6 text-base font-semibold cursor-pointer',
-                          isCodeEditorVisible
-                            ? 'text-white'
-                            : 'text-secondary-6'
-                        )}
-                      >
-                        JSON
-                      </h1>
+                      <div onClick={onJSONEditorClick}>
+                        <h1
+                          className={classNames(
+                            'text-left text-secondary-6 text-base font-semibold cursor-pointer',
+                            isCodeEditorVisible
+                              ? 'text-white'
+                              : 'text-secondary-6'
+                          )}
+                        >
+                          JSON
+                        </h1>
+                      </div>
                     </div>
                   </div>
 
@@ -760,11 +745,7 @@ export default function CodingEnvironment(): JSX.Element {
 
             {showDebug && (
               <div className="flex">
-                <DebugInfo
-                  proofText={proof}
-                  debugOutput={debugOutput}
-                  verifyProgram={verifyProgram}
-                />
+                <DebugInfo debugOutput={debugOutput} />
               </div>
             )}
             {showDebug && debugOutput && (

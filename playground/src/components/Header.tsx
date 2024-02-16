@@ -6,7 +6,6 @@ import {
   XMarkIcon,
   QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
-import { IoMdHelpCircleOutline } from 'react-icons/io';
 
 /** External links for the top navigation menu */
 const navigation = [

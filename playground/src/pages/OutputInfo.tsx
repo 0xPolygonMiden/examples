@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { formatBeautifyNumbersArray } from '../utils/helper_functions';
 
 import 'katex/dist/katex.min.css';

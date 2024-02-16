@@ -1,5 +1,5 @@
 import { createTheme } from '@uiw/codemirror-themes';
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import { tags as t } from '@lezer/highlight';
 
 type MidenInputsProps = {

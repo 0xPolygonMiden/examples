@@ -1,4 +1,4 @@
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import CodeMirror from '@uiw/react-codemirror';
 import {
   DocumentDuplicateIcon,
   DocumentTextIcon
@@ -9,8 +9,7 @@ import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
-  CircleStackIcon
+  ChevronRightIcon
 } from '@heroicons/react/20/solid';
 import { BsChevronBarLeft, BsChevronBarRight } from 'react-icons/bs';
 import { DebugCommand } from 'miden-wasm';

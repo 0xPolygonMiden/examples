@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { DebugOutput } from 'miden-wasm';
 
 import 'katex/dist/katex.min.css';
@@ -23,7 +22,7 @@ const MemoryInfo = (props: MemoryInfoProps): JSX.Element => {
             {props.debugOutput &&
               formatMemory(props.debugOutput.memory).map(
                 (memoryString, index) => (
-                  <div key={index} className="w-1/3 p-2">
+                  <div key={memoryString} className="w-1/3 p-2">
                     <div className="text-white text-sm p-4 rounded">
                       {memoryString}
                     </div>
