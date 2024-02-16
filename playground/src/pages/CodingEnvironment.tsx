@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
 import MidenEditor from '../components/CodingEnvironment/MidenCode';
@@ -275,13 +275,6 @@ export default function CodingEnvironment(): JSX.Element {
     const regex = /^[0-9, ]*$/;
     const newValue = e.target.value;
 
-    // let diff = '';
-    // for (let i = 0; i < newValue.length; i++) {
-    //   if (operandValue[i] !== newValue[i]) {
-    //     diff += newValue[i] || '';
-    //   }
-    // }
-
     if (regex.test(newValue)) {
       setOperandValue(newValue);
     }
@@ -291,13 +284,6 @@ export default function CodingEnvironment(): JSX.Element {
     // Allow numbers and commas
     const regex = /^[0-9, ]*$/;
     const newValue = e.target.value;
-
-    // let diff = '';
-    // for (let i = 0; i < newValue.length; i++) {
-    //   if (adviceValue[i] !== newValue[i]) {
-    //     diff += newValue[i] || '';
-    //   }
-    // }
 
     if (regex.test(newValue)) {
       setAdviceValue(newValue);
@@ -518,7 +504,7 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <div onClick={onInstructionClick}>
+        <div onClick={onInstructionClick} role="button">
           <h1
             className={classNames(
               'flex text-sm items-center font-semibold cursor-pointer',
@@ -531,7 +517,7 @@ export default function CodingEnvironment(): JSX.Element {
           </h1>
         </div>
 
-        <div onClick={onInstructionClick}>
+        <div onClick={onInstructionClick} role="button">
           <h1
             className={classNames(
               'flex text-sm ml-8 items-center font-semibold cursor-pointer',
@@ -544,7 +530,7 @@ export default function CodingEnvironment(): JSX.Element {
           </h1>
         </div>
 
-        <div onClick={onHelpClick}>
+        <div onClick={onHelpClick} role="button">
           <h1
             className={classNames(
               'flex text-sm ml-8 items-center font-semibold cursor-pointer',
@@ -613,7 +599,7 @@ export default function CodingEnvironment(): JSX.Element {
                     </h1>
 
                     <div className="flex ml-auto mr-5">
-                      <div onClick={onFormEditorClick}>
+                      <div onClick={onFormEditorClick} role="button">
                         <h1
                           className={classNames(
                             'text-left mr-3 text-base font-semibold cursor-pointer',
@@ -626,7 +612,7 @@ export default function CodingEnvironment(): JSX.Element {
                         </h1>
                       </div>
 
-                      <div onClick={onJSONEditorClick}>
+                      <div onClick={onJSONEditorClick} role="button">
                         <h1
                           className={classNames(
                             'text-left text-secondary-6 text-base font-semibold cursor-pointer',

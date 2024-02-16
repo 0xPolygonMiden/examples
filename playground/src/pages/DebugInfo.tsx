@@ -79,7 +79,7 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
                 {Array.from<bigint>(props.debugOutput.stack).map(
                   (item, index) => (
                     <div
-                      key={index.toString()}
+                      key={item.toString()}
                       className="relative flex justify-center items-baseline"
                     >
                       <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
