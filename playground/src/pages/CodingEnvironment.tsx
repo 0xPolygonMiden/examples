@@ -504,7 +504,7 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <div onClick={onInstructionClick} role="button">
+        <button onClick={onInstructionClick}>
           <h1
             className={classNames(
               'flex text-sm items-center font-semibold cursor-pointer',
@@ -515,9 +515,9 @@ export default function CodingEnvironment(): JSX.Element {
           >
             TEST & EXPERIMENT
           </h1>
-        </div>
+        </button>
 
-        <div onClick={onInstructionClick} role="button">
+        <button onClick={onInstructionClick}>
           <h1
             className={classNames(
               'flex text-sm ml-8 items-center font-semibold cursor-pointer',
@@ -528,9 +528,9 @@ export default function CodingEnvironment(): JSX.Element {
           >
             INSTRUCTIONS
           </h1>
-        </div>
+        </button>
 
-        <div onClick={onHelpClick} role="button">
+        <button onClick={onHelpClick}>
           <h1
             className={classNames(
               'flex text-sm ml-8 items-center font-semibold cursor-pointer',
@@ -539,7 +539,7 @@ export default function CodingEnvironment(): JSX.Element {
           >
             HELP
           </h1>
-        </div>
+        </button>
       </div>
 
       {isHelpVisible && (
