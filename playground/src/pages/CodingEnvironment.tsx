@@ -599,7 +599,7 @@ export default function CodingEnvironment(): JSX.Element {
                     </h1>
 
                     <div className="flex ml-auto mr-5">
-                      <div onClick={onFormEditorClick} role="button">
+                      <button onClick={onFormEditorClick}>
                         <h1
                           className={classNames(
                             'text-left mr-3 text-base font-semibold cursor-pointer',
@@ -610,9 +610,9 @@ export default function CodingEnvironment(): JSX.Element {
                         >
                           FORM
                         </h1>
-                      </div>
+                      </button>
 
-                      <div onClick={onJSONEditorClick} role="button">
+                      <button onClick={onJSONEditorClick}>
                         <h1
                           className={classNames(
                             'text-left text-secondary-6 text-base font-semibold cursor-pointer',
@@ -623,7 +623,7 @@ export default function CodingEnvironment(): JSX.Element {
                         >
                           JSON
                         </h1>
-                      </div>
+                      </button>
                     </div>
                   </div>
 
