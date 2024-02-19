@@ -6,11 +6,13 @@ This is a Builder's Playground for the Miden Virtual Machine. You can create any
 
 The Miden VM is a zero-knowledge virtual machine. A regular virtual machine consumes an initial state and a program and produces a final state.
 
-![](https://i.imgur.com/y3yYt2R.png)
+![image](https://github.com/0xPolygonMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64)
+
 
 The Miden VM works like a regular virtual machine. Only that you can provide secret inputs (Witness) and together with the final state the Miden VM creates a proof for it. A zero-knowledge virtual machines proves that a given set of inputs and program code results in the final state.
 
-![](https://i.imgur.com/t517366.png)
+![image](https://github.com/0xPolygonMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3)
+
 
 ## Inputs of the Miden VM
 
