@@ -154,7 +154,7 @@ export const checkInputs = (inputString: string): checkedData => {
   }
 };
 
-export const formatBeautifyNumbersArray = (inputString: any) => {
+export const formatBeautifyNumbersArray = (inputString: any) => {// eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     const inputArray = inputString.toString().split(',').map(Number);
 
