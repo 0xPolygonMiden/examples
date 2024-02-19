@@ -1,16 +1,14 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import NavigationTabs from './components/NavigationTabs';
 import CodingEnvironment from './pages/CodingEnvironment';
 import InstructionTable from './pages/InstructionTable';
 import ExplainerPage from './pages/Explainer';
 
 function App() {
   return (
-    <main className="bg-gray-100">
+    <main className="w-full h-screen">
       <HashRouter>
         <Header />
-        <NavigationTabs />
         <Routes>
           <Route path="/" element={<CodingEnvironment />} />
           <Route path="/examples" element={<CodingEnvironment />} />

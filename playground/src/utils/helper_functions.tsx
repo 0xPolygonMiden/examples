@@ -154,6 +154,18 @@ export const checkInputs = (inputString: string): checkedData => {
   }
 };
 
+export const formatBeautifyNumbersArray = (inputString: any) => {
+  try {
+    const inputArray = inputString.toString().split(',').map(Number);
+
+    const formattedOutput = inputArray.join(', ');
+
+    return formattedOutput;
+  } catch (exception) {
+    return inputString;
+  }
+};
+
 const outputSchema = yup.object().shape({
   stack_output: yup.array().of(yup.number().integer().min(0)).required(),
   overflow_addrs: yup.array().of(yup.number().integer().min(0)).notRequired(),
@@ -231,11 +243,12 @@ Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
 /**
  * Helper function to format the Memory in the Debug Output.
  */
-export function formatMemory(memory: BigUint64Array): string {
-  let output = '';
+export function formatMemory(memory: BigUint64Array): string[] {
+  const output: string[] = [];
   for (let i = 0; i < memory.length; i += 5) {
     const memorySlice = memory.slice(i, i + 5);
-    output += `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}] \n           `;
+    const formattedString = `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}]`;
+    output.push(formattedString);
   }
   return output;
 }
