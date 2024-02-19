@@ -21,7 +21,7 @@ const MemoryInfo = (props: MemoryInfoProps): JSX.Element => {
           <div className="flex flex-wrap overflow-auto h-40">
             {props.debugOutput &&
               formatMemory(props.debugOutput.memory).map(
-                (memoryString, index) => (
+                (memoryString) => (
                   <div key={memoryString} className="w-1/3 p-2">
                     <div className="text-white text-sm p-4 rounded">
                       {memoryString}

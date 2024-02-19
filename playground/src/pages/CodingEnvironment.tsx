@@ -110,7 +110,7 @@ export default function CodingEnvironment(): JSX.Element {
         toast.success('Copied!');
       })
       .catch((err) => {
-        toast.error('Failed to copy');
+        toast.error('Failed to copy: ' + err);
       });
   };
 
@@ -259,7 +259,7 @@ export default function CodingEnvironment(): JSX.Element {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackLayoutVisible(true);
       }
-    } catch (error: any) {
+    } catch (error: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
     }
   }, [inputs]);
