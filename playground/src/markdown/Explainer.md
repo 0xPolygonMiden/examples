@@ -110,6 +110,15 @@ Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/a
 ### Run a program
 
 You can create a program and run it. There will be no proof generated which is much faster. Every program that successfully executes can also be proven, so I suggest using this functionality when hacking around.
+<br><br>You can also try providing different inputs values to understand program execution in different examples by seeing the changes in the related output. 
+<br>For that, you can use the input area at the bottom of the coding environment. It provides two modes of input:
+<br><br>FORM - to provide input in plain text
+<br><img width="706" alt="image" src="https://github.com/gubloon/examples/assets/7201911/258c7c4a-84ff-4663-b718-255f743e5d6f">
+
+JSON - to provide input in JSON format
+<br><img width="698" alt="image" src="https://github.com/gubloon/examples/assets/7201911/450f72d5-b570-4a27-a4ca-49873b0eac02">
+
+<br>In both modes, you have options to provide input values for "Operand stack" and "Advice stack".
 
 ### Debug a program
 
