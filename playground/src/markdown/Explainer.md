@@ -104,7 +104,8 @@ Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/a
 
 ## OK, but what can I do now?
 
-![](https://i.imgur.com/Y6pkjzt.png)
+![image](https://github.com/gubloon/examples/assets/7201911/1ef88c9a-1dab-48b5-9cd6-bf58c4b7aea4)
+
 
 ### Run a program
 
