@@ -4,7 +4,6 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const examples = [
   'addition',
-  'advice_provider',
   'catalan',
   'collatz',
   'comparison',
@@ -14,7 +13,8 @@ const examples = [
   'matrix_multiplication',
   'nprime',
   'shamir_secret_share',
-  'standard_library'
+  'standard_library',
+  'advice_provider',
 ];
 
 function classExamples(...classes: string[]) {
@@ -40,9 +40,9 @@ export default function DropDown({
     >
       {({ open }) => (
         <>
-          <div className="relative w-40">
+          <div className="relative w-20 flex-grow sm:flex-grow-0 sm:w-1/2 mb-2 sm:mb-0">
             <Listbox.Button className="relative w-full cursor-default rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
-              <span className="block truncate capitalize">{selected}</span>
+              <span className="block truncate max-w-xs sm:max-w-none capitalize">{selected}</span>
               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronDownIcon className="h-3 w-3 fill-accent-1 stroke-2" />
               </span>
