@@ -44,7 +44,6 @@ export default function CodingEnvironment(): JSX.Element {
    * This sets the inputs to the default values.
    */
   const [inputs, setInputs] = React.useState(exampleInput);
-  const [inputStringValue, setInputStringValue] = React.useState(exampleInput);
 
   /**
    * This sets the code to the default values.
@@ -121,9 +120,11 @@ export default function CodingEnvironment(): JSX.Element {
   const [debugExecutor, setDebugExecutor] = useState<DebugExecutor | null>(
     null
   );
+
   function disableDebug() {
     setShowDebug(false);
     setDebugExecutor(null);
+    setDebugOutput(null);
   }
 
   function classNames(...classes: string[]) {
@@ -135,12 +136,18 @@ export default function CodingEnvironment(): JSX.Element {
       if (!debugExecutor) {
         throw new Error('debugExecutor is undefined');
       }
+      // If the command is rewind and the output is 'Debugging session started', do nothing
+      // There is a bug that lets the DebugExecutor freeze when the rewind command 
+      // is called at start
+      if (output == 'Debugging session started' && command == DebugCommand.Rewind) {
+        return
+      }
       if (typeof params !== 'undefined') {
         const debugOutput: DebugOutput = debugExecutor.execute(command, params);
-        setOutput(formatDebuggerOutput(debugOutput));
         console.log('memory', formatMemory(debugOutput.memory));
         console.log('stack', debugOutput.stack);
 
+        setOutput(formatDebuggerOutput(debugOutput));
         setDebugOutput(debugOutput);
       } else {
         const debugOutput: DebugOutput = debugExecutor.execute(command);
@@ -175,6 +182,7 @@ export default function CodingEnvironment(): JSX.Element {
       return;
     }
 
+    // this is hack and we need to change it. 
     if (value === 'advice_provider') {
       setDisableForm(true);
       setIsCodeEditorVisible(true);
@@ -187,7 +195,6 @@ export default function CodingEnvironment(): JSX.Element {
     setCode(await example_code[1]);
 
     if (isCodeEditorVisible) {
-      console.log('ADVICE');
       setCodeUploadContent(await example_code[0]);
     }
 
@@ -207,7 +214,7 @@ export default function CodingEnvironment(): JSX.Element {
     let inputString;
 
     if (isCodeEditorVisible) {
-      setInputStringValue(codeUploadContent);
+      setInputs(codeUploadContent);
       return;
     }
 
@@ -245,11 +252,11 @@ export default function CodingEnvironment(): JSX.Element {
     }`;
     }
 
-    setInputStringValue(inputString);
+    setInputs(inputString);
   }, [operandValue, adviceValue]);
 
   useEffect(() => {
-    setInputStringValue(codeUploadContent);
+    setInputs(codeUploadContent);
   }, [codeUploadContent]);
 
   useEffect(() => {
@@ -327,9 +334,8 @@ export default function CodingEnvironment(): JSX.Element {
       .then(() => {
         setProof(null);
 
-        const inputCheck = checkInputs(inputStringValue);
+        const inputCheck = checkInputs(inputs);
 
-        console.log('input string', inputStringValue);
         if (!inputCheck.isValid) {
           setOutput(inputCheck.errorMessage);
           toast.error('Execution failed');
@@ -342,7 +348,7 @@ export default function CodingEnvironment(): JSX.Element {
           const start = Date.now();
 
           const { program_hash, stack_output, cycles, trace_len }: Outputs =
-            run_program(code, inputStringValue);
+            run_program(code, inputs);
 
           hideAllRightSideLayout();
 
@@ -378,9 +384,7 @@ export default function CodingEnvironment(): JSX.Element {
     init()
       .then(() => {
         setProof(null);
-
-        const inputCheck = checkInputs(inputStringValue);
-        console.log('input string', inputStringValue);
+        const inputCheck = checkInputs(inputs);
 
         if (!inputCheck.isValid) {
           setOutput(inputCheck.errorMessage);
@@ -402,7 +406,7 @@ export default function CodingEnvironment(): JSX.Element {
             trace_len,
             overflow_addrs,
             proof
-          }: Outputs = prove_program(code, inputStringValue);
+          }: Outputs = prove_program(code, inputs);
           const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
           setProgramInfo(
             `Program Hash: ${program_hash}
@@ -462,7 +466,7 @@ export default function CodingEnvironment(): JSX.Element {
         setDebugExecutor(new DebugExecutor(code, inputs));
         setOutput('Debugging session started');
 
-        setDebugOutput(null);
+
       } catch (error) {
         setOutput(`Error: ${error}`);
       }
