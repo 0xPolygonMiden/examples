@@ -11,7 +11,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon
 } from '@heroicons/react/20/solid';
-import { BsChevronBarLeft, BsChevronBarRight } from 'react-icons/bs';
 import { DebugCommand } from 'miden-wasm';
 
 type MidenCodeProps = {
@@ -79,13 +78,13 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
         {!props.showDebug && (
           <div className="flex flex-col gap-y-3">
             <DocumentDuplicateIcon
-              className="h-6 w-6 stroke-white hover:cursor-pointer"
+              className="h-6 w-6 stroke-green hover:cursor-pointer"
               aria-hidden="true"
               onClick={props.handleCopyClick}
             />
 
             <DocumentTextIcon
-              className="h-6 w-6 stroke-white hover:cursor-pointer"
+              className="h-6 w-6 stroke-green hover:cursor-pointer"
               aria-hidden="true"
               onClick={saveFile}
             />
@@ -93,16 +92,16 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
         )}
 
         {props.showDebug ? (
-          <div className="flex flex-col gap-y-3 mt-3">
-            <BsChevronBarLeft
+          <div className="flex flex-col h-full justify-center items-center gap-y-3">
+            {/* <BsChevronBarLeft
               className=" h-6 w-6 fill-white cursor-pointer"
               aria-hidden="true"
               title="Go to start"
               onClick={() => props.executeDebug(DebugCommand.RewindAll)}
-            />
+            /> */}
 
             <ChevronDoubleLeftIcon
-              className="h-6 w-6 fill-white cursor-pointer"
+              className="h-6 w-6 fill-green cursor-pointer"
               aria-hidden="true"
               title="100 cycles back"
               onClick={() =>
@@ -111,32 +110,32 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
             />
 
             <ChevronLeftIcon
-              className="h-6 w-6 fill-white cursor-pointer"
+              className="h-6 w-6 fill-green cursor-pointer"
               aria-hidden="true"
               title="1 cycle back"
               onClick={() => props.executeDebug(DebugCommand.Rewind, BigInt(1))}
             />
 
             <ChevronRightIcon
-              className="h-6 w-6 fill-white cursor-pointer"
+              className="h-6 w-6 fill-green cursor-pointer"
               aria-hidden="true"
               title="1 cycles"
               onClick={() => props.executeDebug(DebugCommand.Play, BigInt(1))}
             />
 
             <ChevronDoubleRightIcon
-              className="h-6 w-6 fill-white cursor-pointer"
+              className="h-6 w-6 fill-green cursor-pointer"
               aria-hidden="true"
               title="100 cycles"
               onClick={() => props.executeDebug(DebugCommand.Play, BigInt(100))}
             />
 
-            <BsChevronBarRight
+            {/* <BsChevronBarRight
               className="h-6 w-6 fill-white cursor-pointer"
               aria-hidden="true"
               title="Go to end"
               onClick={() => props.executeDebug(DebugCommand.PlayAll)}
-            />
+            /> */}
           </div>
         ) : null}
       </div>

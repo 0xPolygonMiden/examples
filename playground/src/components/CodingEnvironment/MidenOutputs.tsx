@@ -43,10 +43,6 @@ const MidenOutputs = ({
         {showDebug ? (
           <div className="flex gap-x-1">
             <DebugButton
-              icon="Start"
-              onClick={() => executeDebug(DebugCommand.RewindAll)}
-            />
-            <DebugButton
               icon="PPrevious"
               onClick={() => executeDebug(DebugCommand.Rewind, BigInt(100))}
             />
@@ -55,20 +51,12 @@ const MidenOutputs = ({
               onClick={() => executeDebug(DebugCommand.Rewind, BigInt(1))}
             />
             <DebugButton
-              icon="Stack"
-              onClick={() => executeDebug(DebugCommand.PrintState)}
-            />
-            <DebugButton
               icon="Forward"
               onClick={() => executeDebug(DebugCommand.Play, BigInt(1))}
             />
             <DebugButton
               icon="FForward"
               onClick={() => executeDebug(DebugCommand.Play, BigInt(100))}
-            />
-            <DebugButton
-              icon="End"
-              onClick={() => executeDebug(DebugCommand.PlayAll)}
             />
           </div>
         ) : null}

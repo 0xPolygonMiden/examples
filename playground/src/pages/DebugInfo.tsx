@@ -76,25 +76,16 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
               <h1 className="pl-4 text-left text-base font-semibold">Stack</h1>
 
               <div className="grid grid-cols-8 gap-x-1 ml-4 w-full gap-y-4 mr-4">
-                {Array.from<bigint>(props.debugOutput.stack).map(
-                  (item, index) => (
-                    <div
-                      key={item.toString()}
-                      className="relative flex justify-center items-baseline"
-                    >
-                      <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
-                        <span className="text-secondary-5">
-                          {item.toString()}
-                        </span>
-                      </div>
-                      <label
-                        className={`absolute text-[8px] font-bold transition-all top-0 text-green`}
-                      >
-                        {index}
-                      </label>
+                {props.debugOutput.stack && Array.from(props.debugOutput.stack).map((item, index) => (
+                  <div key={index} className="relative flex justify-center items-baseline">
+                    <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
+                      <span className="text-secondary-5">{item.toString()}</span>
                     </div>
-                  )
-                )}
+                    <label className="absolute text-[8px] font-bold transition-all top-0 text-green">
+                      {index}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

@@ -3,9 +3,7 @@ import {
   ChevronDoubleRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  CircleStackIcon
 } from '@heroicons/react/20/solid';
-import { BsChevronBarLeft, BsChevronBarRight } from 'react-icons/bs';
 
 type DebugButtonProps = {
   icon: string;
@@ -15,26 +13,17 @@ type DebugButtonProps = {
 const DebugButton = ({ icon, onClick }: DebugButtonProps): JSX.Element => {
   let tooltipText = "";
   switch(icon) {
-    case 'Start':
-      tooltipText = "Go to start";
-      break;
     case 'PPrevious':
       tooltipText = "100 cycles back";
       break;
     case 'Previous':
       tooltipText = "1 cycle back";
       break;
-    case 'Stack': 
-      tooltipText = "Print current stack";
-      break;
     case 'Forward':
       tooltipText = "1 cycle forward";
       break;
     case 'FForward': 
       tooltipText = "100 cycles forward";
-      break;
-    case 'End': 
-      tooltipText = "Go to end";
       break;
   }
   return (
@@ -45,13 +34,6 @@ const DebugButton = ({ icon, onClick }: DebugButtonProps): JSX.Element => {
       title={tooltipText}
     >
       <span className="sr-only">icon</span>
-      {icon === 'Start' ? (
-        <BsChevronBarLeft
-          className=" h-5 w-5"
-          aria-hidden="true"
-          title={tooltipText}
-        />
-      ) : null}
       {icon === 'PPrevious' ? (
         <ChevronDoubleLeftIcon
           className="h-5 w-5"
@@ -66,13 +48,6 @@ const DebugButton = ({ icon, onClick }: DebugButtonProps): JSX.Element => {
           title={tooltipText}
         />
       ) : null}
-      {icon === 'Stack' ? (
-        <CircleStackIcon
-          className="h-5 w-5"
-          aria-hidden="true"
-          title={tooltipText}
-        />
-      ) : null}
       {icon === 'Forward' ? (
         <ChevronRightIcon
           className="h-5 w-5"
@@ -82,13 +57,6 @@ const DebugButton = ({ icon, onClick }: DebugButtonProps): JSX.Element => {
       ) : null}
       {icon === 'FForward' ? (
         <ChevronDoubleRightIcon
-          className="h-5 w-5"
-          aria-hidden="true"
-          title={tooltipText}
-        />
-      ) : null}
-      {icon === 'End' ? (
-        <BsChevronBarRight
           className="h-5 w-5"
           aria-hidden="true"
           title={tooltipText}
