@@ -320,6 +320,8 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const onInstructionClick = () => {
+    if (isInstructionVisible) return;
+
     hideAllRightSideLayout();
     setIsTestExperimentVisible(true);
     setIsInstructionVisible(!isInstructionVisible);
