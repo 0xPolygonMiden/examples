@@ -35,8 +35,8 @@ import OutputInfo from './OutputInfo';
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const [isInstructionVisible, setIsInstructionVisible] = useState(!isMobile);
-  const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(false);
+  const [isInstructionVisible, setIsInstructionVisible] = useState(false);
+  const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
 
@@ -74,7 +74,7 @@ export default function CodingEnvironment(): JSX.Element {
   const [disableForm, setDisableForm] = useState(false);
 
   const [stackOutputValue, setStackOutputValue] = useState('');
-  const [isStackOutputVisible, setIsStackOutputVisible] = useState(false);
+  const [isStackOutputVisible, setIsStackOutputVisible] = useState(true);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
   const [codeUploadContent, setCodeUploadContent] = useState('');
 
