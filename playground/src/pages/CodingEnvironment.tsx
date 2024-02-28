@@ -35,6 +35,7 @@ export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [isInstructionVisible, setIsInstructionVisible] = useState(true);
+  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(false);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
@@ -186,6 +187,7 @@ export default function CodingEnvironment(): JSX.Element {
     setShowDebug(false);
     setIsProofInfoVisible(false);
     setIsStackOutputVisible(false);
+    setIsTestExperimentVisible(false);
   };
 
   useEffect(() => {
@@ -290,14 +292,28 @@ export default function CodingEnvironment(): JSX.Element {
     }
   };
 
+  const onTestAndExperimentClick = () => {
+    if (isTestExperimentVisible) return;
+
+    hideAllRightSideLayout();
+
+    setIsTestExperimentVisible(true);
+    setIsInstructionVisible(true);
+    setIsHelpVisible(false);
+  };
+
   const onInstructionClick = () => {
     hideAllRightSideLayout();
+    setIsTestExperimentVisible(true);
     setIsInstructionVisible(!isInstructionVisible);
     setIsHelpVisible(false);
   };
 
   const onHelpClick = () => {
+    if (isHelpVisible) return;
+
     setIsHelpVisible(!isHelpVisible);
+    setIsTestExperimentVisible(false);
     setIsInstructionVisible(false);
   };
 
@@ -504,11 +520,11 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <button onClick={onInstructionClick}>
+        <button onClick={onTestAndExperimentClick}>
           <h1
             className={classNames(
               'flex text-sm items-center font-semibold cursor-pointer',
-              !isHelpVisible
+              isTestExperimentVisible
                 ? 'text-white'
                 : 'text-secondary-1 hover:text-white'
             )}
