@@ -6,11 +6,11 @@ This is a Builder's Playground for the Miden Virtual Machine. You can create any
 
 The Miden VM is a zero-knowledge virtual machine. A regular virtual machine consumes an initial state and a program and produces a final state.
 
-![](https://i.imgur.com/y3yYt2R.png)
+<img width="700" alt="image" src="https://github.com/0xPolygonMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64">
 
 The Miden VM works like a regular virtual machine. Only that you can provide secret inputs (Witness) and together with the final state the Miden VM creates a proof for it. A zero-knowledge virtual machines proves that a given set of inputs and program code results in the final state.
 
-![](https://i.imgur.com/t517366.png)
+<img width="700" alt="image" src="https://github.com/0xPolygonMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3">
 
 ## Inputs of the Miden VM
 
@@ -102,15 +102,26 @@ Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/a
 
 ## OK, but what can I do now?
 
-![](https://i.imgur.com/Y6pkjzt.png)
-
 ### Run a program
+<img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/4c493db0-1701-487d-8d09-84c07d63d746">
 
-You can create a program and run it. There will be no proof generated which is much faster. Every program that successfully executes can also be proven, so I suggest using this functionality when hacking around.
+
+You can load programs from existing examples or create a program and run it. There will be no proof generated which is much faster. Every program that successfully executes can also be proven, so I suggest using this functionality when hacking around.
+<br><br>You can also try providing different input values and see their effect in the output to understand respective examples.
+<br>For that, you can use the input area at the bottom of the coding environment. It provides two modes of input:
+<br><br>FORM - to provide input in plain text
+<br><img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/258c7c4a-84ff-4663-b718-255f743e5d6f">
+
+JSON - to provide input in JSON format
+<br><img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/450f72d5-b570-4a27-a4ca-49873b0eac02">
+
+<br>In both modes, you have options to provide input values for "Operand stack" and "Advice stack".
 
 ### Debug a program
+<img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/c1538466-0802-453c-b244-5d00ce022b20">
+<br><i>"Debug" option is supported only on desktop and yet on mobile.</i>
 
-You can step through the program and see the current VM state displayed in the Output section. And the best thing is, that you can add `breakpoint` as Miden Assembly instruction, see below for an example.
+<br>You can step through the program and see the current VM state displayed in the Output section. And the best thing is, that you can add `breakpoint` as Miden Assembly instruction, see below for an example.
 
 ```
 Clock: 2001
@@ -149,11 +160,16 @@ end
 ```
 
 ### Prove a program
+<img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/31dc9130-c3ae-408d-8197-fb92b4338165">
 
 This is what makes the Miden VM interesting. Here you can run your program and create a proof for it. The proof is stored in memory in the backend. You can take a look at the proof by clicking "Show Proof".
 
 You need to prove before you can verify.
 
 ### Verify a program
-
-Ok, here you can verify that the given `operand_stack` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.
+<img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/35d2e85c-820f-4d20-9bc7-baf5779e8bbc">
+<br><i>On desktop, the option appears in the proof info box on the right side which becomes available once you click the "prove" button.</i>
+<br><img width="500" alt="image" src="https://github.com/gubloon/examples/assets/7201911/da4cbff7-aa43-44fa-b8ad-158debf77e58">
+<br><i>On mobile, the option appears on top of the code editor, next to the "prove" option.</i>
+  
+<br>Here you can verify that the given `operand_stack` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.

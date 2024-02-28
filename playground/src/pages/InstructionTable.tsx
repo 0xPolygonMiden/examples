@@ -7,10 +7,6 @@ import { assemblerInstructions } from '../data/instructions';
 
 import 'katex/dist/katex.min.css';
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 /** TODO:
  * Table loads slowly - consider loading only the first 10 rows and then loading more as the user scrolls
  * or use react table (https://react-table.tanstack.com/docs/overview)`
@@ -68,7 +64,7 @@ export default function InstructionTable() {
                         .toLowerCase()
                         .includes(searchQuery.toLowerCase())
                     )
-                    .map((instruction, instructionIdx) => (
+                    .map((instruction) => (
                       <tr
                         key={instruction.instruction}
                         className="border border-secondary-4"
