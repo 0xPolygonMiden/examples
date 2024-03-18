@@ -35,7 +35,9 @@ import OutputInfo from './OutputInfo';
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
   const [isInstructionVisible, setIsInstructionVisible] = useState(!isMobile);
+
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(false);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
@@ -171,7 +173,7 @@ export default function CodingEnvironment(): JSX.Element {
     disableDebug();
     setProof(null);
     setDisableForm(false);
-    
+
     const value = exampleChange;
 
     // set the current example to the selected one
@@ -187,7 +189,7 @@ export default function CodingEnvironment(): JSX.Element {
       setDisableForm(true);
       setIsCodeEditorVisible(true);
       console.log('ADVICE');
-    } 
+    }
 
     // retrieve the example data and update the inputs and code
     const example_code = await getExample(value);
@@ -208,6 +210,7 @@ export default function CodingEnvironment(): JSX.Element {
     setShowDebug(false);
     setIsProofInfoVisible(false);
     setIsStackOutputVisible(false);
+    setIsTestExperimentVisible(false);
   };
 
   useEffect(() => {
@@ -281,7 +284,8 @@ export default function CodingEnvironment(): JSX.Element {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackLayoutVisible(true);
       }
-    } catch (error: any) {// eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
     }
   }, [inputs]);
@@ -312,14 +316,30 @@ export default function CodingEnvironment(): JSX.Element {
     }
   };
 
-  const onInstructionClick = () => {
+  const onTestAndExperimentClick = () => {
+    if (isTestExperimentVisible) return;
+
     hideAllRightSideLayout();
+
+    setIsTestExperimentVisible(true);
+    setIsInstructionVisible(true);
+    setIsHelpVisible(false);
+  };
+
+  const onInstructionClick = () => {
+    if (isInstructionVisible) return;
+
+    hideAllRightSideLayout();
+    setIsTestExperimentVisible(true);
     setIsInstructionVisible(!isInstructionVisible);
     setIsHelpVisible(false);
   };
 
   const onHelpClick = () => {
+    if (isHelpVisible) return;
+
     setIsHelpVisible(!isHelpVisible);
+    setIsTestExperimentVisible(false);
     setIsInstructionVisible(false);
   };
 
@@ -527,11 +547,11 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <button onClick={onInstructionClick}>
+        <button onClick={onTestAndExperimentClick}>
           <h1
             className={classNames(
               'flex text-sm items-center font-semibold cursor-pointer',
-              !isHelpVisible
+              isTestExperimentVisible
                 ? 'text-white'
                 : 'text-secondary-1 hover:text-white'
             )}
@@ -553,7 +573,7 @@ export default function CodingEnvironment(): JSX.Element {
               INSTRUCTIONS
             </h1>
           </button>
-          )}
+        )}
 
         <button onClick={onHelpClick}>
           <h1
@@ -576,44 +596,48 @@ export default function CodingEnvironment(): JSX.Element {
       {!isHelpVisible && (
         <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
           <div className="flex flex-col h-full w-full lg:w-1/2 mr-4 ${ isMobile ? px-3 }">
-          <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
-            <div className="h-14 flex items-center py-3 px-4">
-              <DropDown onExampleValueChange={handleSelectChange} />
-              <button
-                className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                onClick={runProgram}
-                disabled={isProcessing}
-              >
-                Run
-                <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
-              </button>
-              {!isMobile && (
+            <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+              <div className="h-14 flex items-center py-3 px-4">
+                <DropDown onExampleValueChange={handleSelectChange} />
                 <button
                   className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={startDebug}
+                  onClick={runProgram}
                   disabled={isProcessing}
                 >
-                  Debug
+                  Run
+                  <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
                 </button>
-              )}
-              <button
-                className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                onClick={proveProgram}
-                disabled={isProcessing}
-              >
-                Prove
-              </button>
-              {isMobile && (
+                {!isMobile && (
+                  <button
+                    className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    onClick={startDebug}
+                    disabled={isProcessing}
+                  >
+                    Debug
+                  </button>
+                )}
                 <button
-                  className={`flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${proof ? 'text-white border-secondary-4' : 'text-gray-500 border-gray-500'}`}
-                  onClick={verifyProgram}
-                  disabled={isProcessing || !proof}
+                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={proveProgram}
+                  disabled={isProcessing}
                 >
-                  Verify
+                  Prove
                 </button>
-              )}
+                {isMobile && (
+                  <button
+                    className={`flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${
+                      proof
+                        ? 'text-white border-secondary-4'
+                        : 'text-gray-500 border-gray-500'
+                    }`}
+                    onClick={verifyProgram}
+                    disabled={isProcessing || !proof}
+                  >
+                    Verify
+                  </button>
+                )}
               </div>
-            
+
               <div className="h-px bg-secondary-4 mb-4"></div>
               <MidenEditor
                 value={code}
@@ -633,11 +657,13 @@ export default function CodingEnvironment(): JSX.Element {
                     </h1>
 
                     <div className="flex ml-auto mr-5">
-                      <button 
+                      <button
                         onClick={!disableForm ? onFormEditorClick : undefined}
                         className={classNames(
                           'text-left mr-3 text-base font-semibold',
-                          !disableForm ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
+                          !disableForm
+                            ? 'cursor-pointer'
+                            : 'cursor-not-allowed opacity-50',
                           !isCodeEditorVisible && !disableForm
                             ? 'text-white'
                             : 'text-secondary-6'
