@@ -287,8 +287,7 @@ export default function CodingEnvironment(): JSX.Element {
     } catch (error: any) {
       // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
-    }
-    // eslint-disable-next-line
+    } // eslint-disable-line @typescript-eslint/no-explicit-any
   }, [inputs]);
 
   const onInputPlusClick = () => {
