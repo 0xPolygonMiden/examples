@@ -284,7 +284,7 @@ export default function CodingEnvironment(): JSX.Element {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackLayoutVisible(true);
       } // eslint-disable-next-line
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
     } // eslint-disable-line @typescript-eslint/no-explicit-any
