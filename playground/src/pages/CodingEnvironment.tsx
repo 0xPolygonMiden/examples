@@ -36,9 +36,9 @@ export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
-  const [isInstructionVisible, setIsInstructionVisible] = useState(!isMobile);
+  const [isInstructionVisible, setIsInstructionVisible] = useState(false);
 
-  const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(false);
+  const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
 
@@ -75,7 +75,7 @@ export default function CodingEnvironment(): JSX.Element {
   const [disableForm, setDisableForm] = useState(false);
 
   const [stackOutputValue, setStackOutputValue] = useState('');
-  const [isStackOutputVisible, setIsStackOutputVisible] = useState(false);
+  const [isStackOutputVisible, setIsStackOutputVisible] = useState(true);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
   const [codeUploadContent, setCodeUploadContent] = useState('');
 
@@ -283,12 +283,11 @@ export default function CodingEnvironment(): JSX.Element {
       if (inputObject.advice_stack) {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
         setIsAdviceStackLayoutVisible(true);
-      }
-    } catch (error: any) {
+      } // eslint-disable-next-line
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
-    }
-    // eslint-disable-next-line
+    } // eslint-disable-line @typescript-eslint/no-explicit-any
   }, [inputs]);
 
   const onInputPlusClick = () => {
@@ -320,10 +319,9 @@ export default function CodingEnvironment(): JSX.Element {
   const onTestAndExperimentClick = () => {
     if (isTestExperimentVisible) return;
 
-    hideAllRightSideLayout();
-
-    setIsTestExperimentVisible(true);
-    setIsInstructionVisible(true);
+    setIsTestExperimentVisible(true);    
+    setIsProgramInfoVisible(true);
+    setIsStackOutputVisible(true);
     setIsHelpVisible(false);
   };
 
@@ -451,6 +449,7 @@ export default function CodingEnvironment(): JSX.Element {
           if (proof) {
             setProof(proof);
             setIsProofInfoVisible(true);
+            setIsStackOutputVisible(true);
           }
 
           setIsProgramInfoVisible(true);
