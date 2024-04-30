@@ -13,8 +13,8 @@ const examples = [
   'shamir_secret_share',
   'collatz',
   'comparison',
-  'matrix_multiplication',
   'nprime',
+  'matrix_multiplication',
   //'advice_provider',
   //'bsearch',
 ];
