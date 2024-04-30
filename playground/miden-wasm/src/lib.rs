@@ -1,8 +1,12 @@
+extern crate alloc;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
 mod utils_debug;
 mod utils_input;
 mod utils_program;
-use miden_vm::{ExecutionProof, ProvingOptions, DefaultHost, MemAdviceProvider};
 use miden_air::ExecutionOptions;
+use miden_vm::{ExecutionProof, MemAdviceProvider, DefaultHost, ProvingOptions};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -32,8 +36,7 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
 
     let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
-    let execution_options = ExecutionOptions::new(None, 64 as u32)
-        .map_err(|err| format!("{err}"))?;
+    let execution_options = ExecutionOptions::default();
 
     let trace = miden_vm::execute(
         &program.program.unwrap(),
@@ -43,9 +46,11 @@ pub fn run_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outputs
     )
     .map_err(|err| format!("Failed to generate execution trace - {:?}", err))?;
 
+    let stack_output = trace.stack_outputs().stack().iter().map(|felt| felt.as_int()).collect();
+
     let result = Outputs {
         program_hash: program.program_info.unwrap().program_hash().to_string(),
-        stack_output: trace.stack_outputs().stack().to_vec(),
+        stack_output: stack_output,
         cycles: Some(trace.trace_len_summary().trace_len()),
         trace_len: Some(trace.get_trace_len()),
         overflow_addrs: None,
@@ -82,12 +87,15 @@ pub fn prove_program(code_frontend: &str, inputs_frontend: &str) -> Result<Outpu
     )
     .map_err(|err| format!("Failed to prove execution - {:?}", err))?;
 
+    let stack_output = output.stack().iter().map(|felt| felt.as_int()).collect();
+    let overflow_addrs = output.overflow_addrs().iter().map(|felt| felt.as_int()).collect::<Vec<_>>();
+
     let result = Outputs {
         program_hash: program.program_info.clone().unwrap().program_hash().to_string(),
-        stack_output: output.stack().to_vec(),
+        stack_output: stack_output,
         cycles: None,
         trace_len: Some(proof.stark_proof().trace_length()),
-        overflow_addrs: Some(output.overflow_addrs().to_vec()),
+        overflow_addrs: Some(overflow_addrs),
         proof: Some(proof.to_bytes()),
     };
 
@@ -253,7 +261,7 @@ fn test_debug_program() {
     // we test playing one more cycle
     let output = debug_executor_2.execute(utils_debug::DebugCommand::Play, Some(1));
     assert_eq!(output.clk, 4);
-    assert_eq!(output.op, Some("Push(BaseElement(8589934590))".to_string()));
+    assert_eq!(output.op, Some("Push(2)".to_string()));
     assert_eq!(output.instruction, Some("\"push.2\"".to_string()));
     assert_eq!(output.num_of_operations, Some(1));
     assert_eq!(output.operation_index, Some(1));

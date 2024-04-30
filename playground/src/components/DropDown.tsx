@@ -5,16 +5,16 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 const examples = [
   'addition',
   'catalan',
-  'collatz',
-  'comparison',
+  //'collatz',
+  //'comparison',
   'conditional',
   'fibonacci',
   'game_of_life_4x4',
-  'matrix_multiplication',
-  'nprime',
+  //'matrix_multiplication',
+  //'nprime',
   'shamir_secret_share',
-  'standard_library',
-  'advice_provider',
+  //'standard_library',
+  //'advice_provider',
 ];
 
 function classExamples(...classes: string[]) {

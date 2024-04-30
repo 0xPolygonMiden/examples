@@ -3,7 +3,7 @@ name: Deploy Miden Assembly Playground
 on:
   push:
     branches:
-      - main
+      - dominik_update_to_miden_vm_0.9
 
 jobs:
   build:

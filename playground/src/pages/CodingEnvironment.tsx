@@ -174,6 +174,9 @@ export default function CodingEnvironment(): JSX.Element {
     setProof(null);
     setDisableForm(false);
 
+    // reset the output
+    setOutput(emptyOutput);
+
     const value = exampleChange;
 
     // set the current example to the selected one
@@ -199,9 +202,6 @@ export default function CodingEnvironment(): JSX.Element {
     if (isCodeEditorVisible) {
       setCodeUploadContent(await example_code[0]);
     }
-
-    // reset the output
-    setOutput(emptyOutput);
   };
 
   const hideAllRightSideLayout = () => {
@@ -427,6 +427,7 @@ export default function CodingEnvironment(): JSX.Element {
             proof
           }: Outputs = prove_program(code, inputs);
           const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
+          setStackOutputValue(stack_output.toString());
           setProgramInfo(
             `Program Hash: ${program_hash}
             Cycles: ${cycles}
