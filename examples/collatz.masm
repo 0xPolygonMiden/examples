@@ -10,7 +10,7 @@ begin
         swap push.1 add swap 
         
         # actual check
-        dup push.2 u32checked_mod
+        dup push.2 u32assert2 u32mod
         if.true
             push.3 mul push.1 add
         else

@@ -174,16 +174,16 @@ fn test_run_program_with_std_lib() {
         "use.std::math::u64
 
         begin
-            push.1.0
-            push.2.0
-            exec.u64::checked_add
+            push.1
+            push.2
+            exec.u64::max
         end",
         "",
     )
     .unwrap();
     assert_eq!(
         output.stack_output,
-        vec![0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        vec![2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     );
     assert_eq!(output.trace_len, Some(64));
 }
