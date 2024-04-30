@@ -6,17 +6,17 @@ const examples = [
   'addition',
   'conditional',
   'fibonacci',
+  'standard_library',
   'game_of_life_4x4',
   'catalan',
   'dft',
   'shamir_secret_share',
-  //'bsearch',
-  //'collatz',
-  //'comparison',
-  //'matrix_multiplication',
-  //'nprime',
-  //'standard_library',
+  'collatz',
+  'comparison',
+  'matrix_multiplication',
+  'nprime',
   //'advice_provider',
+  //'bsearch',
 ];
 
 function classExamples(...classes: string[]) {

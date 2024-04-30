@@ -24,7 +24,7 @@ end
 proc.count_to_word.0
     # input: [length, ...]
     # output: [word_count, ...]
-    u32checked_divmod.4 eq.0 not add
+    u32assert2 u32divmod.4 eq.0 not add
 end
 
 # multiply_add_word(a: Word, b: Word) -> Felt
