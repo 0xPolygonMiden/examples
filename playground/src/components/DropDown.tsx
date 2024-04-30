@@ -4,15 +4,17 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const examples = [
   'addition',
-  'catalan',
-  //'collatz',
-  //'comparison',
   'conditional',
   'fibonacci',
   'game_of_life_4x4',
+  'catalan',
+  'dft',
+  'shamir_secret_share',
+  //'bsearch',
+  //'collatz',
+  //'comparison',
   //'matrix_multiplication',
   //'nprime',
-  'shamir_secret_share',
   //'standard_library',
   //'advice_provider',
 ];
