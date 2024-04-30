@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/examples/static/css/main.fabec857.css",
-    "main.js": "/examples/static/js/main.da79c410.js",
+    "main.js": "/examples/static/js/main.eb4e6c8a.js",
     "static/media/miden_wasm_bg.wasm": "/examples/static/media/miden_wasm_bg.c79b13f46359b2c2a9c7.wasm",
     "static/media/KaTeX_AMS-Regular.ttf": "/examples/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/examples/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
@@ -66,10 +66,10 @@
     "static/media/KaTeX_Size3-Regular.woff2": "/examples/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/examples/index.html",
     "main.fabec857.css.map": "/examples/static/css/main.fabec857.css.map",
-    "main.da79c410.js.map": "/examples/static/js/main.da79c410.js.map"
+    "main.eb4e6c8a.js.map": "/examples/static/js/main.eb4e6c8a.js.map"
   },
   "entrypoints": [
     "static/css/main.fabec857.css",
-    "static/js/main.da79c410.js"
+    "static/js/main.eb4e6c8a.js"
   ]
 }
