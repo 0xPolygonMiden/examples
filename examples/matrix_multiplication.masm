@@ -313,10 +313,10 @@ proc.matrix_multiply.0
 
         # add the padding
         # [[c, r, colC, writePtr], [words, readA, addrB, 0], acc, ...]
-        dup push.3 u32checked_and neq.0 while.true
+        dup push.3 u32assert2 u32and neq.0 while.true
             push.0 movdn.7
 
-            add.1 dup push.3 u32checked_and neq.0 
+            add.1 dup push.3 u32assert2 u32and neq.0 
         end
 
         # at this point there is a complete row of C's data on the stack. push
