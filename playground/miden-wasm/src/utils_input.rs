@@ -1,9 +1,16 @@
 use miden_vm::{
-    crypto::{MerkleStore, MerkleTree, SimpleSmt},
-    math::{Felt, FieldElement},
-    utils::collections::BTreeMap,
-    AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs, Word,
+    crypto::{MerkleStore, MerkleTree, SimpleSmt, RpoDigest},
+    math::Felt,
+    AdviceInputs, MemAdviceProvider, StackInputs, StackOutputs, Word, ZERO,
 };
+
+use alloc::collections::BTreeMap;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
+// CONSTANTS
+// ================================================================================================
+const SIMPLE_SMT_DEPTH: u8 = u64::BITS as u8;
 
 /// The Outputs struct is used to serialize the output of the program.
 /// Via Rust WASM we cannot return arbitrary structs, so we need to serialize it to JSON.
@@ -103,7 +110,7 @@ impl InputFile {
     }
 
     /// Parse advice map data from the input file.
-    fn parse_advice_map(&self) -> Result<Option<BTreeMap<[u8; 32], Vec<Felt>>>, String> {
+    fn parse_advice_map(&self) -> Result<Option<BTreeMap<RpoDigest, Vec<Felt>>>, String> {
         let advice_map = match &self.advice_map {
             Some(advice_map) => advice_map,
             None => return Ok(None),
@@ -112,23 +119,22 @@ impl InputFile {
         let map = advice_map
             .iter()
             .map(|(k, v)| {
-                // decode hex key
-                let mut key = [0u8; 32];
-                hex::decode_to_slice(k, &mut key)
-                    .map_err(|e| format!("failed to decode advice map key `{k}` - {e}"))?;
+                // Convert key to RpoDigest
+                let key = RpoDigest::try_from(k)
+                    .map_err(|e| format!("failed to decode advice map key '{k}': {e}"))?;
 
                 // convert values to Felt
                 let values = v
                     .iter()
                     .map(|v| {
                         Felt::try_from(*v).map_err(|e| {
-                            format!("failed to convert advice map value `{v}` to Felt - {e}")
+                            format!("failed to convert advice map value '{v}' to Felt: {e}")
                         })
                     })
                     .collect::<Result<Vec<_>, _>>()?;
                 Ok((key, values))
             })
-            .collect::<Result<BTreeMap<[u8; 32], Vec<Felt>>, String>>()?;
+            .collect::<Result<BTreeMap<RpoDigest, Vec<Felt>>, String>>()?;
 
         Ok(Some(map))
     }
@@ -152,10 +158,9 @@ impl InputFile {
                 MerkleData::SparseMerkleTree(data) => {
                     let entries = Self::parse_sparse_merkle_tree(data)?;
                     // TODO: Support variable depth
-                    let smt =
-                        SimpleSmt::with_leaves(SimpleSmt::MAX_DEPTH, entries).map_err(|e| {
-                            format!("failed to add sparse merkle tree to merkle store - {e}")
-                        })?;
+                    let smt = SimpleSmt::<SIMPLE_SMT_DEPTH>::with_leaves(entries)
+                    .map_err(|e| format!("failed to parse a Sparse Merkle Tree: {e}"))?;
+
                     merkle_store.extend(smt.inner_nodes());
                 }
             }
@@ -210,7 +215,7 @@ impl InputFile {
             .map(|v| v.parse::<u64>().map_err(|e| e.to_string()))
             .collect::<Result<Vec<_>, _>>()?;
 
-        StackInputs::try_from_values(stack_inputs).map_err(|e| e.to_string())
+        StackInputs::try_from_ints(stack_inputs).map_err(|e| e.to_string())
     }
 }
 
@@ -225,7 +230,7 @@ pub struct Inputs {
 impl Inputs {
     pub fn new() -> Self {
         Self {
-            stack_inputs: StackInputs::new(vec![Felt::ZERO]),
+            stack_inputs: StackInputs::new(vec![ZERO]).unwrap(),
             advice_provider: MemAdviceProvider::default(),
             stack_outputs: StackOutputs::new(vec![], vec![]).unwrap(),
         }
@@ -246,7 +251,7 @@ impl Inputs {
         let outputs_as_json: Outputs =
             serde_json::from_str(outputs_as_str).map_err(|e| e.to_string())?;
 
-        let outputs = StackOutputs::new(
+        let outputs = StackOutputs::try_from_ints(
             outputs_as_json.stack_output,
             outputs_as_json.overflow_addrs.unwrap_or(vec![]),
         ).unwrap();
@@ -273,7 +278,7 @@ fn test_parse_output() {
 
     assert_eq!(
         output.stack(),
-        vec![3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        vec![Felt::new(3), ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]
     );
-    assert_eq!(output.overflow_addrs(), vec![0, 1]);
+    assert_eq!(output.overflow_addrs(), vec![ZERO, Felt::new(1)]);
 }

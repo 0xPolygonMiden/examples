@@ -1,7 +1,9 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
-use miden_vm::{math::StarkField, VmState, VmStateIterator, Word, DefaultHost, MemAdviceProvider};
+use miden_vm::{VmState, VmStateIterator, Word, DefaultHost, MemAdviceProvider};
 use wasm_bindgen::prelude::*;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 // This is the main struct that will be exported to JS
 // It will be used to execute debug commands against the VM

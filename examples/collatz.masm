@@ -10,11 +10,11 @@ begin
         swap push.1 add swap 
         
         # actual check
-        dup push.2 u32checked_mod
+        dup push.2 u32assert2 u32mod
         if.true
             push.3 mul push.1 add
         else
-            push.2 u32checked_div
+            push.2 u32assert2 u32div
         end
         dup push.1 neq
     end

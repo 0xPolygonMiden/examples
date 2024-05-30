@@ -68,7 +68,7 @@ proc.catalan_i
         dup.1
         # Need to use u32 division to truncate properly
         # Safe to use unchecked, since k < i <= n+1, and n+1 has been asserted as u32
-        u32unchecked_div.2
+        u32div.2
         # [ k/2, running_total, k, i, ... ]
         # Initialize counter
         push.0

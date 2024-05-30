@@ -1,5 +1,6 @@
 use miden_stdlib::StdLibrary;
 use miden_vm::{Assembler, Kernel, Program, ProgramInfo};
+use alloc::string::{String, ToString};
 
 pub struct MidenProgram {
     pub assembler: Assembler,
