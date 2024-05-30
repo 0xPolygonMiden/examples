@@ -3,7 +3,7 @@ name: Deploy Miden Assembly Playground
 on:
   push:
     branches:
-      - dominik_add_simple_provable_compliance_example
+      - main
 
 jobs:
   build:
