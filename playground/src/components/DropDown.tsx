@@ -11,7 +11,6 @@ const examples = [
   'catalan',
   'dft',
   'shamir_secret_share',
-  'standard_library',
   'provable_compliance',
   'collatz',
   'comparison',
