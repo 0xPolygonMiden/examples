@@ -4,18 +4,21 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 
 const examples = [
   'addition',
-  'catalan',
-  'collatz',
-  'comparison',
   'conditional',
   'fibonacci',
+  'standard_library',
   'game_of_life_4x4',
-  'matrix_multiplication',
-  'nprime',
+  'catalan',
+  'dft',
   'shamir_secret_share',
   'standard_library',
-  'advice_provider',
   'provable_compliance',
+  'collatz',
+  'comparison',
+  'nprime',
+  'matrix_multiplication',
+  //'advice_provider',
+  //'bsearch',
 ];
 
 function classExamples(...classes: string[]) {
