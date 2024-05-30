@@ -1,30 +1,30 @@
 # A simple demo program that checks if a target account Id is within a list of
-# sanctioned addresses. The target account Id it provided as a secret input. That means,
-# if the transaction proceeds, we can prove that the target account Id is not within the
-# list of sanctioned addresses without revealing the target account Id.
+# sanctioned addresses. The target account ID is provided as a secret input. That means,
+# if the transaction proceeds, we can prove that the target account ID is not within the
+# list of sanctioned addresses without revealing the target account ID.
 proc.transaction
   mem_load.0
 end
 
 begin
-    # Store the target account Id (secret input) at position 0
+    # Store the target account ID (secret input) at position 0
     adv_push.1 mem_store.0
 
 
     push.1
 
-    # Check every sanctioned account Id against the target account Id
+    # Check every sanctioned account ID against the target account ID
     repeat.9
-        # Load the target account Id
+        # Load the target account ID
         mem_load.0
 
-        # Check if the first entry is equal to the target account Id
-        # If the target account Id within the list of sanctioned addresses,
+        # Check if the first entry is equal to the target account ID
+        # If the target account ID is within the list of sanctioned addresses,
         # the program will stop and return the error code 666
         eq assertz.err=666
     end
 
-    # The program didn't stop, so the target account Id is not within the
-    # list of sanctioned addresses, so we can proceed with the transaction
+    # The program didn't stop, so the target account ID is not within the
+    # list of sanctioned addresses. Thus, we can proceed with the transaction
     exec.transaction
 end
