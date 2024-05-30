@@ -2,7 +2,6 @@
 # sanctioned addresses. The target account Id it provided as a secret input. That means,
 # if the transaction proceeds, we can prove that the target account Id is not within the
 # list of sanctioned addresses without revealing the target account Id.
-
 proc.transaction
   mem_load.0
 end
@@ -15,7 +14,7 @@ begin
     push.1
 
     # Check every sanctioned account Id against the target account Id
-    while.true
+    repeat.9
         # Load the target account Id
         mem_load.0
 
@@ -23,8 +22,6 @@ begin
         # If the target account Id within the list of sanctioned addresses,
         # the program will stop and return the error code 666
         eq assertz.err=666
-
-        dup neq.0
     end
 
     # The program didn't stop, so the target account Id is not within the
