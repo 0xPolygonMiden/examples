@@ -15,6 +15,7 @@ const examples = [
   'shamir_secret_share',
   'standard_library',
   'advice_provider',
+  'provable_compliance',
 ];
 
 function classExamples(...classes: string[]) {
