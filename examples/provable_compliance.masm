@@ -2,6 +2,9 @@
 # sanctioned addresses. The target account ID is provided as a secret input. That means,
 # if the transaction proceeds, we can prove that the target account ID is not within the
 # list of sanctioned addresses without revealing the target account ID.
+
+# Here we pretend to execute a transaction. In reality, we would have to replace the
+# code with the actual transaction code.
 proc.transaction
   push.4.3.2.1
 end
@@ -9,14 +12,16 @@ end
 begin
     # Store the target account ID (secret input) at position 0
     adv_push.1 mem_store.0
+    # => [sanctioned_address_1, sanctioned_address_2, ...]
 
 
     push.1
-
     # Check every sanctioned account ID against the target account ID
     repeat.9
         # Load the target account ID
         mem_load.0
+        # => [target_account_id, sanctioned_address_1, sanctioned_address_2, ...]
+
 
         # Check if the first entry is equal to the target account ID
         # If the target account ID is within the list of sanctioned addresses,
@@ -27,4 +32,5 @@ begin
     # The program didn't stop, so the target account ID is not within the
     # list of sanctioned addresses. Thus, we can proceed with the transaction
     exec.transaction
+    # => [1, 2, 3, 4, ...]
 end
