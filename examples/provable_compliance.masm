@@ -3,7 +3,7 @@
 # if the transaction proceeds, we can prove that the target account ID is not within the
 # list of sanctioned addresses without revealing the target account ID.
 proc.transaction
-  mem_load.0
+  push.4.3.2.1
 end
 
 begin
