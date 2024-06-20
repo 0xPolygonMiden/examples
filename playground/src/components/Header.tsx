@@ -4,7 +4,7 @@ import { Dialog } from '@headlessui/react';
 import {
   Bars3Icon,
   XMarkIcon,
-  QuestionMarkCircleIcon
+  ArrowUpRightIcon
 } from '@heroicons/react/24/outline';
 
 /** External links for the top navigation menu */
@@ -52,23 +52,16 @@ const Header = () => {
 
         <div className="hidden sm:flex lg:gap-x-8">
           <a
-            key="Help"
-            href="https://0xpolygonmiden.github.io/miden-vm/tools/main.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-base font-semibold leading-6 text-secondary-2 hover:text-white"
-          >
-            <QuestionMarkCircleIcon className="h-6 w-6" aria-hidden="true" />
-          </a>
-
-          <a
             key="Documentation"
             href="https://0xpolygonmiden.github.io/miden-vm/intro/main.html"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-base font-semibold leading-6 text-secondary-2 hover:text-white"
+            className="text-base font-semibold leading-6 text-secondary-2 hover:text-[#787580]"
           >
-            Documentation
+            <div className="flex items-center">
+              <p>Documentation</p>
+              <ArrowUpRightIcon className="h-5 w-5 ml-1" aria-hidden="true" />
+            </div>
           </a>
         </div>
 
