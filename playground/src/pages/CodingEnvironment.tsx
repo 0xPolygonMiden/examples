@@ -36,7 +36,6 @@ export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
-  const [isInstructionVisible, setIsInstructionVisible] = useState(false);
 
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
@@ -68,7 +67,6 @@ export default function CodingEnvironment(): JSX.Element {
    * Determines when to show the debug menu
    */
   const [showDebug, setShowDebug] = useState(false);
-  const [isHelpVisible, setIsHelpVisible] = useState(false);
 
   const [operandValue, setOperandValue] = useState('');
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -139,10 +137,13 @@ export default function CodingEnvironment(): JSX.Element {
         throw new Error('debugExecutor is undefined');
       }
       // If the command is rewind and the output is 'Debugging session started', do nothing
-      // There is a bug that lets the DebugExecutor freeze when the rewind command 
+      // There is a bug that lets the DebugExecutor freeze when the rewind command
       // is called at start
-      if (output == 'Debugging session started' && command == DebugCommand.Rewind) {
-        return
+      if (
+        output == 'Debugging session started' &&
+        command == DebugCommand.Rewind
+      ) {
+        return;
       }
       if (typeof params !== 'undefined') {
         const debugOutput: DebugOutput = debugExecutor.execute(command, params);
@@ -187,7 +188,7 @@ export default function CodingEnvironment(): JSX.Element {
       return;
     }
 
-    // this is hack and we need to change it. 
+    // this is hack and we need to change it.
     if (value === 'advice_provider') {
       setDisableForm(true);
       setIsCodeEditorVisible(true);
@@ -205,16 +206,16 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const hideAllRightSideLayout = () => {
-    setIsInstructionVisible(false);
     setIsProgramInfoVisible(false);
     setShowDebug(false);
     setIsProofInfoVisible(false);
     setIsStackOutputVisible(false);
-    setIsTestExperimentVisible(false);
   };
 
   useEffect(() => {
     let inputString;
+
+    console.log('advice value changed', adviceValue);
 
     if (isCodeEditorVisible) {
       setInputs(codeUploadContent);
@@ -276,23 +277,32 @@ export default function CodingEnvironment(): JSX.Element {
       setAdviceValue('');
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
+
+      console.log('they camee here', inputs);
+
       if (inputObject.operand_stack) {
         setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
       }
 
-      if (inputObject.advice_stack) {
+      if (inputObject.advice_stack && inputObject.advice_stack.length > 0) {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
+
         setIsAdviceStackLayoutVisible(true);
       } // eslint-disable-next-line
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
       // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
     } // eslint-disable-line @typescript-eslint/no-explicit-any
   }, [inputs]);
 
   const onInputPlusClick = () => {
+    if (isAdviceStackLayoutVisible) {
+      setAdviceValue('');
+    } else {
+      setAdviceValue('0');
+    }
     setIsAdviceStackLayoutVisible(!isAdviceStackLayoutVisible);
-    setAdviceValue('');
     setIsAdviceFocused(false);
   };
 
@@ -319,27 +329,13 @@ export default function CodingEnvironment(): JSX.Element {
   const onTestAndExperimentClick = () => {
     if (isTestExperimentVisible) return;
 
-    setIsTestExperimentVisible(true);    
+    setIsTestExperimentVisible(true);
     setIsProgramInfoVisible(true);
     setIsStackOutputVisible(true);
-    setIsHelpVisible(false);
   };
 
   const onInstructionClick = () => {
-    if (isInstructionVisible) return;
-
-    hideAllRightSideLayout();
-    setIsTestExperimentVisible(true);
-    setIsInstructionVisible(!isInstructionVisible);
-    setIsHelpVisible(false);
-  };
-
-  const onHelpClick = () => {
-    if (isHelpVisible) return;
-
-    setIsHelpVisible(!isHelpVisible);
     setIsTestExperimentVisible(false);
-    setIsInstructionVisible(false);
   };
 
   /**
@@ -486,8 +482,6 @@ export default function CodingEnvironment(): JSX.Element {
         setShowDebug(true);
         setDebugExecutor(new DebugExecutor(code, inputs));
         setOutput('Debugging session started');
-
-
       } catch (error) {
         setOutput(`Error: ${error}`);
       }
@@ -548,12 +542,12 @@ export default function CodingEnvironment(): JSX.Element {
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
       <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <button onClick={onTestAndExperimentClick}>
+        <button onClick={onTestAndExperimentClick} className="relative">
           <h1
             className={classNames(
-              'flex text-sm items-center font-semibold cursor-pointer',
+              'flex text-sm items-center font-semibold cursor-pointer relative pb-1',
               isTestExperimentVisible
-                ? 'text-white'
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
                 : 'text-secondary-1 hover:text-white'
             )}
           >
@@ -561,40 +555,27 @@ export default function CodingEnvironment(): JSX.Element {
           </h1>
         </button>
 
-        {!isMobile && (
-          <button onClick={onInstructionClick}>
-            <h1
-              className={classNames(
-                'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-                isInstructionVisible
-                  ? 'text-white'
-                  : 'text-secondary-1 hover:text-white'
-              )}
-            >
-              INSTRUCTIONS
-            </h1>
-          </button>
-        )}
-
-        <button onClick={onHelpClick}>
+        <button onClick={onInstructionClick} className="relative ml-8">
           <h1
             className={classNames(
-              'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-              isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
+              'flex text-sm items-center font-semibold cursor-pointer relative pb-1',
+              !isTestExperimentVisible
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
+                : 'text-secondary-1 hover:text-white'
             )}
           >
-            HELP
+            INSTRUCTIONS
           </h1>
         </button>
       </div>
 
-      {isHelpVisible && (
-        <div className="flex bg-secondary-3 lg:px-4 pt-4 w-full h-full overflow-scroll">
-          <ExplainerPage />
+      {!isTestExperimentVisible && (
+        <div className="h-4/6 rounded-xl border relative overflow-y-scroll border-secondary-4">
+          <InstructionTable />
         </div>
       )}
 
-      {!isHelpVisible && (
+      {isTestExperimentVisible && (
         <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
           <div className="flex flex-col h-full w-full lg:w-1/2 mr-4 ${ isMobile ? px-3 }">
             <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
@@ -650,18 +631,22 @@ export default function CodingEnvironment(): JSX.Element {
             </div>
 
             <div className="mt-5">
-              <div className="flex w-full h-56 rounded-xl bg-secondary-main grow overflow-hidden border border-secondary-4">
-                <div className="flex flex-col h-54 w-full">
-                  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-white items-center">
-                    <h1 className="pl-5 text-left text-base font-semibold">
-                      Inputs
+              <div
+                className={`flex w-full rounded-xl grow overflow-hidden border border-borderColor ${
+                  isCodeEditorVisible ? 'h-56' : 'h-fit'
+                }`}
+              >
+                <div className="flex flex-col w-full">
+                  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
+                    <h1 className="pl-5 text-left text-base font-normal">
+                      Input
                     </h1>
 
                     <div className="flex ml-auto mr-5">
                       <button
                         onClick={!disableForm ? onFormEditorClick : undefined}
                         className={classNames(
-                          'text-left mr-3 text-base font-semibold',
+                          'text-left mr-3 text-base font-normal',
                           !disableForm
                             ? 'cursor-pointer'
                             : 'cursor-not-allowed opacity-50',
@@ -670,13 +655,13 @@ export default function CodingEnvironment(): JSX.Element {
                             : 'text-secondary-6'
                         )}
                       >
-                        <h1>FORM</h1>
+                        <h1>Forms</h1>
                       </button>
 
                       <button onClick={onJSONEditorClick}>
                         <h1
                           className={classNames(
-                            'text-left text-secondary-6 text-base font-semibold cursor-pointer',
+                            'text-left text-secondary-6 text-base font-normal cursor-pointer',
                             isCodeEditorVisible
                               ? 'text-white'
                               : 'text-secondary-6'
@@ -693,25 +678,27 @@ export default function CodingEnvironment(): JSX.Element {
                   <div className="flex w-full overflow-auto ">
                     {!isCodeEditorVisible && (
                       <div className="flex flex-col w-full pt-4">
-                        <div className="flex justify-center items-baseline relative grow border-none">
-                          <input
-                            type="text"
-                            value={operandValue}
-                            onChange={handleOperandValueChange}
-                            onFocus={handleInputFocus}
-                            onBlur={handleInputBlur}
-                            className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                          />
-                          <label
-                            htmlFor="input"
-                            className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                              isInputFocused || operandValue
-                                ? 'text-xs top-0 text-green'
-                                : 'text-sm top-4'
-                            }`}
-                          >
-                            Operand Stack
-                          </label>
+                        <div className="flex justify-between w-full items-center border-none">
+                          <div className="flex flex-col grow pl-4">
+                            <label
+                              htmlFor="input"
+                              className={`text-sm text-secondary-7 font-normal transition-all ${
+                                isInputFocused || operandValue
+                                  ? 'text-xs top-0 text-green'
+                                  : 'text-sm top-4'
+                              }`}
+                            >
+                              Public Input
+                            </label>
+                            <input
+                              type="text"
+                              value={operandValue}
+                              onChange={handleOperandValueChange}
+                              onFocus={handleInputFocus}
+                              onBlur={handleInputBlur}
+                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                            />
+                          </div>
 
                           <PlusIcon
                             onClick={onInputPlusClick}
@@ -724,31 +711,28 @@ export default function CodingEnvironment(): JSX.Element {
                           />
                         </div>
 
-                        <div className="h-px bg-secondary-4 mb-4"></div>
+                        <div className="h-px bg-secondary-4"></div>
 
                         {isAdviceStackLayoutVisible && (
-                          <div>
-                            <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
-                              <input
-                                type="text"
-                                value={adviceValue}
-                                onChange={handleAdviceValueChange}
-                                onFocus={handleAdviceFocus}
-                                onBlur={handleAdviceBlur}
-                                className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                              />
-                              <label
-                                htmlFor="advicestack"
-                                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                                  isAdviceFocused || adviceValue
-                                    ? 'text-xs top-0 text-green'
-                                    : 'text-sm top-4'
-                                }`}
-                              >
-                                Advice Stack
-                              </label>
-                            </div>
-                            <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+                          <div className="flex flex-col justify-center h-fit mt-4 grow border-none ml-4">
+                            <label
+                              htmlFor="advicestack"
+                              className={`text-sm text-secondary-7 font-normal transition-all ${
+                                isAdviceFocused || adviceValue
+                                  ? 'text-xs top-0 text-green'
+                                  : 'text-sm top-4'
+                              }`}
+                            >
+                              Private Input
+                            </label>
+                            <input
+                              type="text"
+                              value={adviceValue}
+                              onChange={handleAdviceValueChange}
+                              onFocus={handleAdviceFocus}
+                              onBlur={handleAdviceBlur}
+                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                            />
                           </div>
                         )}
                       </div>
@@ -766,12 +750,6 @@ export default function CodingEnvironment(): JSX.Element {
           </div>
 
           <div className="flex flex-col w-full lg:w-1/2 gap-y-6 mt-4 lg:mt-0">
-            {!isMobile && isInstructionVisible && (
-              <div className="h-4/6 rounded-xl border relative overflow-y-scroll border-secondary-4">
-                <InstructionTable />
-              </div>
-            )}
-
             {isStackOutputVisible && (
               <div className="flex ${ isMobile ? px-3 }">
                 <OutputInfo output={stackOutputValue} />
