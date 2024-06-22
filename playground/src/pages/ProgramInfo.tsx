@@ -1,12 +1,21 @@
 import 'katex/dist/katex.min.css';
 
+export interface ProgramInfoInterface {
+  program_hash?: string;
+  cycles?: number;
+  trace_len?: number;
+  error?: string;
+}
+
 type ProgramInfoProps = {
-  programInfo: string;
+  programInfo: ProgramInfoInterface;
 };
 
 const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
+  const { programInfo } = props;
+
   return (
-    <div className="flex w-full h-fit rounded-xl border overflow-y-scroll border-borderColor">
+    <div className="flex w-full h-fit rounded-xl border overflow-y-scroll border-secondary-4">
       <div className="flex flex-col w-full">
         <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
           <h1 className="pl-5 text-left text-base font-normal">Program Info</h1>
@@ -15,12 +24,54 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
         <div className="h-px bg-secondary-4"></div>
 
         <div className="pb-20 pt-5">
-          <h1
-            className="pl-5 text-left text-white text-xs font-normal"
-            style={{ whiteSpace: 'pre-line' }}
-          >
-            {props.programInfo}
-          </h1>
+          {programInfo.error ? (
+            <h1
+              className="pl-5 text-left text-white text-sm font-normal"
+              style={{ whiteSpace: 'pre-line' }}
+            >
+              Error: {programInfo.error}
+            </h1>
+          ) : (
+            <>
+              {programInfo.program_hash && (
+                <>
+                  <p
+                    className="pl-5 text-left text-secondary-6 text-sm font-normal"
+                    style={{ whiteSpace: 'pre-line' }}
+                  >
+                    Program Hash:
+                  </p>
+                  <p
+                    className="pl-5 text-left text-white mt-2 text-sm font-normal"
+                    style={{ whiteSpace: 'pre-line' }}
+                  >
+                    {programInfo.program_hash}
+                  </p>
+
+                  <div className="flex mt-4">
+                    <p
+                      className="pl-5 text-left text-secondary-6 text-sm font-normal"
+                      style={{ whiteSpace: 'pre-line' }}
+                    >
+                      Cycles:
+                      <span className="text-white ml-1">
+                        {programInfo.cycles}
+                      </span>
+                    </p>
+                    <p
+                      className="pl-5 text-left text-secondary-6 text-sm font-normal"
+                      style={{ whiteSpace: 'pre-line' }}
+                    >
+                      Trace Length:
+                      <span className="text-white ml-1">
+                        {programInfo.trace_len}
+                      </span>
+                    </p>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
