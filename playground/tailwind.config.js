@@ -13,7 +13,8 @@ module.exports = {
           4: '#2B2932',
           5: '#8D8A95',
           6: '#a1a1a3',
-          7: '#FFFFFF99'
+          7: '#FFFFFF99',
+          8: '#24202F'
         },
         borderColor: '#1F1E25',
         accent: {

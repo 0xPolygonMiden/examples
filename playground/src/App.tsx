@@ -12,7 +12,6 @@ function App() {
         <Routes>
           <Route path="/" element={<CodingEnvironment />} />
           <Route path="/examples/:id" element={<CodingEnvironment />} />
-          <Route path="/instruction-set" element={<InstructionTable />} />
           <Route path="/explainer" element={<ExplainerPage />} />
           <Route path="*" element={<p>Path not resolved</p>} />
         </Routes>
