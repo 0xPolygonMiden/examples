@@ -23,9 +23,15 @@ import {
   formatMemory,
   formatBeautifyNumbersArray
 } from '../utils/helper_functions';
-import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid';
+import { PlusIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowDownTrayIcon,
+  ChevronDownIcon,
+  DocumentDuplicateIcon,
+  PlayIcon
+} from '@heroicons/react/24/outline';
 import { emptyOutput, exampleCode, exampleInput } from '../utils/constants';
-import ProgramInfo from './ProgramInfo';
+import ProgramInfo, { ProgramInfoInterface } from './ProgramInfo';
 import ProofInfo from './ProofInfo';
 import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
@@ -35,7 +41,7 @@ import OutputInfo from './OutputInfo';
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
+  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(false);
 
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
@@ -56,7 +62,11 @@ export default function CodingEnvironment(): JSX.Element {
    */
   const [output, setOutput] = React.useState(emptyOutput);
 
-  const [programInfo, setProgramInfo] = React.useState(emptyOutput);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [programInfo, setProgramInfo] = React.useState<ProgramInfoInterface>(
+    {}
+  );
 
   /**
    * This sets the proof to the default proof.
@@ -355,7 +365,7 @@ export default function CodingEnvironment(): JSX.Element {
           setOutput(inputCheck.errorMessage);
           toast.error('Execution failed');
           hideAllRightSideLayout();
-          setProgramInfo(inputCheck.errorMessage);
+          setProgramInfo({ error: inputCheck.errorMessage });
           setIsProgramInfoVisible(true);
           return;
         }
@@ -372,15 +382,20 @@ export default function CodingEnvironment(): JSX.Element {
             "stack_output" : [${stack_output.toString()}],
             "trace_len" : ${trace_len}
             }`);
-          setProgramInfo(
-            `Program Hash: ${program_hash}\nCycles: ${cycles}\nTrace_len: ${trace_len}`
-          );
+
+          setProgramInfo({
+            program_hash: program_hash,
+            cycles: cycles,
+            trace_len: trace_len
+          });
           setIsProgramInfoVisible(true);
           setIsStackOutputVisible(true);
           toast.success(`Execution successful in ${Date.now() - start} ms`);
         } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           hideAllRightSideLayout();
-          setProgramInfo(`Error: ${error}`);
+          setProgramInfo({ error: errorMessage });
           setIsProgramInfoVisible(true);
           setOutput(`Error: ${error}`);
         }
@@ -405,7 +420,7 @@ export default function CodingEnvironment(): JSX.Element {
           setOutput(inputCheck.errorMessage);
 
           hideAllRightSideLayout();
-          setProgramInfo(inputCheck.errorMessage);
+          setProgramInfo({ error: inputCheck.errorMessage });
           setIsProgramInfoVisible(true);
           toast.error('Proving failed', {
             id: 'provingToast'
@@ -424,11 +439,12 @@ export default function CodingEnvironment(): JSX.Element {
           }: Outputs = prove_program(code, inputs);
           const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
           setStackOutputValue(stack_output.toString());
-          setProgramInfo(
-            `Program Hash: ${program_hash}
-            Cycles: ${cycles}
-            Trace_len: ${trace_len}`
-          );
+
+          setProgramInfo({
+            program_hash: program_hash,
+            cycles: cycles,
+            trace_len: trace_len
+          });
           setOutput(`{
             "stack_output" : [${stack_output.toString()}],
             "overflow_addrs" : [${overflow}],
@@ -451,9 +467,12 @@ export default function CodingEnvironment(): JSX.Element {
 
           setIsProgramInfoVisible(true);
         } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+
           setOutput(`Error: ${error}`);
           hideAllRightSideLayout();
-          setProgramInfo(`Error: ${error}`);
+          setProgramInfo({ error: errorMessage });
           setIsProgramInfoVisible(true);
           toast.error(`Error: ${error}`, {
             id: 'provingToast'
@@ -570,8 +589,26 @@ export default function CodingEnvironment(): JSX.Element {
       </div>
 
       {!isTestExperimentVisible && (
-        <div className="h-4/6 rounded-xl border relative overflow-y-scroll border-secondary-4">
-          <InstructionTable />
+        <div className="p-12 h-full">
+          <div className="flex">
+            <h1 className="text-white text-xl mb-5 font-semibold">
+              Miden Virtual Machine Instruction Set Reference
+            </h1>
+            <div className="ml-auto pr-8">
+              <input
+                type="text"
+                name="search"
+                id="search"
+                value={searchQuery}
+                autoComplete="off"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="border-secondary-3 bg-secondary-4 text-white  sm:text-sm rounded-xl w-60 focus:ring-accent-2 focus:border-accent-2"
+                placeholder="Search for a keyword"
+              />
+            </div>
+          </div>
+
+          <InstructionTable searchQuery={searchQuery} />
         </div>
       )}
 
@@ -580,18 +617,52 @@ export default function CodingEnvironment(): JSX.Element {
           <div className="flex flex-col h-full w-full lg:w-1/2 mr-4 ${ isMobile ? px-3 }">
             <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
-                <DropDown onExampleValueChange={handleSelectChange} />
                 <button
-                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="flex items-center hover:bg-secondary-8 mr-3 text-accent-1 text-sm font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={runProgram}
+                  disabled={isProcessing}
+                >
+                  A
+                  <ChevronDownIcon className="h-3 w-3 stroke-2 stroke-accent-1 ml-1.5" />
+                </button>
+
+                <button
+                  className="flex items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={runProgram}
+                  disabled={isProcessing}
+                >
+                  <PlusIcon className="h-4 w-4 stroke-1 stroke-accent-1" />
+                </button>
+
+                <button
+                  className="flex items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={handleCopyClick}
+                  disabled={isProcessing}
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
+                </button>
+
+                <button
+                  className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={handleCopyClick}
+                  disabled={isProcessing}
+                >
+                  <DocumentDuplicateIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
+                </button>
+
+                <div className="w-px h-4 bg-secondary-4 ml-3 mr-3"></div>
+
+                <button
+                  className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
                   disabled={isProcessing}
                 >
                   Run
-                  <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
+                  <PlayIcon className="h-4 w-4 hover:bg-secondary-8 stroke-2 stroke-accent-1 ml-1.5" />
                 </button>
                 {!isMobile && (
                   <button
-                    className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    className="flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                     onClick={startDebug}
                     disabled={isProcessing}
                   >
@@ -599,7 +670,7 @@ export default function CodingEnvironment(): JSX.Element {
                   </button>
                 )}
                 <button
-                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="flex items-center hover:bg-secondary-8 ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={proveProgram}
                   disabled={isProcessing}
                 >
@@ -607,7 +678,7 @@ export default function CodingEnvironment(): JSX.Element {
                 </button>
                 {isMobile && (
                   <button
-                    className={`flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${
+                    className={`flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${
                       proof
                         ? 'text-white border-secondary-4'
                         : 'text-gray-500 border-gray-500'
@@ -618,9 +689,11 @@ export default function CodingEnvironment(): JSX.Element {
                     Verify
                   </button>
                 )}
+
+                <DropDown onExampleValueChange={handleSelectChange} />
               </div>
 
-              <div className="h-px bg-secondary-4 mb-4"></div>
+              <div className="h-px bg-secondary-4"></div>
               <MidenEditor
                 value={code}
                 showDebug={showDebug}
@@ -632,7 +705,7 @@ export default function CodingEnvironment(): JSX.Element {
 
             <div className="mt-5">
               <div
-                className={`flex w-full rounded-xl grow overflow-hidden border border-borderColor ${
+                className={`flex w-full rounded-xl grow overflow-hidden border border-secondary-4 ${
                   isCodeEditorVisible ? 'h-56' : 'h-fit'
                 }`}
               >
