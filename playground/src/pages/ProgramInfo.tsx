@@ -15,9 +15,9 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
   const { programInfo } = props;
 
   return (
-    <div className="flex w-full h-fit rounded-xl border overflow-y-scroll border-secondary-4">
+    <div className="flex flex-wrap w-full h-fit rounded-xl border overflow-y-scroll border-secondary-4">
       <div className="flex flex-col w-full">
-        <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
+        <div className="bg-secondary-main w-full z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
           <h1 className="pl-5 text-left text-base font-normal">Program Info</h1>
         </div>
 

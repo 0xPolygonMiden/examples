@@ -43,8 +43,8 @@ export default function DropDown({
     >
       {({ open }) => (
         <>
-          <div className="relative w-20 flex-grow sm:flex-grow-0 sm:w-44 mb-2 ml-auto sm:mb-0">
-            <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer w-full rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
+          <div className="relative flex-grow sm:flex-grow-0 ml-auto sm:mb-0">
+            <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer w-36 sm:w-44 rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
               <span className="block truncate max-w-xs text-xs sm:max-w-none capitalize">
                 {selected}
               </span>

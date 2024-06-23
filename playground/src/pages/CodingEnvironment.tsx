@@ -41,7 +41,11 @@ import OutputInfo from './OutputInfo';
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(false);
+  const TEST_EXPERIMENT_TAB = 'test_experiment_tab';
+  const INSTRUCTIONS_TAB = 'instructions_tab';
+  const HELP_TAB = 'help_tab';
+
+  const [selectedTab, setSelectedTab] = useState(TEST_EXPERIMENT_TAB);
 
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
@@ -337,15 +341,15 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const onTestAndExperimentClick = () => {
-    if (isTestExperimentVisible) return;
+    if (selectedTab === TEST_EXPERIMENT_TAB) return;
 
-    setIsTestExperimentVisible(true);
+    setSelectedTab(TEST_EXPERIMENT_TAB);
     setIsProgramInfoVisible(true);
     setIsStackOutputVisible(true);
   };
 
   const onInstructionClick = () => {
-    setIsTestExperimentVisible(false);
+    setSelectedTab(INSTRUCTIONS_TAB);
   };
 
   /**
@@ -557,15 +561,21 @@ export default function CodingEnvironment(): JSX.Element {
     setIsCodeEditorVisible(false);
   };
 
+  const onHelpClick = () => {
+    if (selectedTab === HELP_TAB) return;
+
+    setSelectedTab(HELP_TAB);
+  };
+
   return (
     <div className="bg-primary h-full w-full overflow-y-hidden">
       <Toaster />
-      <div className="bg-secondary-main w-full flex items-center py-6 px-16">
-        <button onClick={onTestAndExperimentClick} className="relative">
+      <div className="bg-secondary-main w-full flex px-4 py-4 sm:py-6 sm:px-16">
+        <button onClick={onTestAndExperimentClick}>
           <h1
             className={classNames(
               'flex text-sm items-center font-semibold cursor-pointer relative pb-1',
-              isTestExperimentVisible
+              selectedTab === TEST_EXPERIMENT_TAB
                 ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
                 : 'text-secondary-1 hover:text-white'
             )}
@@ -574,11 +584,11 @@ export default function CodingEnvironment(): JSX.Element {
           </h1>
         </button>
 
-        <button onClick={onInstructionClick} className="relative ml-8">
+        <button onClick={onInstructionClick} className="ml-8 hidden sm:block">
           <h1
             className={classNames(
-              'flex text-sm items-center font-semibold cursor-pointer relative pb-1',
-              !isTestExperimentVisible
+              'flex text-sm font-semibold cursor-pointer relative pb-1',
+              selectedTab === INSTRUCTIONS_TAB
                 ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
                 : 'text-secondary-1 hover:text-white'
             )}
@@ -586,9 +596,28 @@ export default function CodingEnvironment(): JSX.Element {
             INSTRUCTIONS
           </h1>
         </button>
+
+        <button onClick={onHelpClick} className="ml-8">
+          <h1
+            className={classNames(
+              'flex text-sm font-semibold cursor-pointer relative pb-1',
+              selectedTab === HELP_TAB
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
+                : 'text-secondary-1 hover:text-white'
+            )}
+          >
+            HELP
+          </h1>
+        </button>
       </div>
 
-      {!isTestExperimentVisible && (
+      {selectedTab === HELP_TAB && (
+        <div className="flex bg-secondary-3 lg:px-4 pt-4 w-full h-full overflow-scroll">
+          <ExplainerPage />
+        </div>
+      )}
+
+      {selectedTab === INSTRUCTIONS_TAB && (
         <div className="p-12 h-full">
           <div className="flex">
             <h1 className="text-white text-xl mb-5 font-semibold">
@@ -612,46 +641,42 @@ export default function CodingEnvironment(): JSX.Element {
         </div>
       )}
 
-      {isTestExperimentVisible && (
+      {selectedTab === TEST_EXPERIMENT_TAB && (
         <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
-          <div className="flex flex-col h-full w-full lg:w-1/2 mr-4 ${ isMobile ? px-3 }">
-            <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+          <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
+            <div className="flex flex-col sm:h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
                 <button
-                  className="flex items-center hover:bg-secondary-8 mr-3 text-accent-1 text-sm font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="items-center hidden sm:flex hover:bg-secondary-8 mr-3 text-accent-1 text-sm font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
                   disabled={isProcessing}
                 >
                   A
                   <ChevronDownIcon className="h-3 w-3 stroke-2 stroke-accent-1 ml-1.5" />
                 </button>
-
                 <button
-                  className="flex items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
                   disabled={isProcessing}
                 >
                   <PlusIcon className="h-4 w-4 stroke-1 stroke-accent-1" />
                 </button>
-
                 <button
-                  className="flex items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={handleCopyClick}
                   disabled={isProcessing}
                 >
                   <ArrowDownTrayIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
                 </button>
-
                 <button
-                  className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="sm:flex hidden items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={handleCopyClick}
                   disabled={isProcessing}
                 >
                   <DocumentDuplicateIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
                 </button>
 
-                <div className="w-px h-4 bg-secondary-4 ml-3 mr-3"></div>
-
+                <div className="w-px h-4 sm:flex hidden bg-secondary-4 ml-3 mr-3"></div>
                 <button
                   className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
@@ -670,27 +695,16 @@ export default function CodingEnvironment(): JSX.Element {
                   </button>
                 )}
                 <button
-                  className="flex items-center hover:bg-secondary-8 ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  className="flex items-center hover:bg-secondary-8 ml-3 mr-3 sm:mr-0 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={proveProgram}
                   disabled={isProcessing}
                 >
                   Prove
                 </button>
-                {isMobile && (
-                  <button
-                    className={`flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${
-                      proof
-                        ? 'text-white border-secondary-4'
-                        : 'text-gray-500 border-gray-500'
-                    }`}
-                    onClick={verifyProgram}
-                    disabled={isProcessing || !proof}
-                  >
-                    Verify
-                  </button>
-                )}
 
-                <DropDown onExampleValueChange={handleSelectChange} />
+                <div className="ml-auto">
+                  <DropDown onExampleValueChange={handleSelectChange} />
+                </div>
               </div>
 
               <div className="h-px bg-secondary-4"></div>
@@ -822,21 +836,21 @@ export default function CodingEnvironment(): JSX.Element {
             </div>
           </div>
 
-          <div className="flex flex-col w-full lg:w-1/2 gap-y-6 mt-4 lg:mt-0">
+          <div className="flex flex-col w-full lg:w-1/2 sm:gap-y-6 mt-4 lg:mt-0">
             {isStackOutputVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex mx-3 sm:px-0">
                 <OutputInfo output={stackOutputValue} />
               </div>
             )}
 
             {isProgramInfoVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <ProgramInfo programInfo={programInfo} />
               </div>
             )}
 
             {isProofInfoVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex">
                 <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
               </div>
             )}
