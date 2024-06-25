@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isMobile } from 'mobile-device-detect';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
@@ -37,6 +37,8 @@ import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 import ExplainerPage from './Explainer';
 import OutputInfo from './OutputInfo';
+
+const worker = new Worker(new URL('./proveWorker.js', import.meta.url));
 
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -411,80 +413,60 @@ export default function CodingEnvironment(): JSX.Element {
    * This proves the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
    */
-  const proveProgram = async () => {
+  const proveProgram = useCallback(() => {
     setIsProcessing(true);
     disableDebug();
     toast.loading('Proving ...', { id: 'provingToast' });
-    init()
-      .then(() => {
-        setProof(null);
-        const inputCheck = checkInputs(inputs);
 
-        if (!inputCheck.isValid) {
-          setOutput(inputCheck.errorMessage);
+    worker.onmessage = (e) => {
+      console.log('Worker message:', e.data); // Log the message for debugging
 
-          hideAllRightSideLayout();
-          setProgramInfo({ error: inputCheck.errorMessage });
-          setIsProgramInfoVisible(true);
-          toast.error('Proving failed', {
+      const { success, result, error } = e.data;
+
+      if (success) {
+        if (!result) {
+          console.error('Result is undefined:', e.data);
+          setOutput('Error: Result is undefined');
+          toast.error('Error: Result is undefined', {
             id: 'provingToast'
           });
+          setIsProcessing(false);
           return;
         }
-        try {
-          const start = Date.now();
-          const {
-            program_hash,
-            cycles,
-            stack_output,
-            trace_len,
-            overflow_addrs,
-            proof
-          }: Outputs = prove_program(code, inputs);
-          const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
-          setStackOutputValue(stack_output.toString());
 
-          setProgramInfo({
-            program_hash: program_hash,
-            cycles: cycles,
-            trace_len: trace_len
-          });
-          setOutput(`{
-            "stack_output" : [${stack_output.toString()}],
-            "overflow_addrs" : [${overflow}],
-            "trace_len" : ${trace_len}
-            }`);
+        const { programInfo, output, proof, stackOutput, duration } = result;
 
-          toast.success(`Proving successful in ${Date.now() - start} ms`, {
-            id: 'provingToast'
-          });
+        setStackOutputValue(stackOutput);
+        setProgramInfo(programInfo);
+        setOutput(output);
+        toast.success(`Proving successful in ${duration} ms`, {
+          id: 'provingToast'
+        });
 
-          // Store the proof if it exists
+        hideAllRightSideLayout();
 
-          hideAllRightSideLayout();
-
-          if (proof) {
-            setProof(proof);
-            setIsProofInfoVisible(true);
-            setIsStackOutputVisible(true);
-          }
-
-          setIsProgramInfoVisible(true);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-
-          setOutput(`Error: ${error}`);
-          hideAllRightSideLayout();
-          setProgramInfo({ error: errorMessage });
-          setIsProgramInfoVisible(true);
-          toast.error(`Error: ${error}`, {
-            id: 'provingToast'
-          });
+        if (proof) {
+          setProof(proof);
+          setIsProofInfoVisible(true);
+          setIsStackOutputVisible(true);
         }
-      })
-      .finally(() => setIsProcessing(false));
-  };
+
+        setIsProgramInfoVisible(true);
+      } else {
+        setOutput(`Error: ${error}`);
+        hideAllRightSideLayout();
+        setProgramInfo({ error });
+        setIsProgramInfoVisible(true);
+        toast.error(`Error: ${error}`, {
+          id: 'provingToast'
+        });
+      }
+
+      setIsProcessing(false);
+    };
+
+    worker.postMessage({ code, inputs });
+  }, []);
 
   /**
    * It starts a debugging session.
