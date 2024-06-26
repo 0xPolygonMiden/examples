@@ -626,7 +626,7 @@ export default function CodingEnvironment(): JSX.Element {
       {selectedTab === TEST_EXPERIMENT_TAB && (
         <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
           <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
-            <div className="flex flex-col sm:h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+            <div className="flex flex-col sm:h-3/6 rounded-lg border bg-primary border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
                 <button
                   className="items-center hidden sm:flex hover:bg-secondary-8 mr-3 text-accent-1 text-sm font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
