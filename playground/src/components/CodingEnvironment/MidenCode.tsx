@@ -4,7 +4,6 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { createTheme } from '@uiw/codemirror-themes';
-import { tags as t } from '@lezer/highlight';
 import {
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
@@ -12,6 +11,10 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/20/solid';
 import { DebugCommand } from 'miden-wasm';
+import { tags as t } from '@lezer/highlight';
+import { useCallback } from 'react';
+import { StreamLanguage } from '@codemirror/language';
+import { c } from '@codemirror/legacy-modes/mode/clike'; // Import the gas mode
 
 type MidenCodeProps = {
   value: string;
@@ -24,17 +27,32 @@ type MidenCodeProps = {
 const codeTheme = createTheme({
   theme: 'dark',
   settings: {
-    background: '#19181F',
-    foreground: '#ffffff',
-    caret: '#ffffff',
-    selection: '#036dd626',
-    selectionMatch: '#036dd626',
-    lineHighlight: '#19181F',
-    gutterBackground: '#19181F',
-    gutterForeground: '#ffffff'
+    background: '#141318',
+    foreground: '#f8f8f2',
+    caret: '#f8f8f0',
+    selection: '#44475a',
+    selectionMatch: '#44475a',
+    lineHighlight: '#24202F',
+    gutterBackground: '#141318',
+    gutterForeground: '#569CD6'
   },
-  styles: [{ tag: t.comment, color: '#787b8099' }]
+  styles: [
+    { tag: t.comment, color: '#6272a4' }, // Comments (light blue)
+    { tag: t.keyword, color: '#569CD6' }, // Keywords (blue)
+    { tag: t.string, color: '#f1fa8c' }, // Strings (yellow)
+    { tag: t.number, color: '#CB694A' }, // Numbers (orange)
+    { tag: t.operator, color: '#ffb86c' }, // Operators (orange)
+    { tag: t.variableName, color: '#569CD6' }, // Variable names (green)
+    { tag: t.className, color: '#ff79c6' }, // Class names (pink)
+    { tag: t.definition(t.typeName), color: '#569CD6' }, // Type names (green)
+    { tag: t.typeName, color: '#8be9fd' }, // Type names (cyan)
+    { tag: t.angleBracket, color: '#f8f8f2' }, // Angle brackets (white)
+    { tag: t.tagName, color: '#ff79c6' }, // Tag names (pink)
+    { tag: t.attributeName, color: '#ffb86c' } // Attribute names (orange)
+  ]
 });
+
+const extensions = [StreamLanguage.define(c)];
 
 const MidenCode = (props: MidenCodeProps): JSX.Element => {
   const saveFile = () => {
@@ -53,53 +71,15 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
     URL.revokeObjectURL(fileDownloadUrl);
   };
 
+  const onChange = useCallback((value: any, viewUpdate: any) => {
+    console.log('value:', value);
+  }, []);
+
   return (
-    <div className="flex w-full overflow-auto">
-      <CodeMirror
-        value={props.value}
-        theme={codeTheme}
-        onChange={props.onChange}
-        basicSetup={{
-          foldGutter: true,
-          highlightActiveLineGutter: true,
-          dropCursor: true,
-          allowMultipleSelections: false,
-          indentOnInput: false,
-          lineNumbers: true,
-          syntaxHighlighting: true,
-          bracketMatching: true,
-          autocompletion: true,
-          highlightActiveLine: true
-        }}
-        className="grow overflow-auto pr-3"
-      />
-
-      <div className="flex-col mr-2">
-        {!props.showDebug && (
-          <div className="flex flex-col gap-y-3">
-            <DocumentDuplicateIcon
-              className="h-6 w-6 stroke-green hover:cursor-pointer"
-              aria-hidden="true"
-              onClick={props.handleCopyClick}
-            />
-
-            <DocumentTextIcon
-              className="h-6 w-6 stroke-green hover:cursor-pointer"
-              aria-hidden="true"
-              onClick={saveFile}
-            />
-          </div>
-        )}
-
+    <div className="flex flex-col w-full overflow-auto">
+      <div className="flex w-full py-1.5 px-2">
         {props.showDebug ? (
-          <div className="flex flex-col h-full justify-center items-center gap-y-3">
-            {/* <BsChevronBarLeft
-              className=" h-6 w-6 fill-white cursor-pointer"
-              aria-hidden="true"
-              title="Go to start"
-              onClick={() => props.executeDebug(DebugCommand.RewindAll)}
-            /> */}
-
+          <div className="flex items-center ml-auto gap-x-2">
             <ChevronDoubleLeftIcon
               className="h-6 w-6 fill-green cursor-pointer"
               aria-hidden="true"
@@ -129,16 +109,29 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
               title="100 cycles"
               onClick={() => props.executeDebug(DebugCommand.Play, BigInt(100))}
             />
-
-            {/* <BsChevronBarRight
-              className="h-6 w-6 fill-white cursor-pointer"
-              aria-hidden="true"
-              title="Go to end"
-              onClick={() => props.executeDebug(DebugCommand.PlayAll)}
-            /> */}
           </div>
         ) : null}
       </div>
+
+      <CodeMirror
+        value={props.value}
+        theme={codeTheme}
+        extensions={extensions}
+        onChange={onChange}
+        basicSetup={{
+          foldGutter: true,
+          highlightActiveLineGutter: true,
+          dropCursor: true,
+          allowMultipleSelections: false,
+          indentOnInput: true,
+          lineNumbers: true,
+          syntaxHighlighting: true,
+          bracketMatching: true,
+          autocompletion: true,
+          highlightActiveLine: true
+        }}
+        className="grow overflow-auto pr-3"
+      />
     </div>
   );
 };
