@@ -37,6 +37,7 @@ import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 import ExplainerPage from './Explainer';
 import OutputInfo from './OutputInfo';
+import SizeDropDown from '../components/CodingEnvironment/SizeDropDown';
 
 const worker = new Worker(new URL('./proveWorker.js', import.meta.url));
 
@@ -67,6 +68,8 @@ export default function CodingEnvironment(): JSX.Element {
    * This sets the output to the default values.
    */
   const [output, setOutput] = React.useState(emptyOutput);
+
+  const [codeSize, setCodeSize] = React.useState(12);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -219,6 +222,12 @@ export default function CodingEnvironment(): JSX.Element {
     if (isCodeEditorVisible) {
       setCodeUploadContent(await example_code[0]);
     }
+  };
+
+  const handleSizeChange = async (newSize: number) => {
+    setCodeSize(newSize);
+
+    console.log('new size is ', newSize);
   };
 
   const hideAllRightSideLayout = () => {
@@ -628,14 +637,8 @@ export default function CodingEnvironment(): JSX.Element {
           <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
             <div className="flex flex-col sm:h-3/6 rounded-lg border bg-primary border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
-                <button
-                  className="items-center hidden sm:flex hover:bg-secondary-8 mr-3 text-accent-1 text-sm font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={runProgram}
-                  disabled={isProcessing}
-                >
-                  A
-                  <ChevronDownIcon className="h-3 w-3 stroke-2 stroke-accent-1 ml-1.5" />
-                </button>
+                <SizeDropDown onSizeValueChange={handleSizeChange} />
+
                 <button
                   className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
@@ -692,6 +695,7 @@ export default function CodingEnvironment(): JSX.Element {
               <div className="h-px bg-secondary-4"></div>
               <MidenEditor
                 value={code}
+                codeSize={codeSize}
                 showDebug={showDebug}
                 onChange={setCode}
                 handleCopyClick={handleCopyClick}

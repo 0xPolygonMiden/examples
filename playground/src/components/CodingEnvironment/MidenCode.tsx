@@ -18,6 +18,7 @@ import { c } from '@codemirror/legacy-modes/mode/clike'; // Import the gas mode
 
 type MidenCodeProps = {
   value: string;
+  codeSize: number;
   showDebug: boolean;
   onChange: (value: string) => void;
   handleCopyClick: () => void;
@@ -130,7 +131,8 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
           autocompletion: true,
           highlightActiveLine: true
         }}
-        className="grow overflow-auto pr-3"
+        style={{ fontSize: `${props.codeSize}px` }}
+        className={`grow overflow-auto pr-3`}
       />
     </div>
   );
