@@ -1,9 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
 import { isMobile } from 'mobile-device-detect';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
 import MidenEditor from '../components/CodingEnvironment/MidenCode';
 import InstructionTable from './InstructionTable';
+import Joyride, {
+  CallBackProps,
+  STATUS,
+  Step,
+  TooltipRenderProps
+} from 'react-joyride';
 
 import init, {
   DebugExecutor,
@@ -30,7 +42,12 @@ import {
   DocumentDuplicateIcon,
   PlayIcon
 } from '@heroicons/react/24/outline';
-import { emptyOutput, exampleCode, exampleInput } from '../utils/constants';
+import {
+  LOCAL_STORAGE,
+  emptyOutput,
+  exampleCode,
+  exampleInput
+} from '../utils/constants';
 import ProgramInfo, { ProgramInfoInterface } from './ProgramInfo';
 import ProofInfo from './ProofInfo';
 import DebugInfo from './DebugInfo';
@@ -38,6 +55,7 @@ import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 import ExplainerPage from './Explainer';
 import OutputInfo from './OutputInfo';
 import SizeDropDown from '../components/CodingEnvironment/SizeDropDown';
+import OnboardingDialog from '../components/OnboardingDialog';
 
 const worker = new Worker(new URL('./proveWorker.js', import.meta.url));
 
@@ -57,12 +75,17 @@ export default function CodingEnvironment(): JSX.Element {
   /**
    * This sets the inputs to the default values.
    */
-  const [inputs, setInputs] = React.useState(exampleInput);
+  const [inputs, setInputs] = React.useState(
+    localStorage.getItem(LOCAL_STORAGE.INPUT_STRING) ?? exampleInput
+  );
+  const isInitialRender = useRef(true);
 
   /**
    * This sets the code to the default values.
    */
-  const [code, setCode] = React.useState(exampleCode);
+  const [code, setCode] = React.useState('');
+
+  const [run, setRun] = useState(false);
 
   /**
    * This sets the output to the default values.
@@ -77,6 +100,8 @@ export default function CodingEnvironment(): JSX.Element {
     {}
   );
 
+  const [stepIndex, setStepIndex] = React.useState(0);
+
   /**
    * This sets the proof to the default proof.
    */
@@ -87,16 +112,24 @@ export default function CodingEnvironment(): JSX.Element {
    */
   const [showDebug, setShowDebug] = useState(false);
 
-  const [operandValue, setOperandValue] = useState('');
+  const [operandValue, setOperandValue] = useState(
+    localStorage.getItem(LOCAL_STORAGE.OPERAND_VALUE) ?? ''
+  );
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [disableForm, setDisableForm] = useState(false);
 
   const [stackOutputValue, setStackOutputValue] = useState('');
   const [isStackOutputVisible, setIsStackOutputVisible] = useState(true);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
-  const [codeUploadContent, setCodeUploadContent] = useState('');
+  const [codeUploadContent, setCodeUploadContent] = useState(
+    localStorage.getItem(LOCAL_STORAGE.CODE_UPLOAD_CONTENT) ?? ''
+  );
 
-  const [adviceValue, setAdviceValue] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [adviceValue, setAdviceValue] = useState(
+    localStorage.getItem(LOCAL_STORAGE.ADVICE_VALUE) ?? ''
+  );
   const [isAdviceFocused, setIsAdviceFocused] = useState(false);
   const [isAdviceStackLayoutVisible, setIsAdviceStackLayoutVisible] =
     useState(false);
@@ -120,6 +153,30 @@ export default function CodingEnvironment(): JSX.Element {
       setIsAdviceFocused(false);
     }
   };
+
+  useLayoutEffect(() => {
+    const savedCode = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE);
+    const savedCodeSize = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE_SIZE);
+    const jsonEditorVisible =
+      localStorage.getItem(LOCAL_STORAGE.JSON_EDITOR_VISIBLE) ?? 'false';
+    const onboardingShown =
+      localStorage.getItem(LOCAL_STORAGE.ONBOARDING_SHOWN) ?? 'false';
+
+    if (jsonEditorVisible !== null) {
+      setIsCodeEditorVisible(JSON.parse(jsonEditorVisible));
+    }
+
+    if (onboardingShown) {
+      setIsDialogOpen(!JSON.parse(onboardingShown));
+    }
+
+    if (savedCode) {
+      setCode(savedCode);
+    }
+    if (savedCodeSize) {
+      setCodeSize(Number(savedCodeSize));
+    }
+  }, []);
 
   const handleCopyClick = () => {
     navigator.clipboard
@@ -197,6 +254,8 @@ export default function CodingEnvironment(): JSX.Element {
     // reset the output
     setOutput(emptyOutput);
 
+    localStorage.setItem(LOCAL_STORAGE.SELECTED_EXAMPLE_ITEM, exampleChange);
+
     const value = exampleChange;
 
     // set the current example to the selected one
@@ -227,7 +286,7 @@ export default function CodingEnvironment(): JSX.Element {
   const handleSizeChange = async (newSize: number) => {
     setCodeSize(newSize);
 
-    console.log('new size is ', newSize);
+    localStorage.setItem(LOCAL_STORAGE.MIDEN_CODE_SIZE, newSize.toString());
   };
 
   const hideAllRightSideLayout = () => {
@@ -240,7 +299,7 @@ export default function CodingEnvironment(): JSX.Element {
   useEffect(() => {
     let inputString;
 
-    console.log('advice value changed', adviceValue);
+    console.log('advice value changed', adviceValue, operandValue);
 
     if (isCodeEditorVisible) {
       setInputs(codeUploadContent);
@@ -282,11 +341,28 @@ export default function CodingEnvironment(): JSX.Element {
     }
 
     setInputs(inputString);
+
+    localStorage.setItem(LOCAL_STORAGE.CODE_UPLOAD_CONTENT, inputString);
+    localStorage.setItem(LOCAL_STORAGE.INPUT_STRING, inputString);
+    localStorage.setItem(LOCAL_STORAGE.ADVICE_VALUE, adviceValue);
+    localStorage.setItem(LOCAL_STORAGE.OPERAND_VALUE, operandValue);
   }, [operandValue, adviceValue]);
 
   useEffect(() => {
     setInputs(codeUploadContent);
+    if (codeUploadContent) {
+      localStorage.setItem(
+        LOCAL_STORAGE.CODE_UPLOAD_CONTENT,
+        codeUploadContent
+      );
+    }
   }, [codeUploadContent]);
+
+  useEffect(() => {
+    if (code) {
+      localStorage.setItem(LOCAL_STORAGE.MIDEN_CODE, code);
+    }
+  }, [code]);
 
   useEffect(() => {
     if (!inputs) {
@@ -339,6 +415,17 @@ export default function CodingEnvironment(): JSX.Element {
     if (regex.test(newValue)) {
       setOperandValue(newValue);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    localStorage.setItem(LOCAL_STORAGE.ONBOARDING_SHOWN, 'true');
+  };
+
+  const handleTakeTour = () => {
+    setRun(true);
+    setIsDialogOpen(false);
+    localStorage.setItem(LOCAL_STORAGE.ONBOARDING_SHOWN, 'true');
   };
 
   const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -545,10 +632,18 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const onJSONEditorClick = () => {
+    localStorage.setItem(
+      LOCAL_STORAGE.JSON_EDITOR_VISIBLE,
+      JSON.stringify(true)
+    );
     setIsCodeEditorVisible(true);
   };
 
   const onFormEditorClick = () => {
+    localStorage.setItem(
+      LOCAL_STORAGE.JSON_EDITOR_VISIBLE,
+      JSON.stringify(false)
+    );
     setIsCodeEditorVisible(false);
   };
 
@@ -558,8 +653,164 @@ export default function CodingEnvironment(): JSX.Element {
     setSelectedTab(HELP_TAB);
   };
 
+  interface CustomTooltipProps {
+    title: string;
+    content: string;
+    step: number;
+    totalSteps: number;
+    skipProps: TooltipRenderProps['primaryProps'];
+    primaryProps: TooltipRenderProps['primaryProps'];
+  }
+
+  const customStyles = {
+    options: {
+      arrowColor: '#333',
+      backgroundColor: '#201F28',
+      overlayColor: '#201F28',
+      primaryColor: '#201F28',
+      textColor: '#FFF',
+      width: 400,
+      zIndex: 1000
+    },
+    tooltipContainer: {
+      backgroundColor: '#1A1A1A',
+      borderRadius: '0.5rem',
+      color: '#FFF'
+    },
+    tooltipContent: {
+      fontSize: '0.875rem',
+      color: '#FFF'
+    },
+    buttonNext: {
+      backgroundColor: '#0C0C0C',
+      color: '#FFF',
+      padding: '0.5rem 1rem',
+      borderRadius: '8px'
+    },
+    buttonBack: {
+      color: '#FFF',
+      padding: '0.5rem 1rem',
+      borderRadius: '0.375rem'
+    },
+    buttonSkip: {
+      color: '#FFF'
+    },
+    spotlight: {
+      borderRadius: '0.5rem'
+    }
+  };
+
+  const CustomTooltip: React.FC<
+    CustomTooltipProps & { step: number; totalSteps: number }
+  > = ({ title, content, step, totalSteps, skipProps, primaryProps }) => {
+    // Function to handle the skip button click
+    const handleSkip = (event: React.MouseEvent<HTMLButtonElement>) => {
+      // Add your custom logic here
+      console.log('Skip button clicked');
+
+      // Call the provided onSkip function
+      skipProps.onClick(event);
+    };
+
+    return (
+      <div className="bg-[#201F28] p-4 rounded-lg">
+        <div className="mb-2">
+          <h3 className="text-base text-white font-bold">{title}</h3>
+          <p className="text-sm text-secondary-1">{content}</p>
+          <p className="text-sm text-[#9A6FFF] mt-2">{`${step}/${totalSteps} Steps`}</p>
+        </div>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={handleSkip}
+            className="text-sm text-[#B2B2B2] hover:underline"
+          >
+            Skip
+          </button>
+          <button
+            onClick={primaryProps.onClick}
+            className="bg-[#0C0C0C] text-white text-sm px-4 py-2 rounded-lg"
+          >
+            Next <span className="ml-1 text-accent-1">→</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  interface CustomStep extends Step {
+    stepNumber: number;
+    totalSteps: number;
+  }
+
+  const steps: CustomStep[] = [
+    {
+      target: '.miden-code-layout',
+      content: 'Here you can write Miden Assembly programs',
+      title: 'Write your code',
+      stepNumber: 1,
+      totalSteps: 4,
+      placement: 'right',
+      disableBeacon: true
+    },
+    {
+      target: '.input-code-layout',
+      title: 'Inject your inputs',
+      content: 'You can inject public and private inputs',
+      stepNumber: 2,
+      totalSteps: 4,
+      disableBeacon: true
+    },
+    {
+      target: '.example-drop-down',
+      title: 'Explore the examples',
+      content: 'Look at the examples to get a better understanding',
+      stepNumber: 3,
+      totalSteps: 4,
+      placement: 'bottom'
+    },
+    {
+      target: '.run-layout',
+      title: 'Execute your programs',
+      content: 'You can run, prove or even step through the program execution',
+      stepNumber: 4,
+      totalSteps: 4,
+      placement: 'bottom'
+    }
+  ];
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { action, index, type } = data;
+
+    if (type === 'step:after' && action === 'next') {
+      setStepIndex(index + 1);
+    }
+  };
+
   return (
     <div className="bg-primary h-full w-full overflow-y-hidden">
+      <OnboardingDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        onTakeTour={handleTakeTour}
+      />
+      <Joyride
+        steps={steps}
+        stepIndex={stepIndex}
+        continuous={true}
+        styles={customStyles}
+        run={run}
+        callback={handleJoyrideCallback}
+        tooltipComponent={({ step, backProps, primaryProps, skipProps }) => (
+          <CustomTooltip
+            title={step.title as string}
+            content={step.content as string}
+            step={(step as CustomStep).stepNumber}
+            totalSteps={(step as CustomStep).totalSteps}
+            skipProps={skipProps}
+            primaryProps={primaryProps}
+          />
+        )}
+      />
       <Toaster />
       <div className="bg-secondary-main w-full flex px-4 py-4 sm:py-6 sm:px-16">
         <button onClick={onTestAndExperimentClick}>
@@ -662,45 +913,49 @@ export default function CodingEnvironment(): JSX.Element {
                 </button>
 
                 <div className="w-px h-4 sm:flex hidden bg-secondary-4 ml-3 mr-3"></div>
-                <button
-                  className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={runProgram}
-                  disabled={isProcessing}
-                >
-                  Run
-                  <PlayIcon className="h-4 w-4 hover:bg-secondary-8 stroke-2 stroke-accent-1 ml-1.5" />
-                </button>
-                {!isMobile && (
+                <div className="flex run-layout">
                   <button
-                    className="flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                    onClick={startDebug}
+                    className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    onClick={runProgram}
                     disabled={isProcessing}
                   >
-                    Debug
+                    Run
+                    <PlayIcon className="h-4 w-4 hover:bg-secondary-8 stroke-2 stroke-accent-1 ml-1.5" />
                   </button>
-                )}
-                <button
-                  className="flex items-center hover:bg-secondary-8 ml-3 mr-3 sm:mr-0 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={proveProgram}
-                  disabled={isProcessing}
-                >
-                  Prove
-                </button>
+                  {!isMobile && (
+                    <button
+                      className="flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                      onClick={startDebug}
+                      disabled={isProcessing}
+                    >
+                      Debug
+                    </button>
+                  )}
+                  <button
+                    className="flex items-center hover:bg-secondary-8 ml-3 mr-3 sm:mr-0 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    onClick={proveProgram}
+                    disabled={isProcessing}
+                  >
+                    Prove
+                  </button>
+                </div>
 
-                <div className="ml-auto">
+                <div className="ml-auto example-drop-down">
                   <DropDown onExampleValueChange={handleSelectChange} />
                 </div>
               </div>
 
               <div className="h-px bg-secondary-4"></div>
-              <MidenEditor
-                value={code}
-                codeSize={codeSize}
-                showDebug={showDebug}
-                onChange={setCode}
-                handleCopyClick={handleCopyClick}
-                executeDebug={executeDebug}
-              />
+              <div className="miden-code-layout h-full">
+                <MidenEditor
+                  value={code}
+                  codeSize={codeSize}
+                  showDebug={showDebug}
+                  onChange={setCode}
+                  handleCopyClick={handleCopyClick}
+                  executeDebug={executeDebug}
+                />
+              </div>
             </div>
 
             <div className="mt-5">
@@ -748,7 +1003,7 @@ export default function CodingEnvironment(): JSX.Element {
 
                   <div className="h-px bg-secondary-4"></div>
 
-                  <div className="flex w-full overflow-auto ">
+                  <div className="flex w-full overflow-auto input-code-layout">
                     {!isCodeEditorVisible && (
                       <div className="flex flex-col w-full pt-4">
                         <div className="flex justify-between w-full items-center border-none">

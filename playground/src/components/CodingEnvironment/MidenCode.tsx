@@ -73,7 +73,7 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
   };
 
   const onChange = useCallback((value: any, viewUpdate: any) => {
-    console.log('value:', value);
+    props.onChange(value);
   }, []);
 
   return (
