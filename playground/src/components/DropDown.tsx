@@ -1,6 +1,7 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
+import { LOCAL_STORAGE } from '../utils/constants';
 
 const examples = [
   'addition',
@@ -31,7 +32,15 @@ type DropDownProps = {
 export default function DropDown({
   onExampleValueChange
 }: DropDownProps): JSX.Element {
-  const [selected, setSelected] = useState(examples[0]);
+  const [selected, setSelected] = useState(
+    localStorage.getItem(LOCAL_STORAGE.SELECTED_EXAMPLE_ITEM) ?? examples[0]
+  );
+
+  useEffect(() => {
+    if (!localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE)) {
+      onExampleValueChange?.(selected);
+    }
+  }, []);
 
   return (
     <Listbox
