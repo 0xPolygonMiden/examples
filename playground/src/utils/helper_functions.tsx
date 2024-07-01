@@ -252,3 +252,11 @@ export function formatMemory(memory: BigUint64Array): string[] {
   }
   return output;
 }
+
+export function measureSizeInKB(data: Uint8Array): number {
+  const bytes = data.byteLength;
+
+  const kilobytes = Math.floor(bytes / 1024);
+
+  return kilobytes;
+}

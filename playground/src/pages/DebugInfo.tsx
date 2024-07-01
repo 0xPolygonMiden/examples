@@ -10,7 +10,7 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
   return (
     <div className="flex w-full h-fit rounded-xl overflow-hidden border border-secondary-4">
       <div className="flex flex-col w-full">
-        <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-white items-center">
+        <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
           <h1 className="pl-5 text-left text-base font-semibold">
             Program Info
           </h1>
@@ -76,16 +76,22 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
               <h1 className="pl-4 text-left text-base font-semibold">Stack</h1>
 
               <div className="grid grid-cols-8 gap-x-1 ml-4 w-full gap-y-4 mr-4">
-                {props.debugOutput.stack && Array.from(props.debugOutput.stack).map((item, index) => (
-                  <div key={index} className="relative flex justify-center items-baseline">
-                    <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
-                      <span className="text-secondary-5">{item.toString()}</span>
+                {props.debugOutput.stack &&
+                  Array.from(props.debugOutput.stack).map((item, index) => (
+                    <div
+                      key={index}
+                      className="relative flex justify-center items-baseline"
+                    >
+                      <div className="bg-transparent w-full pt-4 pl-12 border-none flex items-center">
+                        <span className="text-secondary-5">
+                          {item.toString()}
+                        </span>
+                      </div>
+                      <label className="absolute text-[8px] font-bold transition-all top-0 text-green">
+                        {index}
+                      </label>
                     </div>
-                    <label className="absolute text-[8px] font-bold transition-all top-0 text-green">
-                      {index}
-                    </label>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>

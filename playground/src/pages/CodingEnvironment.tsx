@@ -1,9 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react';
 import { isMobile } from 'mobile-device-detect';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
-import MidenEditor from '../components/CodingEnvironment/MidenCode';
+import MidenEditor, {
+  MidenCodeHandles
+} from '../components/CodingEnvironment/MidenCode';
 import InstructionTable from './InstructionTable';
+import Joyride, {
+  CallBackProps,
+  STATUS,
+  Step,
+  TooltipRenderProps
+} from 'react-joyride';
 
 import init, {
   DebugExecutor,
@@ -23,41 +37,74 @@ import {
   formatMemory,
   formatBeautifyNumbersArray
 } from '../utils/helper_functions';
-import { PlayIcon, PlusIcon } from '@heroicons/react/24/solid';
-import { emptyOutput, exampleCode, exampleInput } from '../utils/constants';
-import ProgramInfo from './ProgramInfo';
+import { PlusIcon } from '@heroicons/react/24/solid';
+import {
+  ArrowDownTrayIcon,
+  ChevronDownIcon,
+  DocumentDuplicateIcon,
+  PlayIcon
+} from '@heroicons/react/24/outline';
+import {
+  LOCAL_STORAGE,
+  emptyOutput,
+  exampleCode,
+  exampleInput
+} from '../utils/constants';
+import ProgramInfo, { ProgramInfoInterface } from './ProgramInfo';
 import ProofInfo from './ProofInfo';
 import DebugInfo from './DebugInfo';
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
 import ExplainerPage from './Explainer';
 import OutputInfo from './OutputInfo';
+import SizeDropDown from '../components/CodingEnvironment/SizeDropDown';
+import OnboardingDialog from '../components/OnboardingDialog';
+
+const worker = new Worker(new URL('./proveWorker.js', import.meta.url));
 
 export default function CodingEnvironment(): JSX.Element {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const [isTestExperimentVisible, setIsTestExperimentVisible] = useState(true);
-  const [isInstructionVisible, setIsInstructionVisible] = useState(false);
+  const TEST_EXPERIMENT_TAB = 'test_experiment_tab';
+  const INSTRUCTIONS_TAB = 'instructions_tab';
+  const HELP_TAB = 'help_tab';
+
+  const [selectedTab, setSelectedTab] = useState(TEST_EXPERIMENT_TAB);
 
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
 
+  const midenCodeRef = useRef<MidenCodeHandles>(null);
+
   /**
    * This sets the inputs to the default values.
    */
-  const [inputs, setInputs] = React.useState(exampleInput);
+  const [inputs, setInputs] = React.useState(
+    localStorage.getItem(LOCAL_STORAGE.INPUT_STRING) ?? exampleInput
+  );
+  const isInitialRender = useRef(true);
 
   /**
    * This sets the code to the default values.
    */
-  const [code, setCode] = React.useState(exampleCode);
+  const [code, setCode] = React.useState('');
+
+  const [run, setRun] = useState(false);
 
   /**
    * This sets the output to the default values.
    */
   const [output, setOutput] = React.useState(emptyOutput);
 
-  const [programInfo, setProgramInfo] = React.useState(emptyOutput);
+  const [codeSize, setCodeSize] = React.useState(12);
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [programInfo, setProgramInfo] = React.useState<ProgramInfoInterface>(
+    {}
+  );
+
+  const [stepIndex, setStepIndex] = React.useState(0);
 
   /**
    * This sets the proof to the default proof.
@@ -68,18 +115,25 @@ export default function CodingEnvironment(): JSX.Element {
    * Determines when to show the debug menu
    */
   const [showDebug, setShowDebug] = useState(false);
-  const [isHelpVisible, setIsHelpVisible] = useState(false);
 
-  const [operandValue, setOperandValue] = useState('');
+  const [operandValue, setOperandValue] = useState(
+    localStorage.getItem(LOCAL_STORAGE.OPERAND_VALUE) ?? ''
+  );
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [disableForm, setDisableForm] = useState(false);
 
   const [stackOutputValue, setStackOutputValue] = useState('');
   const [isStackOutputVisible, setIsStackOutputVisible] = useState(true);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
-  const [codeUploadContent, setCodeUploadContent] = useState('');
+  const [codeUploadContent, setCodeUploadContent] = useState(
+    localStorage.getItem(LOCAL_STORAGE.CODE_UPLOAD_CONTENT) ?? ''
+  );
 
-  const [adviceValue, setAdviceValue] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [adviceValue, setAdviceValue] = useState(
+    localStorage.getItem(LOCAL_STORAGE.ADVICE_VALUE) ?? ''
+  );
   const [isAdviceFocused, setIsAdviceFocused] = useState(false);
   const [isAdviceStackLayoutVisible, setIsAdviceStackLayoutVisible] =
     useState(false);
@@ -103,6 +157,37 @@ export default function CodingEnvironment(): JSX.Element {
       setIsAdviceFocused(false);
     }
   };
+
+  const handleDownloadCode = () => {
+    console.log('asdfasdfadsf');
+    if (midenCodeRef.current) {
+      midenCodeRef.current.downloadCode();
+    }
+  };
+
+  useLayoutEffect(() => {
+    const savedCode = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE);
+    const savedCodeSize = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE_SIZE);
+    const jsonEditorVisible =
+      localStorage.getItem(LOCAL_STORAGE.JSON_EDITOR_VISIBLE) ?? 'false';
+    const onboardingShown =
+      localStorage.getItem(LOCAL_STORAGE.ONBOARDING_SHOWN) ?? 'false';
+
+    if (jsonEditorVisible !== null) {
+      setIsCodeEditorVisible(JSON.parse(jsonEditorVisible));
+    }
+
+    if (onboardingShown) {
+      setIsDialogOpen(!JSON.parse(onboardingShown));
+    }
+
+    if (savedCode) {
+      setCode(savedCode);
+    }
+    if (savedCodeSize) {
+      setCodeSize(Number(savedCodeSize));
+    }
+  }, []);
 
   const handleCopyClick = () => {
     navigator.clipboard
@@ -139,10 +224,13 @@ export default function CodingEnvironment(): JSX.Element {
         throw new Error('debugExecutor is undefined');
       }
       // If the command is rewind and the output is 'Debugging session started', do nothing
-      // There is a bug that lets the DebugExecutor freeze when the rewind command 
+      // There is a bug that lets the DebugExecutor freeze when the rewind command
       // is called at start
-      if (output == 'Debugging session started' && command == DebugCommand.Rewind) {
-        return
+      if (
+        output == 'Debugging session started' &&
+        command == DebugCommand.Rewind
+      ) {
+        return;
       }
       if (typeof params !== 'undefined') {
         const debugOutput: DebugOutput = debugExecutor.execute(command, params);
@@ -177,6 +265,8 @@ export default function CodingEnvironment(): JSX.Element {
     // reset the output
     setOutput(emptyOutput);
 
+    localStorage.setItem(LOCAL_STORAGE.SELECTED_EXAMPLE_ITEM, exampleChange);
+
     const value = exampleChange;
 
     // set the current example to the selected one
@@ -187,7 +277,7 @@ export default function CodingEnvironment(): JSX.Element {
       return;
     }
 
-    // this is hack and we need to change it. 
+    // this is hack and we need to change it.
     if (value === 'advice_provider') {
       setDisableForm(true);
       setIsCodeEditorVisible(true);
@@ -204,17 +294,23 @@ export default function CodingEnvironment(): JSX.Element {
     }
   };
 
+  const handleSizeChange = async (newSize: number) => {
+    setCodeSize(newSize);
+
+    localStorage.setItem(LOCAL_STORAGE.MIDEN_CODE_SIZE, newSize.toString());
+  };
+
   const hideAllRightSideLayout = () => {
-    setIsInstructionVisible(false);
     setIsProgramInfoVisible(false);
     setShowDebug(false);
     setIsProofInfoVisible(false);
     setIsStackOutputVisible(false);
-    setIsTestExperimentVisible(false);
   };
 
   useEffect(() => {
     let inputString;
+
+    console.log('advice value changed', adviceValue, operandValue);
 
     if (isCodeEditorVisible) {
       setInputs(codeUploadContent);
@@ -256,11 +352,28 @@ export default function CodingEnvironment(): JSX.Element {
     }
 
     setInputs(inputString);
+
+    localStorage.setItem(LOCAL_STORAGE.CODE_UPLOAD_CONTENT, inputString);
+    localStorage.setItem(LOCAL_STORAGE.INPUT_STRING, inputString);
+    localStorage.setItem(LOCAL_STORAGE.ADVICE_VALUE, adviceValue);
+    localStorage.setItem(LOCAL_STORAGE.OPERAND_VALUE, operandValue);
   }, [operandValue, adviceValue]);
 
   useEffect(() => {
     setInputs(codeUploadContent);
+    if (codeUploadContent) {
+      localStorage.setItem(
+        LOCAL_STORAGE.CODE_UPLOAD_CONTENT,
+        codeUploadContent
+      );
+    }
   }, [codeUploadContent]);
+
+  useEffect(() => {
+    if (code) {
+      localStorage.setItem(LOCAL_STORAGE.MIDEN_CODE, code);
+    }
+  }, [code]);
 
   useEffect(() => {
     if (!inputs) {
@@ -276,23 +389,32 @@ export default function CodingEnvironment(): JSX.Element {
       setAdviceValue('');
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
+
+      // console.log('they camee here', inputs);
+
       if (inputObject.operand_stack) {
         setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
       }
 
-      if (inputObject.advice_stack) {
+      if (inputObject.advice_stack && inputObject.advice_stack.length > 0) {
         setAdviceValue(formatBeautifyNumbersArray(inputObject.advice_stack));
+
         setIsAdviceStackLayoutVisible(true);
       } // eslint-disable-next-line
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
       // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log('Inputs must be a valid JSON object: ${error.message}');
     } // eslint-disable-line @typescript-eslint/no-explicit-any
   }, [inputs]);
 
   const onInputPlusClick = () => {
+    if (isAdviceStackLayoutVisible) {
+      setAdviceValue('');
+    } else {
+      setAdviceValue('0');
+    }
     setIsAdviceStackLayoutVisible(!isAdviceStackLayoutVisible);
-    setAdviceValue('');
     setIsAdviceFocused(false);
   };
 
@@ -306,6 +428,17 @@ export default function CodingEnvironment(): JSX.Element {
     }
   };
 
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    localStorage.setItem(LOCAL_STORAGE.ONBOARDING_SHOWN, 'true');
+  };
+
+  const handleTakeTour = () => {
+    setRun(true);
+    setIsDialogOpen(false);
+    localStorage.setItem(LOCAL_STORAGE.ONBOARDING_SHOWN, 'true');
+  };
+
   const handleAdviceValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Allow numbers and commas
     const regex = /^[0-9, ]*$/;
@@ -317,29 +450,15 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const onTestAndExperimentClick = () => {
-    if (isTestExperimentVisible) return;
+    if (selectedTab === TEST_EXPERIMENT_TAB) return;
 
-    setIsTestExperimentVisible(true);    
+    setSelectedTab(TEST_EXPERIMENT_TAB);
     setIsProgramInfoVisible(true);
     setIsStackOutputVisible(true);
-    setIsHelpVisible(false);
   };
 
   const onInstructionClick = () => {
-    if (isInstructionVisible) return;
-
-    hideAllRightSideLayout();
-    setIsTestExperimentVisible(true);
-    setIsInstructionVisible(!isInstructionVisible);
-    setIsHelpVisible(false);
-  };
-
-  const onHelpClick = () => {
-    if (isHelpVisible) return;
-
-    setIsHelpVisible(!isHelpVisible);
-    setIsTestExperimentVisible(false);
-    setIsInstructionVisible(false);
+    setSelectedTab(INSTRUCTIONS_TAB);
   };
 
   /**
@@ -359,12 +478,14 @@ export default function CodingEnvironment(): JSX.Element {
           setOutput(inputCheck.errorMessage);
           toast.error('Execution failed');
           hideAllRightSideLayout();
-          setProgramInfo(inputCheck.errorMessage);
+          setProgramInfo({ error: inputCheck.errorMessage });
           setIsProgramInfoVisible(true);
           return;
         }
         try {
           const start = Date.now();
+
+          console.log('the data for program issss', code);
 
           const { program_hash, stack_output, cycles, trace_len }: Outputs =
             run_program(code, inputs);
@@ -376,15 +497,20 @@ export default function CodingEnvironment(): JSX.Element {
             "stack_output" : [${stack_output.toString()}],
             "trace_len" : ${trace_len}
             }`);
-          setProgramInfo(
-            `Program Hash: ${program_hash}\nCycles: ${cycles}\nTrace_len: ${trace_len}`
-          );
+
+          setProgramInfo({
+            program_hash: program_hash,
+            cycles: cycles,
+            trace_len: trace_len
+          });
           setIsProgramInfoVisible(true);
           setIsStackOutputVisible(true);
           toast.success(`Execution successful in ${Date.now() - start} ms`);
         } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           hideAllRightSideLayout();
-          setProgramInfo(`Error: ${error}`);
+          setProgramInfo({ error: errorMessage });
           setIsProgramInfoVisible(true);
           setOutput(`Error: ${error}`);
         }
@@ -396,76 +522,60 @@ export default function CodingEnvironment(): JSX.Element {
    * This proves the program using the MidenVM and displays the output.
    * It runs the Rust program that is imported above.
    */
-  const proveProgram = async () => {
+  const proveProgram = useCallback(() => {
     setIsProcessing(true);
     disableDebug();
     toast.loading('Proving ...', { id: 'provingToast' });
-    init()
-      .then(() => {
-        setProof(null);
-        const inputCheck = checkInputs(inputs);
 
-        if (!inputCheck.isValid) {
-          setOutput(inputCheck.errorMessage);
+    worker.onmessage = (e) => {
+      console.log('Worker message:', e.data); // Log the message for debugging
 
-          hideAllRightSideLayout();
-          setProgramInfo(inputCheck.errorMessage);
-          setIsProgramInfoVisible(true);
-          toast.error('Proving failed', {
+      const { success, result, error } = e.data;
+
+      if (success) {
+        if (!result) {
+          console.error('Result is undefined:', e.data);
+          setOutput('Error: Result is undefined');
+          toast.error('Error: Result is undefined', {
             id: 'provingToast'
           });
+          setIsProcessing(false);
           return;
         }
-        try {
-          const start = Date.now();
-          const {
-            program_hash,
-            cycles,
-            stack_output,
-            trace_len,
-            overflow_addrs,
-            proof
-          }: Outputs = prove_program(code, inputs);
-          const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
-          setStackOutputValue(stack_output.toString());
-          setProgramInfo(
-            `Program Hash: ${program_hash}
-            Cycles: ${cycles}
-            Trace_len: ${trace_len}`
-          );
-          setOutput(`{
-            "stack_output" : [${stack_output.toString()}],
-            "overflow_addrs" : [${overflow}],
-            "trace_len" : ${trace_len}
-            }`);
 
-          toast.success(`Proving successful in ${Date.now() - start} ms`, {
-            id: 'provingToast'
-          });
+        const { programInfo, output, proof, stackOutput, duration } = result;
 
-          // Store the proof if it exists
+        setStackOutputValue(stackOutput);
+        setProgramInfo(programInfo);
+        setOutput(output);
+        toast.success(`Proving successful in ${duration} ms`, {
+          id: 'provingToast'
+        });
 
-          hideAllRightSideLayout();
+        hideAllRightSideLayout();
 
-          if (proof) {
-            setProof(proof);
-            setIsProofInfoVisible(true);
-            setIsStackOutputVisible(true);
-          }
-
-          setIsProgramInfoVisible(true);
-        } catch (error) {
-          setOutput(`Error: ${error}`);
-          hideAllRightSideLayout();
-          setProgramInfo(`Error: ${error}`);
-          setIsProgramInfoVisible(true);
-          toast.error(`Error: ${error}`, {
-            id: 'provingToast'
-          });
+        if (proof) {
+          setProof(proof);
+          setIsProofInfoVisible(true);
+          setIsStackOutputVisible(true);
         }
-      })
-      .finally(() => setIsProcessing(false));
-  };
+
+        setIsProgramInfoVisible(true);
+      } else {
+        setOutput(`Error: ${error}`);
+        hideAllRightSideLayout();
+        setProgramInfo({ error });
+        setIsProgramInfoVisible(true);
+        toast.error(`Error: ${error}`, {
+          id: 'provingToast'
+        });
+      }
+
+      setIsProcessing(false);
+    };
+
+    worker.postMessage({ code, inputs });
+  }, [code, inputs]);
 
   /**
    * It starts a debugging session.
@@ -486,8 +596,6 @@ export default function CodingEnvironment(): JSX.Element {
         setShowDebug(true);
         setDebugExecutor(new DebugExecutor(code, inputs));
         setOutput('Debugging session started');
-
-
       } catch (error) {
         setOutput(`Error: ${error}`);
       }
@@ -537,23 +645,193 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const onJSONEditorClick = () => {
+    localStorage.setItem(
+      LOCAL_STORAGE.JSON_EDITOR_VISIBLE,
+      JSON.stringify(true)
+    );
     setIsCodeEditorVisible(true);
   };
 
   const onFormEditorClick = () => {
+    localStorage.setItem(
+      LOCAL_STORAGE.JSON_EDITOR_VISIBLE,
+      JSON.stringify(false)
+    );
     setIsCodeEditorVisible(false);
+  };
+
+  const onHelpClick = () => {
+    if (selectedTab === HELP_TAB) return;
+
+    setSelectedTab(HELP_TAB);
+  };
+
+  interface CustomTooltipProps {
+    title: string;
+    content: string;
+    step: number;
+    totalSteps: number;
+    skipProps: TooltipRenderProps['primaryProps'];
+    primaryProps: TooltipRenderProps['primaryProps'];
+  }
+
+  const customStyles = {
+    options: {
+      arrowColor: '#333',
+      backgroundColor: '#201F28',
+      overlayColor: '#201F28',
+      primaryColor: '#201F28',
+      textColor: '#FFF',
+      width: 400,
+      zIndex: 1000
+    },
+    tooltipContainer: {
+      backgroundColor: '#1A1A1A',
+      borderRadius: '0.5rem',
+      color: '#FFF'
+    },
+    tooltipContent: {
+      fontSize: '0.875rem',
+      color: '#FFF'
+    },
+    buttonNext: {
+      backgroundColor: '#0C0C0C',
+      color: '#FFF',
+      padding: '0.5rem 1rem',
+      borderRadius: '8px'
+    },
+    buttonBack: {
+      color: '#FFF',
+      padding: '0.5rem 1rem',
+      borderRadius: '0.375rem'
+    },
+    buttonSkip: {
+      color: '#FFF'
+    },
+    spotlight: {
+      borderRadius: '0.5rem'
+    }
+  };
+
+  const CustomTooltip: React.FC<
+    CustomTooltipProps & { step: number; totalSteps: number }
+  > = ({ title, content, step, totalSteps, skipProps, primaryProps }) => {
+    // Function to handle the skip button click
+    const handleSkip = (event: React.MouseEvent<HTMLButtonElement>) => {
+      // Add your custom logic here
+      console.log('Skip button clicked');
+
+      // Call the provided onSkip function
+      skipProps.onClick(event);
+    };
+
+    return (
+      <div className="bg-[#201F28] p-4 rounded-lg">
+        <div className="mb-2">
+          <h3 className="text-base text-white font-bold">{title}</h3>
+          <p className="text-sm text-secondary-1">{content}</p>
+          <p className="text-sm text-[#9A6FFF] mt-2">{`${step}/${totalSteps} Steps`}</p>
+        </div>
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={handleSkip}
+            className="text-sm text-[#B2B2B2] hover:underline"
+          >
+            Skip
+          </button>
+          <button
+            onClick={primaryProps.onClick}
+            className="bg-[#0C0C0C] text-white text-sm px-4 py-2 rounded-lg"
+          >
+            Next <span className="ml-1 text-accent-1">→</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  interface CustomStep extends Step {
+    stepNumber: number;
+    totalSteps: number;
+  }
+
+  const steps: CustomStep[] = [
+    {
+      target: '.miden-code-layout',
+      content: 'Here you can write Miden Assembly programs',
+      title: 'Write your code',
+      stepNumber: 1,
+      totalSteps: 4,
+      placement: 'right',
+      disableBeacon: true
+    },
+    {
+      target: '.input-code-layout',
+      title: 'Inject your inputs',
+      content: 'You can inject public and private inputs',
+      stepNumber: 2,
+      totalSteps: 4,
+      disableBeacon: true
+    },
+    {
+      target: '.example-drop-down',
+      title: 'Explore the examples',
+      content: 'Look at the examples to get a better understanding',
+      stepNumber: 3,
+      totalSteps: 4,
+      placement: 'bottom'
+    },
+    {
+      target: '.run-layout',
+      title: 'Execute your programs',
+      content: 'You can run, prove or even step through the program execution',
+      stepNumber: 4,
+      totalSteps: 4,
+      placement: 'bottom'
+    }
+  ];
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { action, index, type } = data;
+
+    if (type === 'step:after' && action === 'next') {
+      setStepIndex(index + 1);
+    }
   };
 
   return (
     <div className="bg-primary h-full w-full overflow-y-hidden">
+      <OnboardingDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        onTakeTour={handleTakeTour}
+      />
+      <Joyride
+        steps={steps}
+        stepIndex={stepIndex}
+        continuous={true}
+        styles={customStyles}
+        run={run}
+        callback={handleJoyrideCallback}
+        tooltipComponent={({ step, backProps, primaryProps, skipProps }) => (
+          <CustomTooltip
+            title={step.title as string}
+            content={step.content as string}
+            step={(step as CustomStep).stepNumber}
+            totalSteps={(step as CustomStep).totalSteps}
+            skipProps={skipProps}
+            primaryProps={primaryProps}
+          />
+        )}
+      />
       <Toaster />
-      <div className="bg-secondary-main w-full flex items-center py-6 px-16">
+      <div className="bg-secondary-main w-full flex px-4 py-4 sm:py-6 sm:px-16">
         <button onClick={onTestAndExperimentClick}>
           <h1
             className={classNames(
-              'flex text-sm items-center font-semibold cursor-pointer',
-              isTestExperimentVisible
-                ? 'text-white'
+              'flex text-sm items-center font-semibold cursor-pointer relative pb-1',
+              selectedTab === TEST_EXPERIMENT_TAB
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
                 : 'text-secondary-1 hover:text-white'
             )}
           >
@@ -561,26 +839,26 @@ export default function CodingEnvironment(): JSX.Element {
           </h1>
         </button>
 
-        {!isMobile && (
-          <button onClick={onInstructionClick}>
-            <h1
-              className={classNames(
-                'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-                isInstructionVisible
-                  ? 'text-white'
-                  : 'text-secondary-1 hover:text-white'
-              )}
-            >
-              INSTRUCTIONS
-            </h1>
-          </button>
-        )}
-
-        <button onClick={onHelpClick}>
+        <button onClick={onInstructionClick} className="ml-8 hidden sm:block">
           <h1
             className={classNames(
-              'flex text-sm ml-8 items-center font-semibold cursor-pointer',
-              isHelpVisible ? 'text-white' : 'text-secondary-1 hover:text-white'
+              'flex text-sm font-semibold cursor-pointer relative pb-1',
+              selectedTab === INSTRUCTIONS_TAB
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
+                : 'text-secondary-1 hover:text-white'
+            )}
+          >
+            INSTRUCTIONS
+          </h1>
+        </button>
+
+        <button onClick={onHelpClick} className="ml-8">
+          <h1
+            className={classNames(
+              'flex text-sm font-semibold cursor-pointer relative pb-1',
+              selectedTab === HELP_TAB
+                ? 'text-white after:content-[""] after:absolute after:bottom-[-16px] after:left-0 after:w-full after:h-0.5 after:bg-accent-1'
+                : 'text-secondary-1 hover:text-white'
             )}
           >
             HELP
@@ -588,60 +866,103 @@ export default function CodingEnvironment(): JSX.Element {
         </button>
       </div>
 
-      {isHelpVisible && (
+      {selectedTab === HELP_TAB && (
         <div className="flex bg-secondary-3 lg:px-4 pt-4 w-full h-full overflow-scroll">
           <ExplainerPage />
         </div>
       )}
 
-      {!isHelpVisible && (
-        <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
-          <div className="flex flex-col h-full w-full lg:w-1/2 mr-4 ${ isMobile ? px-3 }">
-            <div className="flex flex-col h-3/6 rounded-lg border bg-secondary-main border-secondary-4">
+      {selectedTab === INSTRUCTIONS_TAB && (
+        <div className="p-12 h-full">
+          <div className="flex">
+            <h1 className="text-white text-xl mb-5 font-semibold">
+              Miden Virtual Machine Instruction Set Reference
+            </h1>
+            <div className="ml-auto pr-8">
+              <input
+                type="text"
+                name="search"
+                id="search"
+                value={searchQuery}
+                autoComplete="off"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="border-secondary-3 bg-secondary-4 text-white  sm:text-sm rounded-xl w-60 focus:ring-accent-2 focus:border-accent-2"
+                placeholder="Search for a keyword"
+              />
+            </div>
+          </div>
+
+          <InstructionTable searchQuery={searchQuery} />
+        </div>
+      )}
+
+      {selectedTab === TEST_EXPERIMENT_TAB && (
+        <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-auto">
+          <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
+            <div className="flex flex-col sm:h-3/6 rounded-lg border bg-primary border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
-                <DropDown onExampleValueChange={handleSelectChange} />
-                <button
-                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                <SizeDropDown onSizeValueChange={handleSizeChange} />
+
+                {/* <button
+                  className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
                   disabled={isProcessing}
                 >
-                  Run
-                  <PlayIcon className="h-3 w-3 fill-accent-2 ml-1.5" />
-                </button>
-                {!isMobile && (
-                  <button
-                    className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                    onClick={startDebug}
-                    disabled={isProcessing}
-                  >
-                    Debug
-                  </button>
-                )}
+                  <PlusIcon className="h-4 w-4 stroke-1 stroke-accent-1" />
+                </button> */}
                 <button
-                  className="flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={proveProgram}
+                  className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={handleDownloadCode}
                   disabled={isProcessing}
                 >
-                  Prove
+                  <ArrowDownTrayIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
                 </button>
-                {isMobile && (
+                <button
+                  className="sm:flex hidden items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                  onClick={handleCopyClick}
+                  disabled={isProcessing}
+                >
+                  <DocumentDuplicateIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
+                </button>
+
+                <div className="w-px h-4 sm:flex hidden bg-secondary-4 ml-3 mr-3"></div>
+                <div className="flex run-layout">
                   <button
-                    className={`flex items-center ml-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5 ${
-                      proof
-                        ? 'text-white border-secondary-4'
-                        : 'text-gray-500 border-gray-500'
-                    }`}
-                    onClick={verifyProgram}
-                    disabled={isProcessing || !proof}
+                    className="flex items-center hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    onClick={runProgram}
+                    disabled={isProcessing}
                   >
-                    Verify
+                    Run
+                    <PlayIcon className="h-4 w-4 hover:bg-secondary-8 stroke-2 stroke-accent-1 ml-1.5" />
                   </button>
-                )}
+                  {!isMobile && (
+                    <button
+                      className="flex items-center ml-3 hover:bg-secondary-8 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                      onClick={startDebug}
+                      disabled={isProcessing}
+                    >
+                      Debug
+                    </button>
+                  )}
+                  <button
+                    className="flex items-center hover:bg-secondary-8 ml-3 mr-3 sm:mr-0 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
+                    onClick={proveProgram}
+                    disabled={isProcessing}
+                  >
+                    Prove
+                  </button>
+                </div>
+
+                <div className="ml-auto example-drop-down">
+                  <DropDown onExampleValueChange={handleSelectChange} />
+                </div>
               </div>
 
-              <div className="h-px bg-secondary-4 mb-4"></div>
+              <div className="h-px bg-secondary-4"></div>
               <MidenEditor
+                ref={midenCodeRef}
                 value={code}
+                codeSize={codeSize}
                 showDebug={showDebug}
                 onChange={setCode}
                 handleCopyClick={handleCopyClick}
@@ -650,18 +971,22 @@ export default function CodingEnvironment(): JSX.Element {
             </div>
 
             <div className="mt-5">
-              <div className="flex w-full h-56 rounded-xl bg-secondary-main grow overflow-hidden border border-secondary-4">
-                <div className="flex flex-col h-54 w-full">
-                  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-white items-center">
-                    <h1 className="pl-5 text-left text-base font-semibold">
-                      Inputs
+              <div
+                className={`flex w-full rounded-xl grow overflow-hidden border border-secondary-4 ${
+                  isCodeEditorVisible ? 'h-56' : 'h-fit'
+                }`}
+              >
+                <div className="flex flex-col w-full">
+                  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
+                    <h1 className="pl-5 text-left text-base font-normal">
+                      Input
                     </h1>
 
                     <div className="flex ml-auto mr-5">
                       <button
                         onClick={!disableForm ? onFormEditorClick : undefined}
                         className={classNames(
-                          'text-left mr-3 text-base font-semibold',
+                          'text-left mr-3 text-base font-normal',
                           !disableForm
                             ? 'cursor-pointer'
                             : 'cursor-not-allowed opacity-50',
@@ -670,13 +995,13 @@ export default function CodingEnvironment(): JSX.Element {
                             : 'text-secondary-6'
                         )}
                       >
-                        <h1>FORM</h1>
+                        <h1>Forms</h1>
                       </button>
 
                       <button onClick={onJSONEditorClick}>
                         <h1
                           className={classNames(
-                            'text-left text-secondary-6 text-base font-semibold cursor-pointer',
+                            'text-left text-secondary-6 text-base font-normal cursor-pointer',
                             isCodeEditorVisible
                               ? 'text-white'
                               : 'text-secondary-6'
@@ -690,28 +1015,30 @@ export default function CodingEnvironment(): JSX.Element {
 
                   <div className="h-px bg-secondary-4"></div>
 
-                  <div className="flex w-full overflow-auto ">
+                  <div className="flex w-full overflow-auto input-code-layout">
                     {!isCodeEditorVisible && (
                       <div className="flex flex-col w-full pt-4">
-                        <div className="flex justify-center items-baseline relative grow border-none">
-                          <input
-                            type="text"
-                            value={operandValue}
-                            onChange={handleOperandValueChange}
-                            onFocus={handleInputFocus}
-                            onBlur={handleInputBlur}
-                            className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                          />
-                          <label
-                            htmlFor="input"
-                            className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                              isInputFocused || operandValue
-                                ? 'text-xs top-0 text-green'
-                                : 'text-sm top-4'
-                            }`}
-                          >
-                            Operand Stack
-                          </label>
+                        <div className="flex justify-between w-full items-center border-none">
+                          <div className="flex flex-col grow pl-4">
+                            <label
+                              htmlFor="input"
+                              className={`text-sm text-secondary-7 font-normal transition-all ${
+                                isInputFocused || operandValue
+                                  ? 'text-xs top-0 text-green'
+                                  : 'text-sm top-4'
+                              }`}
+                            >
+                              Public Input
+                            </label>
+                            <input
+                              type="text"
+                              value={operandValue}
+                              onChange={handleOperandValueChange}
+                              onFocus={handleInputFocus}
+                              onBlur={handleInputBlur}
+                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                            />
+                          </div>
 
                           <PlusIcon
                             onClick={onInputPlusClick}
@@ -724,31 +1051,28 @@ export default function CodingEnvironment(): JSX.Element {
                           />
                         </div>
 
-                        <div className="h-px bg-secondary-4 mb-4"></div>
+                        <div className="h-px bg-secondary-4"></div>
 
                         {isAdviceStackLayoutVisible && (
-                          <div>
-                            <div className="flex justify-center h-fit items-baseline relative grow border-none ml-12">
-                              <input
-                                type="text"
-                                value={adviceValue}
-                                onChange={handleAdviceValueChange}
-                                onFocus={handleAdviceFocus}
-                                onBlur={handleAdviceBlur}
-                                className="bg-transparent w-full focus:ring-0 text-green pt-4 pb-2 pl-16 outline-none border-none"
-                              />
-                              <label
-                                htmlFor="advicestack"
-                                className={`absolute text-base text-secondary-6 font-bold left-2 transition-all ${
-                                  isAdviceFocused || adviceValue
-                                    ? 'text-xs top-0 text-green'
-                                    : 'text-sm top-4'
-                                }`}
-                              >
-                                Advice Stack
-                              </label>
-                            </div>
-                            <div className="h-px bg-secondary-4 mb-4 ml-12"></div>
+                          <div className="flex flex-col justify-center h-fit mt-4 grow border-none ml-4">
+                            <label
+                              htmlFor="advicestack"
+                              className={`text-sm text-secondary-7 font-normal transition-all ${
+                                isAdviceFocused || adviceValue
+                                  ? 'text-xs top-0 text-green'
+                                  : 'text-sm top-4'
+                              }`}
+                            >
+                              Private Input
+                            </label>
+                            <input
+                              type="text"
+                              value={adviceValue}
+                              onChange={handleAdviceValueChange}
+                              onFocus={handleAdviceFocus}
+                              onBlur={handleAdviceBlur}
+                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                            />
                           </div>
                         )}
                       </div>
@@ -765,38 +1089,32 @@ export default function CodingEnvironment(): JSX.Element {
             </div>
           </div>
 
-          <div className="flex flex-col w-full lg:w-1/2 gap-y-6 mt-4 lg:mt-0">
-            {!isMobile && isInstructionVisible && (
-              <div className="h-4/6 rounded-xl border relative overflow-y-scroll border-secondary-4">
-                <InstructionTable />
-              </div>
-            )}
-
+          <div className="flex flex-col w-full lg:w-1/2 sm:gap-y-6 mt-4 mb-32 lg:mt-0">
             {isStackOutputVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex mx-3 sm:px-0">
                 <OutputInfo output={stackOutputValue} />
               </div>
             )}
 
             {isProgramInfoVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <ProgramInfo programInfo={programInfo} />
               </div>
             )}
 
             {isProofInfoVisible && (
-              <div className="flex ${ isMobile ? px-3 }">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
               </div>
             )}
 
             {showDebug && (
-              <div className="flex">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <DebugInfo debugOutput={debugOutput} />
               </div>
             )}
             {showDebug && debugOutput && (
-              <div className="flex">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <MemoryInfo debugOutput={debugOutput} />
               </div>
             )}
