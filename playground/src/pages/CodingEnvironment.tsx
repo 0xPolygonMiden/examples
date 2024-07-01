@@ -8,7 +8,9 @@ import React, {
 import { isMobile } from 'mobile-device-detect';
 import DropDown from '../components/DropDown';
 import MidenInputs from '../components/CodingEnvironment/MidenInputs';
-import MidenEditor from '../components/CodingEnvironment/MidenCode';
+import MidenEditor, {
+  MidenCodeHandles
+} from '../components/CodingEnvironment/MidenCode';
 import InstructionTable from './InstructionTable';
 import Joyride, {
   CallBackProps,
@@ -71,6 +73,8 @@ export default function CodingEnvironment(): JSX.Element {
   const [isProgramInfoVisible, setIsProgramInfoVisible] = useState(true);
   const [isProofInfoVisible, setIsProofInfoVisible] = useState(false);
   const [debugOutput, setDebugOutput] = useState<DebugOutput | null>(null);
+
+  const midenCodeRef = useRef<MidenCodeHandles>(null);
 
   /**
    * This sets the inputs to the default values.
@@ -151,6 +155,13 @@ export default function CodingEnvironment(): JSX.Element {
   const handleAdviceBlur = () => {
     if (!adviceValue) {
       setIsAdviceFocused(false);
+    }
+  };
+
+  const handleDownloadCode = () => {
+    console.log('asdfasdfadsf');
+    if (midenCodeRef.current) {
+      midenCodeRef.current.downloadCode();
     }
   };
 
@@ -379,7 +390,7 @@ export default function CodingEnvironment(): JSX.Element {
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
 
-      console.log('they camee here', inputs);
+      // console.log('they camee here', inputs);
 
       if (inputObject.operand_stack) {
         setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));
@@ -474,6 +485,8 @@ export default function CodingEnvironment(): JSX.Element {
         try {
           const start = Date.now();
 
+          console.log('the data for program issss', code);
+
           const { program_hash, stack_output, cycles, trace_len }: Outputs =
             run_program(code, inputs);
 
@@ -562,7 +575,7 @@ export default function CodingEnvironment(): JSX.Element {
     };
 
     worker.postMessage({ code, inputs });
-  }, []);
+  }, [code, inputs]);
 
   /**
    * It starts a debugging session.
@@ -884,22 +897,22 @@ export default function CodingEnvironment(): JSX.Element {
       )}
 
       {selectedTab === TEST_EXPERIMENT_TAB && (
-        <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-hidden">
+        <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-auto">
           <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
             <div className="flex flex-col sm:h-3/6 rounded-lg border bg-primary border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
                 <SizeDropDown onSizeValueChange={handleSizeChange} />
 
-                <button
+                {/* <button
                   className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
                   onClick={runProgram}
                   disabled={isProcessing}
                 >
                   <PlusIcon className="h-4 w-4 stroke-1 stroke-accent-1" />
-                </button>
+                </button> */}
                 <button
                   className="sm:flex hidden items-center hover:bg-secondary-8 mr-3 text-white text-xs font-normal border z-10 rounded-lg border-secondary-4 py-2 px-2.5"
-                  onClick={handleCopyClick}
+                  onClick={handleDownloadCode}
                   disabled={isProcessing}
                 >
                   <ArrowDownTrayIcon className="h-4 w-4 stroke-2 stroke-accent-1" />
@@ -946,16 +959,15 @@ export default function CodingEnvironment(): JSX.Element {
               </div>
 
               <div className="h-px bg-secondary-4"></div>
-              <div className="miden-code-layout h-full">
-                <MidenEditor
-                  value={code}
-                  codeSize={codeSize}
-                  showDebug={showDebug}
-                  onChange={setCode}
-                  handleCopyClick={handleCopyClick}
-                  executeDebug={executeDebug}
-                />
-              </div>
+              <MidenEditor
+                ref={midenCodeRef}
+                value={code}
+                codeSize={codeSize}
+                showDebug={showDebug}
+                onChange={setCode}
+                handleCopyClick={handleCopyClick}
+                executeDebug={executeDebug}
+              />
             </div>
 
             <div className="mt-5">
@@ -1077,7 +1089,7 @@ export default function CodingEnvironment(): JSX.Element {
             </div>
           </div>
 
-          <div className="flex flex-col w-full lg:w-1/2 sm:gap-y-6 mt-4 lg:mt-0">
+          <div className="flex flex-col w-full lg:w-1/2 sm:gap-y-6 mt-4 mb-32 lg:mt-0">
             {isStackOutputVisible && (
               <div className="flex mx-3 sm:px-0">
                 <OutputInfo output={stackOutputValue} />
@@ -1091,18 +1103,18 @@ export default function CodingEnvironment(): JSX.Element {
             )}
 
             {isProofInfoVisible && (
-              <div className="flex">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
               </div>
             )}
 
             {showDebug && (
-              <div className="flex">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <DebugInfo debugOutput={debugOutput} />
               </div>
             )}
             {showDebug && debugOutput && (
-              <div className="flex">
+              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
                 <MemoryInfo debugOutput={debugOutput} />
               </div>
             )}

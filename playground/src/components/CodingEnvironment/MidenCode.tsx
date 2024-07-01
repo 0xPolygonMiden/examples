@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/20/solid';
 import { DebugCommand } from 'miden-wasm';
 import { tags as t } from '@lezer/highlight';
-import { useCallback } from 'react';
+import { forwardRef, useCallback, useImperativeHandle } from 'react';
 import { StreamLanguage } from '@codemirror/language';
 import { c } from '@codemirror/legacy-modes/mode/clike'; // Import the gas mode
 
@@ -24,6 +24,10 @@ type MidenCodeProps = {
   handleCopyClick: () => void;
   executeDebug: (command: DebugCommand, params?: bigint) => void;
 };
+
+export interface MidenCodeHandles {
+  downloadCode: () => void;
+}
 
 const codeTheme = createTheme({
   theme: 'dark',
@@ -55,29 +59,30 @@ const codeTheme = createTheme({
 
 const extensions = [StreamLanguage.define(c)];
 
-const MidenCode = (props: MidenCodeProps): JSX.Element => {
-  const saveFile = () => {
-    const blob = new Blob([props.value], { type: 'text/plain' });
+const MidenCode = forwardRef<MidenCodeHandles, MidenCodeProps>((props, ref) => {
+  useImperativeHandle(ref, () => ({
+    downloadCode() {
+      const blob = new Blob([props.value], { type: 'text/plain' });
 
-    // Step 3: Create a URL for the Blob
-    const fileDownloadUrl = URL.createObjectURL(blob);
+      const fileDownloadUrl = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
-    link.href = fileDownloadUrl;
-    link.download = 'code.masm'; // File name for download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const link = document.createElement('a');
+      link.href = fileDownloadUrl;
+      link.download = 'code.masm'; // File name for download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-    URL.revokeObjectURL(fileDownloadUrl);
-  };
+      URL.revokeObjectURL(fileDownloadUrl);
+    }
+  }));
 
   const onChange = useCallback((value: any, viewUpdate: any) => {
     props.onChange(value);
   }, []);
 
   return (
-    <div className="flex flex-col w-full overflow-auto">
+    <div className="flex flex-col w-full overflow-auto miden-code-layout">
       <div className="flex w-full py-1.5 px-2">
         {props.showDebug ? (
           <div className="flex items-center ml-auto gap-x-2">
@@ -136,6 +141,6 @@ const MidenCode = (props: MidenCodeProps): JSX.Element => {
       />
     </div>
   );
-};
+});
 
 export default MidenCode;
