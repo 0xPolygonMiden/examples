@@ -1036,7 +1036,7 @@ export default function CodingEnvironment(): JSX.Element {
                               onChange={handleOperandValueChange}
                               onFocus={handleInputFocus}
                               onBlur={handleInputBlur}
-                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                              className="bg-transparent w-full text-sm focus:ring-0 pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
                             />
                           </div>
 
@@ -1045,7 +1045,7 @@ export default function CodingEnvironment(): JSX.Element {
                             className={classNames(
                               'h-6 w-6 ml-1.5 mr-3 hover:cursor-pointer',
                               isAdviceStackLayoutVisible
-                                ? 'fill-green'
+                                ? 'fill-accent-1'
                                 : 'fill-secondary-6'
                             )}
                           />
@@ -1059,7 +1059,7 @@ export default function CodingEnvironment(): JSX.Element {
                               htmlFor="advicestack"
                               className={`text-sm text-secondary-7 font-normal transition-all ${
                                 isAdviceFocused || adviceValue
-                                  ? 'text-xs top-0 text-green'
+                                  ? 'text-xs top-0 text-accent-1'
                                   : 'text-sm top-4'
                               }`}
                             >
@@ -1071,7 +1071,7 @@ export default function CodingEnvironment(): JSX.Element {
                               onChange={handleAdviceValueChange}
                               onFocus={handleAdviceFocus}
                               onBlur={handleAdviceBlur}
-                              className="bg-transparent w-full focus:ring-0 pl-0 text-green pt-2 pb-2 outline-none border-none"
+                              className="bg-transparent w-full focus:ring-0 text-sm pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
                             />
                           </div>
                         )}
