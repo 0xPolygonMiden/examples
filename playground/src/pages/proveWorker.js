@@ -5,7 +5,6 @@ onmessage = async function (e) {
 
   try {
     await init();
-    const start = Date.now();
     const {
       program_hash,
       cycles,
@@ -15,7 +14,6 @@ onmessage = async function (e) {
       proof
     } = prove_program(code, inputs);
     const overflow = overflow_addrs ? overflow_addrs.toString() : '[]';
-    const duration = Date.now() - start;
 
     postMessage({
       success: true,

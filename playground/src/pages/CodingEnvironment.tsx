@@ -14,7 +14,6 @@ import MidenEditor, {
 import InstructionTable from './InstructionTable';
 import Joyride, {
   CallBackProps,
-  STATUS,
   Step,
   TooltipRenderProps
 } from 'react-joyride';
@@ -23,7 +22,6 @@ import init, {
   DebugExecutor,
   Outputs,
   run_program,
-  prove_program,
   verify_program,
   DebugCommand,
   DebugOutput
@@ -41,7 +39,6 @@ import {
 import { PlusIcon } from '@heroicons/react/24/solid';
 import {
   ArrowDownTrayIcon,
-  ChevronDownIcon,
   DocumentDuplicateIcon,
   PlayIcon
 } from '@heroicons/react/24/outline';
@@ -83,7 +80,6 @@ export default function CodingEnvironment(): JSX.Element {
   const [inputs, setInputs] = React.useState(
     localStorage.getItem(LOCAL_STORAGE.INPUT_STRING) ?? exampleInput
   );
-  const isInitialRender = useRef(true);
 
   /**
    * This sets the code to the default values.
@@ -390,8 +386,6 @@ export default function CodingEnvironment(): JSX.Element {
       setAdviceValue('');
       setOperandValue('');
       const inputObject = JSON.parse(inputs);
-
-      // console.log('they camee here', inputs);
 
       if (inputObject.operand_stack) {
         setOperandValue(formatBeautifyNumbersArray(inputObject.operand_stack));

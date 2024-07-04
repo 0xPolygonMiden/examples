@@ -1,7 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import CodingEnvironment from './pages/CodingEnvironment';
-import InstructionTable from './pages/InstructionTable';
 import ExplainerPage from './pages/Explainer';
 
 function App() {

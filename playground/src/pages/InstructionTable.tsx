@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import gfm from 'remark-gfm';
 import math from 'remark-math';
@@ -41,13 +40,6 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
   const [filteredClasses, setFilteredClasses] = useState<InstructionClass[]>(
     []
   );
-  const [isLoading, setIsLoading] = useState(false);
-
-  const allInstructions = useMemo(() => {
-    return assemblerInstructions.flatMap(
-      (instructionClass: InstructionClass) => instructionClass.instructions
-    );
-  }, []);
 
   const fuse = useMemo(() => {
     const options = {
@@ -65,7 +57,6 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
     }
 
     const timeoutId = setTimeout(() => {
-      setIsLoading(true);
       const results = fuse.search(searchQuery);
       const resultData = results
         .map((result) => {
@@ -82,7 +73,6 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
         })
         .filter((item) => item.instructions.length > 0);
       setFilteredClasses(resultData);
-      setIsLoading(false);
     }, 500);
 
     return () => clearTimeout(timeoutId);
