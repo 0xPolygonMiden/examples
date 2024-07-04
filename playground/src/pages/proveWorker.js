@@ -31,8 +31,7 @@ onmessage = async function (e) {
             "trace_len" : ${trace_len}
           }`,
         proof,
-        stackOutput: stack_output.toString(),
-        duration
+        stackOutput: stack_output.toString()
       }
     });
   } catch (error) {

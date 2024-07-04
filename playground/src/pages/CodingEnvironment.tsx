@@ -35,7 +35,8 @@ import {
   checkOutputs,
   formatDebuggerOutput,
   formatMemory,
-  formatBeautifyNumbersArray
+  formatBeautifyNumbersArray,
+  formatDuration
 } from '../utils/helper_functions';
 import { PlusIcon } from '@heroicons/react/24/solid';
 import {
@@ -525,6 +526,7 @@ export default function CodingEnvironment(): JSX.Element {
   const proveProgram = useCallback(() => {
     setIsProcessing(true);
     disableDebug();
+    const start = Date.now();
     toast.loading('Proving ...', { id: 'provingToast' });
 
     worker.onmessage = (e) => {
@@ -532,25 +534,34 @@ export default function CodingEnvironment(): JSX.Element {
 
       const { success, result, error } = e.data;
 
+      console.log('prove method', success, result, error);
+
       if (success) {
         if (!result) {
           console.error('Result is undefined:', e.data);
           setOutput('Error: Result is undefined');
           toast.error('Error: Result is undefined', {
-            id: 'provingToast'
+            id: 'provingToast',
+            duration: 3000
           });
           setIsProcessing(false);
           return;
         }
 
-        const { programInfo, output, proof, stackOutput, duration } = result;
+        const { programInfo, output, proof, stackOutput } = result;
 
         setStackOutputValue(stackOutput);
         setProgramInfo(programInfo);
         setOutput(output);
-        toast.success(`Proving successful in ${duration} ms`, {
-          id: 'provingToast'
-        });
+        const proveDuration = Date.now() - start;
+
+        toast.success(
+          `Proving successful in ${formatDuration(proveDuration)}`,
+          {
+            id: 'provingToast',
+            duration: 3000
+          }
+        );
 
         hideAllRightSideLayout();
 
@@ -567,7 +578,8 @@ export default function CodingEnvironment(): JSX.Element {
         setProgramInfo({ error });
         setIsProgramInfoVisible(true);
         toast.error(`Error: ${error}`, {
-          id: 'provingToast'
+          id: 'provingToast',
+          duration: 3000
         });
       }
 

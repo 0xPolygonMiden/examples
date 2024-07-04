@@ -260,3 +260,7 @@ export function measureSizeInKB(data: Uint8Array): number {
 
   return kilobytes;
 }
+
+export const formatDuration = (duration: number): string => {
+  return duration > 1000 ? `${(duration / 1000).toFixed(1)} seconds` : `${duration} milliseconds`;
+};

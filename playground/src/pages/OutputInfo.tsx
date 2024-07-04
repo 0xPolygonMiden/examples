@@ -19,7 +19,7 @@ const OutputInfo = (props: ProgramInfoProps): JSX.Element => {
         <div className="h-px bg-secondary-4"></div>
 
         <div className="pb-20 pt-5">
-          <h1 className="pl-5 text-left text-accent-1 text-sm font-normal">
+          <h1 className="pl-5 text-left text-green text-sm font-normal">
             {formatBeautifyNumbersArray(props.output)}
           </h1>
         </div>
