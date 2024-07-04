@@ -1,8 +1,4 @@
 import CodeMirror from '@uiw/react-codemirror';
-import {
-  DocumentDuplicateIcon,
-  DocumentTextIcon
-} from '@heroicons/react/24/outline';
 import { createTheme } from '@uiw/codemirror-themes';
 import {
   ChevronDoubleLeftIcon,
@@ -21,7 +17,6 @@ type MidenCodeProps = {
   codeSize: number;
   showDebug: boolean;
   onChange: (value: string) => void;
-  handleCopyClick: () => void;
   executeDebug: (command: DebugCommand, params?: bigint) => void;
 };
 

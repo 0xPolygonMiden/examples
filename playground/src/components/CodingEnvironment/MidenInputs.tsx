@@ -1,7 +1,6 @@
 import { createTheme } from '@uiw/codemirror-themes';
 import CodeMirror from '@uiw/react-codemirror';
 import { tags as t } from '@lezer/highlight';
-import { useEffect, useState } from 'react';
 import { json } from '@codemirror/lang-json';
 
 type MidenInputsProps = {

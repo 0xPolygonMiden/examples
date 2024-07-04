@@ -8,9 +8,9 @@ function classExamples(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-type SizeDropDownProps = {
+interface SizeDropDownProps {
   onSizeValueChange?: (newType: number) => void;
-};
+}
 
 export default function SizeDropDown({
   onSizeValueChange

@@ -98,8 +98,7 @@ export default function DropDown({
                         {selected ? (
                           <span
                             className={classExamples(
-                              active ? 'text-accent-1' : 'text-accent-1',
-                              'absolute inset-y-0 right-0 flex items-center pr-4'
+                              'absolute inset-y-0 right-0 flex items-center pr-4 text-accent-1'
                             )}
                           >
                             <svg

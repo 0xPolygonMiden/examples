@@ -965,7 +965,6 @@ export default function CodingEnvironment(): JSX.Element {
                 codeSize={codeSize}
                 showDebug={showDebug}
                 onChange={setCode}
-                handleCopyClick={handleCopyClick}
                 executeDebug={executeDebug}
               />
             </div>
