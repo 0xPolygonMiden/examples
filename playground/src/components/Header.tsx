@@ -115,7 +115,7 @@ const Header = () => {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 {navigation.map((item) => (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col" key={item.name}>
                     <a
                       key={item.name}
                       href={item.href}

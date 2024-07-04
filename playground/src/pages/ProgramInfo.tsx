@@ -50,7 +50,7 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
 
                   <div className="flex flex-col md:flex-row mt-4">
                     <p
-                      className="pl-5 text-left text-secondary-6 text-sm font-normal"
+                      className="pl-5 text-left text-secondary-6 text-sm font-normal mb-1"
                       style={{ whiteSpace: 'pre-line' }}
                     >
                       Cycles:
