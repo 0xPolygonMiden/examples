@@ -93,13 +93,23 @@ function processTables(tableData, classNames) {
   return tableData.map((table, index) => {
     const className = classNames[index] || 'Procedures';
 
-    const instructions = table.data.map((row) => ({
-      instruction: row['Instruction'] || '',
-      stackInput: row['Stack_input'] || '',
-      stackOutput: row['Stack_output'] || '',
-      cycles: (row['Instruction']?.match(/\((\d+)\s+cycles?\)/) || [])[1] || '',
-      notes: row['Notes'] || ''
-    }));
+    const instructions = table.data
+      .map((row) => ({
+        instruction: row['Instruction'] || '',
+        stackInput: row['Stack_input'] || '',
+        stackOutput: row['Stack_output'] || '',
+        cycles:
+          (row['Instruction']?.match(/\((\d+)\s+cycles?\)/) || [])[1] || '',
+        notes: row['Notes'] || ''
+      }))
+      .filter(
+        (instruction) =>
+          instruction.instruction ||
+          instruction.stackInput ||
+          instruction.stackOutput ||
+          instruction.cycles ||
+          instruction.notes
+      ); // Filter out empty instructions
 
     return {
       class: className,
@@ -123,7 +133,6 @@ async function main() {
           const classNames = getClassNames(markdown);
           console.log(`Parsed ${tableData.length} tables from ${REPO_URL}`);
           const processedTables = processTables(tableData, classNames);
-          const jsonData = JSON.stringify(processedTables, null, 2);
 
           allTableData.push(...processedTables);
         } else {
@@ -145,7 +154,7 @@ async function main() {
       tsxContent,
       'utf-8'
     );
-    console.log('Data saved to Instructions.tsx');
+    console.log('Data saved to instructions.tsx');
   } catch (error) {
     console.error('Error in main function:', error);
   }
