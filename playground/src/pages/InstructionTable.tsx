@@ -91,14 +91,9 @@ const InstructionClassSection: React.FC<{
   instructionClass: InstructionClass;
   searchQuery: string;
 }> = ({ instructionClass, searchQuery }) => {
-  const filteredInstructions = useMemo(
-    () =>
-      instructionClass.instructions.filter((instruction) =>
-        instruction.instruction
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      ),
-    [instructionClass.instructions, searchQuery]
+  const filteredInstructions = instructionClass.instructions.filter(
+    (instruction) =>
+      instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (filteredInstructions.length === 0) {
@@ -141,33 +136,35 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
     return new Fuse(assemblerInstructions, options);
   }, []);
 
-  useEffect(() => {
-    if (searchQuery.length === 0) {
+  const handleSearch = (query: string) => {
+    if (query.length === 0) {
       setFilteredClasses(assemblerInstructions);
       return;
     }
 
+    const results = fuse.search(query);
+    const resultData = results
+      .map((result) => {
+        const matchedInstructions = result.item.instructions.filter(
+          (instruction) =>
+            instruction.instruction.toLowerCase().includes(query.toLowerCase())
+        );
+        return {
+          ...result.item,
+          instructions: matchedInstructions
+        };
+      })
+      .filter((item) => item.instructions.length > 0);
+    setFilteredClasses(resultData);
+  };
+
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const results = fuse.search(searchQuery);
-      const resultData = results
-        .map((result) => {
-          const matchedInstructions = result.item.instructions.filter(
-            (instruction) =>
-              instruction.instruction
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-          );
-          return {
-            ...result.item,
-            instructions: matchedInstructions
-          };
-        })
-        .filter((item) => item.instructions.length > 0);
-      setFilteredClasses(resultData);
+      handleSearch(searchQuery);
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, fuse]);
+  }, [searchQuery]);
 
   return (
     <div className="h-full rounded-xl border relative overflow-y-scroll border-secondary-4">
