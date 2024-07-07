@@ -85,7 +85,7 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
                           {item.toString()}
                         </span>
                       </div>
-                      <label className="absolute text-[8px] font-bold transition-all top-0 text-green">
+                      <label className="absolute text-[8px] font-bold transition-all top-0 text-accent-1">
                         {index}
                       </label>
                     </div>

@@ -78,7 +78,7 @@ export default function CodingEnvironment(): JSX.Element {
    * This sets the inputs to the default values.
    */
   const [inputs, setInputs] = React.useState(
-    localStorage.getItem(LOCAL_STORAGE.INPUT_STRING) ?? exampleInput
+    getLocalStorageValue(LOCAL_STORAGE.INPUT_STRING, exampleInput)
   );
 
   /**
@@ -114,7 +114,7 @@ export default function CodingEnvironment(): JSX.Element {
   const [showDebug, setShowDebug] = useState(false);
 
   const [operandValue, setOperandValue] = useState(
-    localStorage.getItem(LOCAL_STORAGE.OPERAND_VALUE) ?? ''
+    getLocalStorageValue(LOCAL_STORAGE.OPERAND_VALUE, '')
   );
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [disableForm, setDisableForm] = useState(false);
@@ -123,17 +123,23 @@ export default function CodingEnvironment(): JSX.Element {
   const [isStackOutputVisible, setIsStackOutputVisible] = useState(true);
   const [isCodeEditorVisible, setIsCodeEditorVisible] = useState(false);
   const [codeUploadContent, setCodeUploadContent] = useState(
-    localStorage.getItem(LOCAL_STORAGE.CODE_UPLOAD_CONTENT) ?? ''
+    getLocalStorageValue(LOCAL_STORAGE.CODE_UPLOAD_CONTENT, '')
   );
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [adviceValue, setAdviceValue] = useState(
-    localStorage.getItem(LOCAL_STORAGE.ADVICE_VALUE) ?? ''
+    getLocalStorageValue(LOCAL_STORAGE.ADVICE_VALUE, '')
   );
   const [isAdviceFocused, setIsAdviceFocused] = useState(false);
   const [isAdviceStackLayoutVisible, setIsAdviceStackLayoutVisible] =
     useState(false);
+
+  function getLocalStorageValue(key: string, initialValue: string): string {
+    const value = localStorage.getItem(key);
+
+    return value ?? initialValue;
+  }
 
   const handleInputFocus = () => {
     setIsInputFocused(true);
@@ -156,7 +162,6 @@ export default function CodingEnvironment(): JSX.Element {
   };
 
   const handleDownloadCode = () => {
-    console.log('asdfasdfadsf');
     if (midenCodeRef.current) {
       midenCodeRef.current.downloadCode();
     }
@@ -165,10 +170,14 @@ export default function CodingEnvironment(): JSX.Element {
   useLayoutEffect(() => {
     const savedCode = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE);
     const savedCodeSize = localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE_SIZE);
-    const jsonEditorVisible =
-      localStorage.getItem(LOCAL_STORAGE.JSON_EDITOR_VISIBLE) ?? 'false';
-    const onboardingShown =
-      localStorage.getItem(LOCAL_STORAGE.ONBOARDING_SHOWN) ?? 'false';
+    const jsonEditorVisible = getLocalStorageValue(
+      LOCAL_STORAGE.JSON_EDITOR_VISIBLE,
+      'false'
+    );
+    const onboardingShown = getLocalStorageValue(
+      LOCAL_STORAGE.ONBOARDING_SHOWN,
+      'false'
+    );
 
     if (jsonEditorVisible !== null) {
       setIsCodeEditorVisible(JSON.parse(jsonEditorVisible));
@@ -1029,7 +1038,7 @@ export default function CodingEnvironment(): JSX.Element {
                               htmlFor="input"
                               className={`text-sm text-secondary-7 font-normal transition-all ${
                                 isInputFocused || operandValue
-                                  ? 'text-xs top-0 text-green'
+                                  ? 'text-xs top-0 text-accent-1'
                                   : 'text-sm top-4'
                               }`}
                             >

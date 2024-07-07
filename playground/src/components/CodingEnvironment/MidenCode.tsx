@@ -82,7 +82,7 @@ const MidenCode = forwardRef<MidenCodeHandles, MidenCodeProps>((props, ref) => {
         {props.showDebug ? (
           <div className="flex items-center ml-auto gap-x-2">
             <ChevronDoubleLeftIcon
-              className="h-6 w-6 fill-green cursor-pointer"
+              className="h-6 w-6 fill-accent-1 cursor-pointer"
               aria-hidden="true"
               title="100 cycles back"
               onClick={() =>
@@ -91,21 +91,21 @@ const MidenCode = forwardRef<MidenCodeHandles, MidenCodeProps>((props, ref) => {
             />
 
             <ChevronLeftIcon
-              className="h-6 w-6 fill-green cursor-pointer"
+              className="h-6 w-6 fill-accent-1 cursor-pointer"
               aria-hidden="true"
               title="1 cycle back"
               onClick={() => props.executeDebug(DebugCommand.Rewind, BigInt(1))}
             />
 
             <ChevronRightIcon
-              className="h-6 w-6 fill-green cursor-pointer"
+              className="h-6 w-6 fill-accent-1 cursor-pointer"
               aria-hidden="true"
               title="1 cycles"
               onClick={() => props.executeDebug(DebugCommand.Play, BigInt(1))}
             />
 
             <ChevronDoubleRightIcon
-              className="h-6 w-6 fill-green cursor-pointer"
+              className="h-6 w-6 fill-accent-1 cursor-pointer"
               aria-hidden="true"
               title="100 cycles"
               onClick={() => props.executeDebug(DebugCommand.Play, BigInt(100))}

@@ -8,14 +8,10 @@ import Fuse from 'fuse.js';
 
 import 'katex/dist/katex.min.css';
 
-/** TODO:
- * Table loads slowly - consider loading only the first 10 rows and then loading more as the user scrolls
- * or use react table (https://react-table.tanstack.com/docs/overview)`
- */
-
 interface InstructionTableProps {
   searchQuery: string;
 }
+
 interface AssemblerInstruction {
   instruction: string;
   stackInput: string;
@@ -35,6 +31,81 @@ interface InstructionClass {
   class: string;
   instructions: AssemblerInstruction[];
 }
+
+const InstructionRow: React.FC<{ instruction: AssemblerInstruction }> = ({
+  instruction
+}) => (
+  <tr className="border border-secondary-4">
+    <td className="pl-3 w-96 py-4 text-xs font-normal text-secondary-6">
+      <ReactMarkdown remarkPlugins={[math]} rehypePlugins={[katex]}>
+        {instruction.instruction}
+      </ReactMarkdown>
+    </td>
+    <td className="text-xs font-normal py-4 text-secondary-6">
+      <div className="flex flex-wrap gap-3 w-60">
+        {parseStringArray(instruction.stackInput).map((item, index) => (
+          <div
+            key={index}
+            className="w-10 h-10 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+    </td>
+    <td className="text-xs font-normal py-4 text-secondary-6">
+      <div className="w-60 flex gap-3">
+        {parseStringArray(instruction.stackOutput).map((item, index) => (
+          <div
+            key={index}
+            className="w-10 h-10 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
+          >
+            {item}
+          </div>
+        ))}
+      </div>
+    </td>
+    <td className="py-4 text-xs font-normal text-secondary-6 pr-8">
+      <ReactMarkdown remarkPlugins={[math, gfm]} rehypePlugins={[katex]}>
+        {instruction.notes}
+      </ReactMarkdown>
+    </td>
+  </tr>
+);
+
+const InstructionClassSection: React.FC<{
+  instructionClass: InstructionClass;
+  searchQuery: string;
+}> = ({ instructionClass, searchQuery }) => {
+  const filteredInstructions = instructionClass.instructions.filter(
+    (instruction) =>
+      instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (filteredInstructions.length === 0) {
+    return null;
+  }
+
+  return (
+    <Fragment key={instructionClass.class}>
+      <tr>
+        <th
+          colSpan={6}
+          scope="colgroup"
+          className="text-left text-base font-semibold text-white py-2 px-3"
+        >
+          {instructionClass.class}
+        </th>
+      </tr>
+      {filteredInstructions.map((instruction) => (
+        <InstructionRow
+          key={instruction.instruction}
+          instruction={instruction}
+        />
+      ))}
+    </Fragment>
+  );
+};
 
 const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
   const [filteredClasses, setFilteredClasses] = useState<InstructionClass[]>(
@@ -99,83 +170,13 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
               )}
               {filteredClasses &&
                 filteredClasses.length > 0 &&
-                filteredClasses.map((instructionClass) => {
-                  const filteredInstructions =
-                    instructionClass.instructions.filter((instruction) =>
-                      instruction.instruction
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-                    );
-
-                  if (filteredInstructions.length === 0) {
-                    return null;
-                  }
-
-                  return (
-                    <Fragment key={instructionClass.class}>
-                      <tr>
-                        <th
-                          colSpan={6}
-                          scope="colgroup"
-                          className="text-left text-base font-semibold text-white py-2 px-3"
-                        >
-                          {instructionClass.class}
-                        </th>
-                      </tr>
-                      {filteredInstructions.map((instruction) => (
-                        <tr
-                          key={instruction.instruction}
-                          className="border border-secondary-4"
-                        >
-                          <td className="pl-3 w-96 py-4 text-xs font-normal text-secondary-6">
-                            <ReactMarkdown
-                              remarkPlugins={[math]}
-                              rehypePlugins={[katex]}
-                            >
-                              {instruction.instruction}
-                            </ReactMarkdown>
-                          </td>
-                          <td className="text-xs font-normal py-4 text-secondary-6">
-                            <div className="flex flex-wrap gap-3 w-60">
-                              {parseStringArray(instruction.stackInput).map(
-                                (item, index) => (
-                                  <div
-                                    key={index}
-                                    className="w-10 h-10 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
-                                  >
-                                    {item}
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </td>
-                          <td className="text-xs font-normal py-4 text-secondary-6">
-                            <div className="w-60 flex gap-3">
-                              {parseStringArray(instruction.stackOutput).map(
-                                (item, index) => (
-                                  <div
-                                    key={index}
-                                    className="w-10 h-10 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
-                                  >
-                                    {item}
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-4 text-xs font-normal text-secondary-6 pr-8">
-                            <ReactMarkdown
-                              remarkPlugins={[math, gfm]}
-                              rehypePlugins={[katex]}
-                            >
-                              {instruction.notes}
-                            </ReactMarkdown>
-                          </td>
-                        </tr>
-                      ))}
-                    </Fragment>
-                  );
-                })}
+                filteredClasses.map((instructionClass) => (
+                  <InstructionClassSection
+                    key={instructionClass.class}
+                    instructionClass={instructionClass}
+                    searchQuery={searchQuery}
+                  />
+                ))}
             </tbody>
           </table>
         </div>
