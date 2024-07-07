@@ -107,6 +107,15 @@ const InstructionClassSection: React.FC<{
   );
 };
 
+const TableHeader: React.FC = () => (
+  <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-5 items-center">
+    <h1 className="pl-5 w-96 text-left text-sm font-semibold">Instructions</h1>
+    <h1 className="text-left w-60 text-sm font-semibold">Input</h1>
+    <h1 className="text-left w-60 text-sm font-semibold">Output</h1>
+    <h1 className="text-left text-sm font-semibold">Description</h1>
+  </div>
+);
+
 const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
   const [filteredClasses, setFilteredClasses] = useState<InstructionClass[]>(
     []
@@ -153,14 +162,7 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
     <div className="h-full rounded-xl border relative overflow-y-scroll border-secondary-4">
       <div className="flex w-full">
         <div className="flex flex-col w-full pb-32">
-          <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-5 items-center">
-            <h1 className="pl-5 w-96 text-left text-sm font-semibold">
-              Instructions
-            </h1>
-            <h1 className="text-left w-60 text-sm font-semibold">Input</h1>
-            <h1 className="text-left w-60 text-sm font-semibold">Output</h1>
-            <h1 className="text-left text-sm font-semibold">Description</h1>
-          </div>
+          <TableHeader />
           <table>
             <tbody>
               {filteredClasses && filteredClasses.length === 0 && (
