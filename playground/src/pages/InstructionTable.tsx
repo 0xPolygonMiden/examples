@@ -73,13 +73,32 @@ const InstructionRow: React.FC<{ instruction: AssemblerInstruction }> = ({
   </tr>
 );
 
+const InstructionClassHeader: React.FC<{ className: string }> = ({
+  className
+}) => (
+  <tr>
+    <th
+      colSpan={6}
+      scope="colgroup"
+      className="text-left text-base font-semibold text-white py-2 px-3"
+    >
+      {className}
+    </th>
+  </tr>
+);
+
 const InstructionClassSection: React.FC<{
   instructionClass: InstructionClass;
   searchQuery: string;
 }> = ({ instructionClass, searchQuery }) => {
-  const filteredInstructions = instructionClass.instructions.filter(
-    (instruction) =>
-      instruction.instruction.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredInstructions = useMemo(
+    () =>
+      instructionClass.instructions.filter((instruction) =>
+        instruction.instruction
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      ),
+    [instructionClass.instructions, searchQuery]
   );
 
   if (filteredInstructions.length === 0) {
@@ -88,15 +107,7 @@ const InstructionClassSection: React.FC<{
 
   return (
     <Fragment key={instructionClass.class}>
-      <tr>
-        <th
-          colSpan={6}
-          scope="colgroup"
-          className="text-left text-base font-semibold text-white py-2 px-3"
-        >
-          {instructionClass.class}
-        </th>
-      </tr>
+      <InstructionClassHeader className={instructionClass.class} />
       {filteredInstructions.map((instruction) => (
         <InstructionRow
           key={instruction.instruction}
@@ -165,20 +176,23 @@ const InstructionTable: React.FC<InstructionTableProps> = ({ searchQuery }) => {
           <TableHeader />
           <table>
             <tbody>
-              {filteredClasses && filteredClasses.length === 0 && (
-                <h1 className="text-center text-white mt-16 text-sm font-semibold">
-                  No results found
-                </h1>
-              )}
-              {filteredClasses &&
-                filteredClasses.length > 0 &&
+              {filteredClasses.length === 0 ? (
+                <tr>
+                  <td colSpan={4}>
+                    <h1 className="text-center text-white mt-16 text-sm font-semibold">
+                      No results found
+                    </h1>
+                  </td>
+                </tr>
+              ) : (
                 filteredClasses.map((instructionClass) => (
                   <InstructionClassSection
                     key={instructionClass.class}
                     instructionClass={instructionClass}
                     searchQuery={searchQuery}
                   />
-                ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
