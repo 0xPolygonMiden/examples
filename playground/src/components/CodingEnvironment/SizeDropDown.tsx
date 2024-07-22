@@ -3,7 +3,7 @@ import { Listbox, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { LOCAL_STORAGE } from '../../utils/constants';
 
-const examples = [12, 14, 16, 18, 20, 22];
+const fontSizes = [12, 14, 16, 18, 20, 22];
 
 function classExamples(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -18,7 +18,8 @@ export default function SizeDropDown({
 }: Readonly<SizeDropDownProps>): JSX.Element {
   const [selected, setSelected] = useState<number>(
     () =>
-      Number(localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE_SIZE)) || examples[0]
+      Number(localStorage.getItem(LOCAL_STORAGE.MIDEN_CODE_SIZE)) ||
+      fontSizes[0]
   );
 
   return (
@@ -47,16 +48,16 @@ export default function SizeDropDown({
             leaveTo="opacity-0"
           >
             <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-primary py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {examples.map((example) => (
+              {fontSizes.map((fontSize) => (
                 <Listbox.Option
-                  key={example}
+                  key={fontSize}
                   className={({ active }) =>
                     classExamples(
                       active ? 'text-accent-1 bg-secondary-8' : 'text-white',
                       'relative cursor-pointer select-none py-2 pl-3 pr-9'
                     )
                   }
-                  value={example}
+                  value={fontSize}
                   data-testid="select-option"
                 >
                   {({ selected, active }) => (
@@ -68,7 +69,7 @@ export default function SizeDropDown({
                         'block truncate text-center'
                       )}
                     >
-                      {example}
+                      {fontSize}
                     </span>
                   )}
                 </Listbox.Option>

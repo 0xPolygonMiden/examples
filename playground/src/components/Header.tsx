@@ -15,7 +15,7 @@ const navigation = [
   },
   {
     name: 'DOCUMENTATION',
-    href: 'https://0xpolygonmiden.github.io/miden-vm/intro/main.html'
+    href: 'https://docs.polygon.technology/miden/'
   },
   {
     name: 'DEVELOPER TOOLS',
@@ -53,7 +53,7 @@ const Header = () => {
         <div className="hidden sm:flex lg:gap-x-8">
           <a
             key="Documentation"
-            href="https://0xpolygonmiden.github.io/miden-vm/intro/main.html"
+            href="https://docs.polygon.technology/miden/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-base font-semibold leading-6 text-secondary-2 hover:text-[#787580]"

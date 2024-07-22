@@ -489,8 +489,6 @@ export default function CodingEnvironment(): JSX.Element {
         try {
           const start = Date.now();
 
-          console.log('the data for program issss', code);
-
           const { program_hash, stack_output, cycles, trace_len }: Outputs =
             run_program(code, inputs);
 
@@ -533,8 +531,6 @@ export default function CodingEnvironment(): JSX.Element {
     toast.loading('Proving ...', { id: 'provingToast' });
 
     worker.onmessage = (e) => {
-      console.log('Worker message:', e.data); // Log the message for debugging
-
       const { success, result, error } = e.data;
 
       console.log('prove method', success, result, error);
