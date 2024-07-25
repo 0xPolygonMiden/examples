@@ -40,7 +40,9 @@ import { PlusIcon } from '@heroicons/react/24/solid';
 import {
   ArrowDownTrayIcon,
   DocumentDuplicateIcon,
-  PlayIcon
+  PlayIcon,
+  MagnifyingGlassIcon,
+  XCircleIcon
 } from '@heroicons/react/24/outline';
 import {
   LOCAL_STORAGE,
@@ -56,6 +58,7 @@ import ExplainerPage from './Explainer';
 import OutputInfo from './OutputInfo';
 import SizeDropDown from '../components/CodingEnvironment/SizeDropDown';
 import OnboardingDialog from '../components/OnboardingDialog';
+import InfoSectionLayout from './InfoSectionLayout';
 
 const worker = new Worker(new URL('./proveWorker.js', import.meta.url));
 
@@ -688,7 +691,7 @@ export default function CodingEnvironment(): JSX.Element {
 
   const customStyles = {
     options: {
-      arrowColor: '#333',
+      arrowColor: '#201F28',
       backgroundColor: '#201F28',
       overlayColor: '#201F28',
       primaryColor: '#201F28',
@@ -698,8 +701,10 @@ export default function CodingEnvironment(): JSX.Element {
     },
     tooltipContainer: {
       backgroundColor: '#1A1A1A',
-      borderRadius: '0.5rem',
-      color: '#FFF'
+      borderRadius: '8px',
+      color: '#FFF',
+      minWidth: '500px',
+      maxWidth: '500px'
     },
     tooltipContent: {
       fontSize: '0.875rem',
@@ -737,22 +742,27 @@ export default function CodingEnvironment(): JSX.Element {
     };
 
     return (
-      <div className="bg-[#201F28] p-4 rounded-lg">
-        <div className="mb-2">
-          <h3 className="text-base text-white font-bold">{title}</h3>
-          <p className="text-sm text-secondary-1">{content}</p>
-          <p className="text-sm text-[#9A6FFF] mt-2">{`${step}/${totalSteps} Steps`}</p>
-        </div>
-        <div className="flex justify-between mt-4">
+      <div className="bg-[#201F28] px-4 py-3 rounded-lg">
+        <div className="flex w-full justify-end">
           <button
             onClick={handleSkip}
             className="text-sm text-[#B2B2B2] hover:underline"
           >
             Skip
           </button>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-base text-white font-bold">{title}</h3>
+          <p className="text-sm text-secondary-1">{content}</p>
+        </div>
+
+        <div className="flex justify-between mt-4">
+          <p className="text-sm text-[#9A6FFF] mt-2">{`${step}/${totalSteps} Steps`}</p>
+
           <button
             onClick={primaryProps.onClick}
-            className="bg-[#0C0C0C] text-white text-sm px-4 py-2 rounded-lg"
+            className="bg-[#0C0C0C] hover:bg-hoverBg border-secondary-8 border-1 text-white text-sm px-4 py-2 rounded-lg"
           >
             Next <span className="ml-1 text-accent-1">→</span>
           </button>
@@ -824,7 +834,7 @@ export default function CodingEnvironment(): JSX.Element {
         styles={customStyles}
         run={run}
         callback={handleJoyrideCallback}
-        tooltipComponent={({ step, backProps, primaryProps, skipProps }) => (
+        tooltipComponent={({ step, primaryProps, skipProps }) => (
           <CustomTooltip
             title={step.title as string}
             content={step.content as string}
@@ -836,7 +846,7 @@ export default function CodingEnvironment(): JSX.Element {
         )}
       />
       <Toaster />
-      <div className="bg-secondary-main w-full flex px-4 py-4 sm:py-6 sm:px-16">
+      <div className="bg-secondary-main w-full flex px-4 py-4 sm:py-6 sm:px-12">
         <button onClick={onTestAndExperimentClick}>
           <h1
             className={classNames(
@@ -889,7 +899,8 @@ export default function CodingEnvironment(): JSX.Element {
             <h1 className="text-white text-xl mb-5 font-semibold">
               Miden Virtual Machine Instruction Set Reference
             </h1>
-            <div className="ml-auto pr-8">
+            <div className="relative ml-auto pr-8">
+              <MagnifyingGlassIcon className="absolute h-4 w-4 left-3 top-3 transform text-gray-400" />
               <input
                 type="text"
                 name="search"
@@ -897,9 +908,15 @@ export default function CodingEnvironment(): JSX.Element {
                 value={searchQuery}
                 autoComplete="off"
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="border-secondary-3 bg-secondary-4 text-white  sm:text-sm rounded-xl w-60 focus:ring-accent-2 focus:border-accent-2"
+                className="border-secondary-4 bg-secondary-main text-white sm:text-sm rounded-lg pl-10 pr-10 w-60 focus:ring-accent-2 focus:border-accent-2"
                 placeholder="Search for a keyword"
               />
+              {searchQuery && (
+                <XCircleIcon
+                  className="absolute right-3 top-3 transform -translate-x-8 h-4 w-4 text-gray-400 cursor-pointer"
+                  onClick={() => setSearchQuery('')}
+                />
+              )}
             </div>
           </div>
 
@@ -908,8 +925,8 @@ export default function CodingEnvironment(): JSX.Element {
       )}
 
       {selectedTab === TEST_EXPERIMENT_TAB && (
-        <div className="flex flex-col lg:flex-row lg:px-4 pt-4 w-full h-full overflow-y-auto">
-          <div className="flex flex-col h-fit sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
+        <div className="flex flex-col lg:flex-row lg:px-12 pt-4 w-full h-full overflow-y-auto">
+          <div className="flex flex-col h-fit overflow-scroll sm:h-full w-full lg:w-1/2 mr-0 px-3 sm:px-0 sm:mr-4">
             <div className="flex flex-col sm:h-3/6 rounded-lg border bg-primary border-secondary-4">
               <div className="h-14 flex items-center py-3 px-4">
                 <SizeDropDown onSizeValueChange={handleSizeChange} />
@@ -986,7 +1003,7 @@ export default function CodingEnvironment(): JSX.Element {
                   isCodeEditorVisible ? 'h-56' : 'h-fit'
                 }`}
               >
-                <div className="flex flex-col w-full">
+                <div className="flex flex-col w-full input-code-layout">
                   <div className="bg-secondary-main z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
                     <h1 className="pl-5 text-left text-base font-normal">
                       Input
@@ -1025,9 +1042,9 @@ export default function CodingEnvironment(): JSX.Element {
 
                   <div className="h-px bg-secondary-4"></div>
 
-                  <div className="flex w-full overflow-auto input-code-layout">
+                  <div className="flex w-full overflow-auto">
                     {!isCodeEditorVisible && (
-                      <div className="flex flex-col w-full pt-4">
+                      <div className="flex flex-col w-full pt-4 font-geist-mono">
                         <div className="flex justify-between w-full items-center border-none">
                           <div className="flex flex-col grow pl-4">
                             <label
@@ -1046,7 +1063,7 @@ export default function CodingEnvironment(): JSX.Element {
                               onChange={handleOperandValueChange}
                               onFocus={handleInputFocus}
                               onBlur={handleInputBlur}
-                              className="bg-transparent w-full text-sm focus:ring-0 pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
+                              className="bg-transparent font-geist-mono w-full text-sm focus:ring-0 pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
                             />
                           </div>
 
@@ -1081,7 +1098,7 @@ export default function CodingEnvironment(): JSX.Element {
                               onChange={handleAdviceValueChange}
                               onFocus={handleAdviceFocus}
                               onBlur={handleAdviceBlur}
-                              className="bg-transparent w-full focus:ring-0 text-sm pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
+                              className="bg-transparent w-full font-geist-mono focus:ring-0 text-sm pl-0 text-accent-1 pt-2 pb-2 outline-none border-none"
                             />
                           </div>
                         )}
@@ -1097,37 +1114,34 @@ export default function CodingEnvironment(): JSX.Element {
                 </div>
               </div>
             </div>
+
+            <div className="w-full block sm:hidden">
+              <InfoSectionLayout
+                isStackOutputVisible={isStackOutputVisible}
+                stackOutputValue={stackOutputValue}
+                isProgramInfoVisible={isProgramInfoVisible}
+                programInfo={programInfo}
+                isProofInfoVisible={isProofInfoVisible}
+                proof={proof}
+                verifyProgram={verifyProgram}
+                showDebug={showDebug}
+                debugOutput={debugOutput}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col w-full lg:w-1/2 sm:gap-y-6 mt-4 mb-32 lg:mt-0">
-            {isStackOutputVisible && (
-              <div className="flex mx-3 sm:px-0">
-                <OutputInfo output={stackOutputValue} />
-              </div>
-            )}
-
-            {isProgramInfoVisible && (
-              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
-                <ProgramInfo programInfo={programInfo} />
-              </div>
-            )}
-
-            {isProofInfoVisible && (
-              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
-                <ProofInfo proofText={proof} verifyProgram={verifyProgram} />
-              </div>
-            )}
-
-            {showDebug && (
-              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
-                <DebugInfo debugOutput={debugOutput} />
-              </div>
-            )}
-            {showDebug && debugOutput && (
-              <div className="flex mt-4 lg:mt-0 mx-3 sm:px-0">
-                <MemoryInfo debugOutput={debugOutput} />
-              </div>
-            )}
+          <div className="w-full lg:w-1/2 hidden sm:block">
+            <InfoSectionLayout
+              isStackOutputVisible={isStackOutputVisible}
+              stackOutputValue={stackOutputValue}
+              isProgramInfoVisible={isProgramInfoVisible}
+              programInfo={programInfo}
+              isProofInfoVisible={isProofInfoVisible}
+              proof={proof}
+              verifyProgram={verifyProgram}
+              showDebug={showDebug}
+              debugOutput={debugOutput}
+            />
           </div>
         </div>
       )}

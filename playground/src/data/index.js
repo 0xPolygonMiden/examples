@@ -13,8 +13,6 @@ async function fetchFileList(url) {
     const files = response.data;
     const markdownFiles = [];
 
-    // markdownFiles.push(FILE_URL);
-
     for (const file of files) {
       if (file.type === 'file' && file.name.endsWith('.md')) {
         markdownFiles.push(file.download_url);
