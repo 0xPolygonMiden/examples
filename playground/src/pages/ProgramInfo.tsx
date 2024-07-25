@@ -15,7 +15,7 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
   const { programInfo } = props;
 
   return (
-    <div className="flex flex-col w-full h-fit rounded-xl border overflow-hidden border-secondary-4">
+    <div className="flex flex-col w-full h-full rounded-xl border overflow-hidden border-secondary-4">
       <div className="flex flex-col w-full">
         <div className="bg-secondary-main w-full z-10 py-4 flex sticky top-0 text-secondary-7 items-center">
           <h1 className="pl-5 text-left text-base font-normal">Program Info</h1>
@@ -23,7 +23,7 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
 
         <div className="h-px bg-secondary-4"></div>
 
-        <div className="pb-20 pt-5">
+        <div className="pb-20 pt-3 font-geist-mono">
           {programInfo.error ? (
             <h1
               className="pl-5 text-left text-white text-sm font-normal break-words"
@@ -36,21 +36,21 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
               {programInfo.program_hash && (
                 <>
                   <p
-                    className="pl-5 text-left text-secondary-6 text-sm font-normal"
+                    className="pl-4 text-left text-secondary-6 text-sm font-normal"
                     style={{ whiteSpace: 'pre-line' }}
                   >
                     Program Hash:
                   </p>
                   <p
-                    className="pl-5 text-left text-white mt-2 text-sm font-normal break-words"
+                    className="pl-4 text-left text-white mt-2 text-sm font-normal break-words"
                     style={{ whiteSpace: 'pre-line' }}
                   >
                     {programInfo.program_hash}
                   </p>
 
-                  <div className="flex flex-col md:flex-row mt-4">
+                  <div className="flex flex-col md:flex-row mt-6">
                     <p
-                      className="pl-5 text-left text-secondary-6 text-sm font-normal mb-1"
+                      className="pl-4 text-left text-secondary-6 text-sm font-normal mb-1"
                       style={{ whiteSpace: 'pre-line' }}
                     >
                       Cycles:
@@ -59,7 +59,7 @@ const ProgramInfo = (props: ProgramInfoProps): JSX.Element => {
                       </span>
                     </p>
                     <p
-                      className="pl-5 text-left text-secondary-6 text-sm font-normal mt-2 md:mt-0 md:ml-4"
+                      className="pl-4 text-left text-secondary-6 text-sm font-normal mt-2 md:mt-0 md:ml-4"
                       style={{ whiteSpace: 'pre-line' }}
                     >
                       Trace Length:

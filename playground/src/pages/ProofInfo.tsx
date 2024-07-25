@@ -59,7 +59,7 @@ const ProofInfo = (props: ProofInfoProps): JSX.Element => {
         <div className="h-px bg-secondary-4"></div>
 
         <div className="pb-20 h-40 py-5 w-full overflow-y-scroll">
-          <h1 className="px-5 text-white text-sm font-medium break-words">
+          <h1 className="px-5 text-white text-sm font-medium font-geist-mono break-words">
             {props.proofText}
           </h1>
         </div>

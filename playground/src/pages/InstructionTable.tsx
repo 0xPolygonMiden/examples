@@ -36,7 +36,7 @@ const InstructionRow: React.FC<{ instruction: AssemblerInstruction }> = ({
   instruction
 }) => (
   <tr className="border border-secondary-4">
-    <td className="pl-3 w-96 py-4 text-xs font-normal text-secondary-6">
+    <td className="pl-6 w-96 py-4 text-xs font-normal text-secondary-6">
       <ReactMarkdown remarkPlugins={[math]} rehypePlugins={[katex]}>
         {instruction.instruction}
       </ReactMarkdown>
@@ -54,11 +54,11 @@ const InstructionRow: React.FC<{ instruction: AssemblerInstruction }> = ({
       </div>
     </td>
     <td className="text-xs font-normal py-4 text-secondary-6">
-      <div className="w-60 flex gap-3">
+      <div className="w-60 flex flex-wrap gap-3">
         {parseStringArray(instruction.stackOutput).map((item, index) => (
           <div
             key={index}
-            className="w-10 h-10 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
+            className="px-4 py-3 flex items-center justify-center bg-[#B490FF1A] text-xs text-white rounded-md"
           >
             {item}
           </div>
@@ -80,7 +80,7 @@ const InstructionClassHeader: React.FC<{ className: string }> = ({
     <th
       colSpan={6}
       scope="colgroup"
-      className="text-left text-base font-semibold text-white py-2 px-3"
+      className="text-left text-base font-semibold text-white py-4 px-6"
     >
       {className}
     </th>

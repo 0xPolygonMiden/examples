@@ -25,7 +25,7 @@ const DebugInfo = (props: DebugInfoProps): JSX.Element => {
         )}
 
         {props.debugOutput && (
-          <div className="pb-4 w-full">
+          <div className="pb-4 w-full font-geist-mono">
             <div className="pt-4 pb-4 flex top-0 text-secondary-7 items-center">
               <h1 className="pl-4 text-left text-base font-normal">
                 Clock Cycle
