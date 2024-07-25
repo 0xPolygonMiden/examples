@@ -21,6 +21,10 @@ interface AssemblerInstruction {
 }
 
 const parseStringArray = (input: string): string[] => {
+  if (input.includes('\n')) {
+    return input.split('\n').map((part) => part.trim());
+  }
+
   return input
     .slice(1, -1)
     .split(', ')
