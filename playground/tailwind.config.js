@@ -21,7 +21,12 @@ module.exports = {
           1: '#B490FF',
           2: '#773EF0'
         },
-        green: '#39C707C7'
+        green: '#39C707C7',
+        hoverBg: '#ffffff0a'
+      },
+      fontFamily: {
+        geist: ['Geist', 'sans-serif'],
+        'geist-mono': ['Geist Mono', 'monospace']
       }
     },
     palette: {
