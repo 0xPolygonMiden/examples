@@ -21,18 +21,18 @@ const codeTheme = createTheme({
     gutterForeground: '#569CD6'
   },
   styles: [
-    { tag: t.comment, color: '#6272a4' }, // Comments (light blue)
-    { tag: t.keyword, color: '#569CD6' }, // Keywords (blue)
-    { tag: t.string, color: '#f1fa8c' }, // Strings (yellow)
-    { tag: t.number, color: '#CB694A' }, // Numbers (orange)
-    { tag: t.operator, color: '#ffb86c' }, // Operators (orange)
-    { tag: t.variableName, color: '#569CD6' }, // Variable names (green)
-    { tag: t.className, color: '#ff79c6' }, // Class names (pink)
-    { tag: t.definition(t.typeName), color: '#569CD6' }, // Type names (green)
-    { tag: t.typeName, color: '#8be9fd' }, // Type names (cyan)
-    { tag: t.angleBracket, color: '#f8f8f2' }, // Angle brackets (white)
-    { tag: t.tagName, color: '#ff79c6' }, // Tag names (pink)
-    { tag: t.attributeName, color: '#ffb86c' } // Attribute names (orange)
+    { tag: t.comment, color: '#6272a4' },
+    { tag: t.keyword, color: '#569CD6' },
+    { tag: t.string, color: '#f1fa8c' },
+    { tag: t.number, color: '#CB694A' },
+    { tag: t.operator, color: '#ffb86c' },
+    { tag: t.variableName, color: '#569CD6' },
+    { tag: t.className, color: '#ff79c6' },
+    { tag: t.definition(t.typeName), color: '#569CD6' },
+    { tag: t.typeName, color: '#8be9fd' },
+    { tag: t.angleBracket, color: '#f8f8f2' },
+    { tag: t.tagName, color: '#ff79c6' },
+    { tag: t.attributeName, color: '#ffb86c' }
   ]
 });
 

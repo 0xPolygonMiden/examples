@@ -32,7 +32,7 @@ export default function SizeDropDown({
     >
       {({ open }) => (
         <div className="relative flex-grow sm:flex-grow-0 sm:mb-0 mr-3">
-          <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer w-20 sm:w-20 rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
+          <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
             <span className="block truncate max-w-xs text-accent-1 text-xm sm:max-w-none capitalize">
               A
             </span>
@@ -47,14 +47,14 @@ export default function SizeDropDown({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-primary py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Listbox.Options className="absolute z-10 mt-1 font-geist-mono max-h-60 w-full overflow-auto rounded-md bg-primary py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
               {fontSizes.map((fontSize) => (
                 <Listbox.Option
                   key={fontSize}
                   className={({ active }) =>
                     classExamples(
                       active ? 'text-accent-1 bg-secondary-8' : 'text-white',
-                      'relative cursor-pointer select-none py-2 pl-3 pr-9'
+                      'relative cursor-pointer select-none py-2'
                     )
                   }
                   value={fontSize}

@@ -29,7 +29,7 @@ const Header = () => {
   return (
     <header className="bg-primary">
       <nav
-        className="mx-auto flex items-center justify-between sm:py-6 py-4 px-4 sm:px-16"
+        className="mx-auto flex items-center justify-between sm:py-6 py-4 px-4 sm:px-12"
         aria-label="Global"
       >
         <div className="flex items-center">

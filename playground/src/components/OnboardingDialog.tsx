@@ -27,13 +27,13 @@ const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
 
         <h2 className="text-sm font-semibold text-[#C0BEC6]">Welcome to the</h2>
 
-        <p className="text-white text-xl mt-2">Miden Playground</p>
-        <div className="flex justify-between mt-10 items-center">
+        <p className="text-white text-xl mt-1">Miden Playground</p>
+        <div className="flex justify-between mt-6 items-center">
           <button className="text-[#C0BEC6] text-sm" onClick={onClose}>
             Skip tour
           </button>
           <button
-            className=" text-white border-2 border-secondary-8 text-sm px-2 py-2 rounded-md flex items-center"
+            className=" text-white border-2 border-secondary-8 hover:bg-hoverBg text-sm px-2 py-2 rounded-md flex items-center"
             onClick={onTakeTour}
           >
             Take a tour
