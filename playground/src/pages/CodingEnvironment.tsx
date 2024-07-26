@@ -899,7 +899,7 @@ export default function CodingEnvironment(): JSX.Element {
             <h1 className="text-white text-xl mb-5 font-semibold">
               Miden Virtual Machine Instruction Set Reference
             </h1>
-            <div className="relative ml-auto pr-8">
+            <div className="relative ml-auto">
               <MagnifyingGlassIcon className="absolute h-4 w-4 left-3 top-3 transform text-gray-400" />
               <input
                 type="text"
