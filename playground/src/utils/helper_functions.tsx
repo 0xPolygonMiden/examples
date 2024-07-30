@@ -252,3 +252,15 @@ export function formatMemory(memory: BigUint64Array): string[] {
   }
   return output;
 }
+
+export function measureSizeInKB(data: Uint8Array): number {
+  const bytes = data.byteLength;
+
+  const kilobytes = Math.floor(bytes / 1024);
+
+  return kilobytes;
+}
+
+export const formatDuration = (duration: number): string => {
+  return duration > 1000 ? `${(duration / 1000).toFixed(1)} seconds` : `${duration} milliseconds`;
+};

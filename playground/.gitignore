@@ -14,3 +14,5 @@
 .env.development.local
 .env.test.local
 .env.production.local
+
+/src/data/node_modules

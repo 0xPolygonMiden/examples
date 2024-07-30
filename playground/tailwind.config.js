@@ -12,13 +12,21 @@ module.exports = {
           3: '#1C1A24',
           4: '#2B2932',
           5: '#8D8A95',
-          6: '#a1a1a3'
+          6: '#a1a1a3',
+          7: '#FFFFFF99',
+          8: '#24202F'
         },
+        borderColor: '#1F1E25',
         accent: {
           1: '#B490FF',
           2: '#773EF0'
         },
-        green: '#1b911b'
+        green: '#39C707C7',
+        hoverBg: '#ffffff0a'
+      },
+      fontFamily: {
+        geist: ['Geist', 'sans-serif'],
+        'geist-mono': ['Geist Mono', 'monospace']
       }
     },
     palette: {
