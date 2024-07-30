@@ -50,7 +50,7 @@ code {
 .popover {
   background-color: white;
   width: 500px;
-  padding: 10px;
+  padding: 9px;
   border: 1px solid #ccc;
   font-size: medium;
 }
