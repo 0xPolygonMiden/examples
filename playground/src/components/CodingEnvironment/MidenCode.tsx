@@ -72,7 +72,7 @@ const MidenCode = forwardRef<MidenCodeHandles, MidenCodeProps>((props, ref) => {
     }
   }));
 
-  const onChange = useCallback((value: any) => {
+  const onChange = useCallback((value: string) => {
     props.onChange(value);
   }, []);
 

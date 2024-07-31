@@ -1,20 +1,21 @@
 import React from 'react';
 import OutputInfo from './OutputInfo'; // Adjust the path as needed
-import ProgramInfo from './ProgramInfo'; // Adjust the path as needed
+import ProgramInfo, { ProgramInfoInterface } from './ProgramInfo'; // Adjust the path as needed
 import ProofInfo from './ProofInfo'; // Adjust the path as needed
 import DebugInfo from './DebugInfo'; // Adjust the path as needed
 import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
+import { DebugOutput } from 'miden-wasm';
 
 interface InfoSectionProps {
   isStackOutputVisible: boolean;
   stackOutputValue: string;
   isProgramInfoVisible: boolean;
-  programInfo: any;
+  programInfo: ProgramInfoInterface;
   isProofInfoVisible: boolean;
   proof: Uint8Array | null;
   verifyProgram: () => void;
   showDebug: boolean;
-  debugOutput: any;
+  debugOutput: DebugOutput | null;
 }
 
 const InfoSectionLayout: React.FC<InfoSectionProps> = ({
