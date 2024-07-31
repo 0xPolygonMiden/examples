@@ -82,7 +82,7 @@ export default function DropDown({
                     value={example}
                     data-testid="select-option"
                   >
-                    {({ selected, active }) => (
+                    {({ selected }) => (
                       <>
                         <span
                           className={classExamples(

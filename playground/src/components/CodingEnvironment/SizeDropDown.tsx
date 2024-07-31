@@ -60,7 +60,7 @@ export default function SizeDropDown({
                   value={fontSize}
                   data-testid="select-option"
                 >
-                  {({ selected, active }) => (
+                  {({ selected }) => (
                     <span
                       className={classExamples(
                         selected

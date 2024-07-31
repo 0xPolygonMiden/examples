@@ -50,12 +50,8 @@ import {
   exampleCode,
   exampleInput
 } from '../utils/constants';
-import ProgramInfo, { ProgramInfoInterface } from './ProgramInfo';
-import ProofInfo from './ProofInfo';
-import DebugInfo from './DebugInfo';
-import MemoryInfo from '../components/CodingEnvironment/MemoryInfo';
+import { ProgramInfoInterface } from './ProgramInfo';
 import ExplainerPage from './Explainer';
-import OutputInfo from './OutputInfo';
 import SizeDropDown from '../components/CodingEnvironment/SizeDropDown';
 import OnboardingDialog from '../components/OnboardingDialog';
 import InfoSectionLayout from './InfoSectionLayout';
