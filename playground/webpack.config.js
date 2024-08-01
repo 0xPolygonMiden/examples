@@ -32,6 +32,19 @@ module.exports = {
       {
         test: /\.md$/,
         use: 'raw-loader'
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]',
+              outputPath: 'images/',
+              publicPath: 'images/'
+            }
+          }
+        ]
       }
     ]
   },
