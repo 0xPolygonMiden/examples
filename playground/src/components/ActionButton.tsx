@@ -9,6 +9,8 @@ type ActionButtonProps = {
  * This component renders a button with the specified label and calls the specified function when clicked.
  * @param label defines the text of the button
  * @param onClick provides a function to be called when the button is clicked
+ * @param disabled specifies whether the button should be disabled and not clickable
+ * @param fixedWidth specifies whether the button should have a fixed width or grow to fill the available space
  * @returns a button whose text is the specified label and which calls the specified function when clicked
  */
 const ActionButton = ({
