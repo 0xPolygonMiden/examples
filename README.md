@@ -26,7 +26,7 @@ There are several examples in our repo and we hope we get more in the future. Th
 
 - **Collatz**: A program which executes an unbounded loop to compute a Collatz sequence which starts with the provided value; the output of the program is the number of steps needed to reach 1 - the end of the sequence.
 
-- **Fibonnacci**: Elegant way to calculate the 1001st fibonacci number.
+- **Fibonacci**: Elegant way to calculate the 1001st fibonacci number.
 
 - **nPrime**: Program to calculate the n-th prime number. It will return all prime numbers up to the n-th prime number which is on top of the stack.
 
