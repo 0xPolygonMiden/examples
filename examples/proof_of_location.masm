@@ -1,0 +1,681 @@
+# Implements an example for "proof of location".
+# This can be used to show that a secret location given as GPS coordinates on the advice stack
+# is within a certain radius (here 300km) around another fixed location given as public input (or hardcoded).
+#
+# ### Formula
+#
+# This uses the chord length formula for calculating the distance between two GPS coordinates given in radians scaled with the scaling factor.
+#
+# 1) Convert the GPS coordinates to 3D cartesian coordinates:
+# x = cos(lat) * cos(lon)
+# y = cos⁡(lat) * sin⁡(lon)
+# z = sin(lon)
+#
+# 2) Calculate the distance between those coordinates using the chord length formula:
+# distance_chord = sqrt((x_2 - x_1)^2 + (y_2 - y_1)^2 + (z_2 - z_1)^2)
+#
+# This gives the straight-line distance between the two points through the Earth (the chord length).
+#
+# 3) To get the surface distance, we calculate
+#
+# 2 * earth_radius * arcsin(distance_chord / 2)
+#
+# ### Challenges
+#
+# 1) We use fixed-point arithmetic since we cannot use floating points. This means there is a scaling factor by which all floats are scaled, such that e.g. 0.5 would become 500 with a scaling factor of 1000.
+# 2) We implement i64 helper functions so that we can correctly multiply and divide i64s. For addition and subtraction we can simply use u64::overflowing_{add,sub} since an overflowed u64 can be interpreted as an i64.
+# 3) We approximate sin, cos and arcsin in fixed-point using their taylor series expansion.
+# 4) We approximate the square root using the Newton-Raphson method.
+#
+# Small distances of a few kilometers seem to not have enough precision to work correctly,
+# so the distance needs to be large enough for the calculations to work.
+#
+# ### Misc
+#
+# See the constants for examples on how to input signed/unsigned values.
+
+use.std::math::u64
+
+# CONSTANTS
+# =================================================================================================
+
+# Berlin:
+# Coordinates (degrees): 52.516153334050344, 13.37771249202354
+# Radians (scaled): 91657978.61613761, 23348512.937098645
+const.BERLIN_LAT=916579786
+const.BERLIN_LAT_SIGNED=0
+const.BERLIN_LON=233485129
+const.BERLIN_LON_SIGNED=0
+
+# Dublin
+# Coordinates (degrees): 53.344962823862815, -6.263920652136714
+# Radians (scaled): 93104524.06303781, -10932603.946345603
+const.DUBLIN_LAT_SIGNED=0
+const.DUBLIN_LAT=931045240
+const.DUBLIN_LON_SIGNED=1
+const.DUBLIN_LON=109326039
+
+# Rio de Janeiro
+# Coordinates (degrees): -22.95107162884021, -43.21186908425289
+# Radians (scaled): -40057176.678431965, -75418939.14609599
+const.RIO_DE_JANEIRO_LAT_SIGNED=1
+const.RIO_DE_JANEIRO_LAT=40057176
+const.RIO_DE_JANEIRO_LON_SIGNED=1
+const.RIO_DE_JANEIRO_LON=75418939
+
+# Melbourne
+# Coordinates (degrees): -37.810663237404874, 144.88590927245338
+# Radians (scaled): -65992056.58554934, 252873615.65500936
+const.MELBOURNE_LAT_SIGNED=1
+const.MELBOURNE_LAT=65992056
+const.MELBOURNE_LON_SIGNED=0
+const.MELBOURNE_LON=252873615
+
+const.SCALING_FACTOR_LO=1000000000
+const.SCALING_FACTOR_HI=0
+
+# 2 * earth radius in kilometers.
+const.DOUBLE_EARTH_RADIUS_LO=12742
+const.DOUBLE_EARTH_RADIUS_HI=0
+
+# u64 UTILS
+# =================================================================================================
+
+#! Swaps two u64s.
+#! Inputs: [x_hi, x_lo, y_hi, y_lo]
+#! Outputs: [y_hi, y_lo, x_hi, x_lo]
+proc.u64_swap
+  movdn.3 movdn.3
+end
+
+#! Computes the absolute difference between two u64s.
+#!
+#! Inputs: [x_hi, x_lo, y_hi, y_lo]
+#! Outputs: [diff_abs_hi, diff_abs_lo]
+proc.u64_abs_difference
+  dup.3 dup.3 dup.3 dup.3
+  # => [x_hi, x_lo, y_hi, y_lo, x_hi, x_lo, y_hi, y_lo]
+  exec.u64::lt
+  # => [is_y_lt_x, x_hi, x_lo, y_hi, y_lo]
+  if.true
+    # If y < x we cannot compute y - x without underflow, so we swap them.
+    exec.u64_swap
+  end
+
+  # Now we can safely subtract y from x without underflow.
+  exec.u64::overflowing_sub
+  # Assert no underflow happened.
+  not assert
+end
+
+# i64 MATH
+# =================================================================================================
+
+#! Negates an i64 by computing its bitwise NOT and adding 1.
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [x_hi, x_lo]
+#! NOTE: Does not handle the case of inverting the largest negative number.
+proc.i64_neg
+  u32not swap u32not swap
+  # => [x_inverted_hi, x_inverted_lo]
+  push.1.0 exec.u64::overflowing_add not assert
+  # => [-x_hi, -x_lo]
+end
+
+#! Returns 1 if the given number is signed (its most significant bit is set)
+#! without consuming its inputs, 0 otherwise.
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [is_x_signed, x_hi, x_lo]
+proc.i64_is_signed
+  dup push.0x80000000 u32and u32shr.31
+  # => [is_signed, x_hi, x_lo]
+end
+
+#! Computes x * y of two i64s while respecting the result's sign.
+#! It computes abs(x) * abs(y) as u64s and then corrects the sign at the end.
+#! Inputs: [x_hi, x_lo, y_hi, y_lo]
+#! Outputs: [xy_hi, xy_lo]
+#! Locals:
+#! 0: is_x_signed
+#! 1: is_y_signed
+#! 2: is_result_signed
+proc.i64_mul.3
+  # Initialize result sign to 0.
+  push.0 loc_store.2
+  # => [x_hi, x_lo, y_hi, y_lo]
+
+  # Store whether the inputs are signed in locals.
+  exec.i64_is_signed loc_store.0
+  # => [x_hi, x_lo, y_hi, y_lo]
+  exec.u64_swap
+  # => [y_hi, y_lo, x_hi, x_lo]
+  exec.i64_is_signed loc_store.1
+  # => [y_hi, y_lo, x_hi, x_lo]
+
+  loc_load.1
+  # => [is_y_signed, y_hi, y_lo, x_hi, x_lo]
+  if.true
+    exec.i64_neg
+    # Set the sign of the result.
+    loc_load.2 push.1 u32xor loc_store.2
+  end
+
+  exec.u64_swap
+  # => [x_hi, x_lo, y_hi, y_lo]
+
+  loc_load.0
+  # => [is_x_signed, x_hi, x_lo, y_hi, y_lo]
+  if.true
+    exec.i64_neg
+    # Set the sign of the result.
+    loc_load.2 push.1 u32xor loc_store.2
+  end
+
+  # Run the multiplication of u64s. Assert we never overflow.
+  exec.u64::overflowing_mul eq.0 assert eq.0 assert
+  # => [xy_hi, xy_lo]
+
+  loc_load.2
+  # => [is_result_signed, xy_hi, xy_lo]
+  if.true
+    exec.i64_neg
+  end
+  # => [xy_hi, xy_lo]
+end
+
+#! Computes x / y of two i64s while respecting the result's sign.
+#! It computes abs(x) / abs(y) as u64s and then corrects the sign at the end.
+#! Inputs: [x_hi, x_lo, y_hi, y_lo]
+#! Outputs: => [x_div_y_hi, x_div_y_lo]
+#! Locals:
+#! 0: is_x_signed
+#! 1: is_y_signed
+#! 2: is_result_signed
+proc.i64_div.3
+  # Initialize result sign to 0.
+  push.0 loc_store.2
+  # => [x_hi, x_lo, y_hi, y_lo]
+
+  # Store whether the inputs are signed in locals.
+  exec.i64_is_signed loc_store.0
+  # => [x_hi, x_lo, y_hi, y_lo]
+  exec.u64_swap
+  # => [y_hi, y_lo, x_hi, x_lo]
+  exec.i64_is_signed loc_store.1
+  # => [y_hi, y_lo, x_hi, x_lo]
+
+  loc_load.1
+  # => [is_y_signed, y_hi, y_lo, x_hi, x_lo]
+  if.true
+    exec.i64_neg
+    # => [y_hi, y_lo, x_hi, x_lo]
+    # Set the sign of the result.
+    loc_load.2 push.1 u32xor loc_store.2
+  end
+
+  exec.u64_swap
+  # => [x_hi, x_lo, y_hi, y_lo]
+
+  loc_load.0
+  # => [is_x_signed, x_hi, x_lo, y_hi, y_lo]
+  if.true
+    exec.i64_neg
+    # Set the sign of the result.
+    loc_load.2 push.1 u32xor loc_store.2
+  end
+
+  exec.u64::div
+  # => [x_div_y_hi, x_div_y_lo]
+
+  loc_load.2
+  # => [is_result_signed, xy_hi, xy_lo]
+  if.true
+    exec.i64_neg
+  end
+  # => [x_div_y_hi, x_div_y_lo]
+end
+
+
+#! Computes x^pow with x given as a u64 while maintaining the correct scale.
+#! Note: Does not handle pow == 0 and pow == 1 correctly. In other words, pow must be >= 2.
+#! Note: This is a very naive and inefficient implementation of exponentiation.
+#!
+#! Inputs: [pow, x_hi, x_lo]
+#! Outputs: [x^pow_hi, x^pow_lo]
+#!
+#! Locals:
+#! 0: pow
+#! 1: loop_counter
+#! 2: x_hi
+#! 3: x_lo
+proc.i64_exp.4
+  loc_store.0
+  # => [x_hi, x_lo]
+  # Starts at 1 since we enter the loop once in any case.
+  push.1 loc_store.1
+  # => [x_hi, x_lo]
+  dup loc_store.2
+  # => [x_hi, x_lo]
+  dup.1 loc_store.3
+  # => [x_hi, x_lo]
+
+  push.1
+  # => [1, x_hi, x_lo]
+  while.true
+    loc_load.3 loc_load.2
+    # => [x_hi, x_lo, x_hi_(init|prev_loop), x_lo_(init|prev_loop)]
+    exec.i64_mul
+    # => [x_mul_hi, x_mul_lo]
+    # Maintain correct fixed-point scaling by dividing once by scaling factor.
+    push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+    # => [x_mul_hi, x_mul_lo]
+    loc_load.1 add.1 dup loc_store.1
+    # => [loop_counter_+_1, x_mul_hi, x_mul_lo]
+    loc_load.0 u32lt
+    # => [loop_counter_lt_pow, x_mul_hi, x_mul_lo]
+  end
+
+  # => [x^pow_hi, x^pow_lo]
+end
+
+# TRIGONOMETRIC FUNCTIONS
+# =================================================================================================
+
+#! Approximates arcsin(x) using its taylor series expansion:
+#! x + 1/6*x^3 + 3/40*x^5 + 5/112*x^7 + ...
+#!
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [arcsin_x_hi, arcsin_x_lo]
+#!
+#! Locals:
+#! 0: x_hi
+#! 1: x_lo
+proc.arcsin.2
+  dup loc_store.0
+  dup.1 loc_store.1
+  # => [x_hi, x_lo]
+
+  # First Taylor polynomial (x) is x itself.
+  dup.1 dup.1
+  # => [x_hi, x_lo, x_hi, x_lo]
+
+  # Second Taylor polynomial (1/6*x^3).
+  push.3 exec.i64_exp
+  # => [x^3_hi, x^3_lo, x_hi, x_lo]
+  push.6.0
+  # => [0, 6, x^3_hi, x^3_lo, x_hi, x_lo]
+  exec.u64::div
+  # => [x^3/6_hi, x^3/6_lo, x_hi, x_lo]
+  exec.u64::overflowing_add drop
+  # => [arcsin_x_hi, arcsin_x_lo]
+
+  # Third Taylor polynomial (3/40*x^5).
+  loc_load.1 loc_load.0
+  # => [x_hi, x_lo, arcsin_x_hi, arcsin_x_lo]
+  push.5 exec.i64_exp
+  # => [x^5_hi, x^5_lo, arcsin_x_hi, arcsin_x_lo]
+  push.3.0 exec.i64_mul
+  push.40.0 exec.i64_div
+  # => [term_hi, term_lo, arcsin_x_hi, arcsin_x_lo]
+  exec.u64::overflowing_add drop
+  # => [arcsin_x_hi, arcsin_x_lo]
+
+  # Fourth Taylor polynomial (5/112*x^7).
+  loc_load.1 loc_load.0
+  # => [x_hi, x_lo, arcsin_x_hi, arcsin_x_lo]
+  push.7 exec.i64_exp
+  # => [x^7_hi, x^7_lo, arcsin_x_hi, arcsin_x_lo]
+  push.5.0 exec.i64_mul
+  push.112.0 exec.i64_div
+  # => [term_hi, term_lo, arcsin_x_hi, arcsin_x_lo]
+  exec.u64::overflowing_add drop
+  # => [arcsin_x_hi, arcsin_x_lo]
+end
+
+#! Approximates sin(x) using its taylor series expansion:
+#! x - x^3/3! + x^5/5! - x^7/7! + ...
+#!
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [sin_x_hi, sin_x_lo]
+#!
+#! Locals:
+#! 0: x_hi
+#! 1: x_lo
+proc.sin.2
+  dup loc_store.0
+  dup.1 loc_store.1
+  # => [x_hi, x_lo]
+
+  # First Taylor polynomial (x/1!) is x itself.
+  dup.1 dup.1
+  # => [x_hi, x_lo, x_hi, x_lo]
+
+  # Second Taylor polynomial (x^3/3!).
+  push.3 exec.i64_exp
+  # => [x^3_hi, x^3_lo, x_hi, x_lo]
+  push.6.0
+  # => [0, 6, x^3_hi, x^3_lo, x_hi, x_lo]
+  exec.i64_div
+  # => [x^3/6_hi, x^3/6_lo, x_hi, x_lo]
+  exec.u64::overflowing_sub drop
+  # => [sin_x_hi, sin_x_lo]
+
+  # Third Taylor polynomial (x^5/5!).
+  loc_load.1 loc_load.0
+  # => [x_hi, x_lo, sin_x_hi, sin_x_lo]
+  push.5 exec.i64_exp
+  # => [x^5_hi, x^5_lo, sin_x_hi, sin_x_lo]
+  push.120.0
+  # => [0, 120, x^5_hi, x^5_lo, sin_x_hi, sin_x_lo]
+  exec.i64_div
+  # => [x^5/120_hi, x^5/120_lo, sin_x_hi, sin_x_lo]
+  exec.u64::overflowing_add drop
+  # => [sin_x_hi, sin_x_lo]
+end
+
+#! Approximates cos(x) using its taylor series expansion:
+#! 1 - x^2/2! + x^4/4! - x^6/6! + ...
+#!
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [cos_x_hi, cos_x_lo]
+#!
+#! Locals:
+#! 0: x_hi
+#! 1: x_lo
+proc.cos.2
+  loc_store.0
+  loc_store.1
+  # => [ ]
+
+  # First Taylor polynomial is 1, equal to the scaling factor in our case.
+  push.SCALING_FACTOR_LO.SCALING_FACTOR_HI
+  # => [0, 1000000]
+
+  # Second Taylor polynomial (x^2/2!).
+  loc_load.1 loc_load.0
+  # => [x_hi, x_lo, 0, 1]
+  push.2 exec.i64_exp
+  # => [x^2_hi, x^2_lo, 0, 1]
+  push.2.0
+  # => [0, 2, x^2_hi, x^2_lo, 0, 1]
+  exec.i64_div
+  # => [x^2/2_hi, x^2/2_lo, 0, 1]
+  exec.u64::overflowing_sub drop
+  # => [cos_x_hi, cos_x_lo]
+
+  # Third Taylor polynomial (x^4/4!).
+  loc_load.1 loc_load.0
+  # => [x_hi, x_lo, cos_x_hi, cos_x_lo]
+  push.4 exec.i64_exp
+  # => [x^4_hi, x^4_lo, cos_x_hi, cos_x_lo]
+  push.24.0
+  # => [0, 24, x^4_hi, x^4_lo, cos_x_hi, cos_x_lo]
+  exec.i64_div
+  # => [x^4/24_hi, x^4/24_lo, cos_x_hi, cos_x_lo]
+  exec.u64::overflowing_add drop
+  # => [cos_x_hi, cos_x_lo]
+end
+
+# SQUARE ROOT
+# =================================================================================================
+
+#! Inputs: [x_hi, x_lo]
+#! Outputs: [sqrt_x_hi, sqrt_x_lo]
+#! Locals:
+#! 0: approximation_hi
+#! 1: approximation_lo
+proc.square_root.2
+  loc_store.0 loc_store.1
+  loc_load.1 loc_load.0
+  # => [x_scaled_hi, x_scaled_lo]
+
+  repeat.7
+    # Duplicate x.
+    dup.1 dup.1
+    # => [x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+    push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_mul
+    # => [x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+    loc_load.1 loc_load.0
+    # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+    # push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+    # => [approximation_downscaled_hi, approximation_downscaled_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+    exec.i64_div
+    # => [intermediate_hi, intermediate_lo, x_scaled_hi, x_scaled_lo]
+    loc_load.1 loc_load.0 exec.u64::overflowing_add drop
+    # => [intermediate_hi, intermediate_lo, x_scaled_hi, x_scaled_lo]
+    push.2.0 exec.i64_div
+    # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo]
+    loc_store.0 loc_store.1
+  end
+
+  # Drop x.
+  drop drop
+  # => [ ]
+  # Put the result on the stack.
+  loc_load.1 loc_load.0
+  # => [sqrt_hi, sqrt_lo]
+end
+
+# COORDINATES CONVERSION & DISTANCE
+# =================================================================================================
+
+#! Convert radians to cartesian coordinates:
+#! x = cos(lat) * cos(lon)
+#! y = cos(lat) * sin(lon)
+#! z = sin(lat)
+#!
+#! Inputs: [lat_hi, lat_lo, lon_hi, lon_lo]
+#! Outputs: [x_hi, x_lo, y_hi, y_lo, z_hi, z_lo]
+#!
+#! Locals:
+#! 0: lat_hi
+#! 1: lat_lo
+#! 2: lon_hi
+#! 3: lon_lo
+#! 4: x_hi
+#! 5: x_lo
+proc.gps_to_cartesian.6
+  loc_store.0 loc_store.1 loc_store.2 loc_store.3
+  # => [ ]
+  loc_load.1 loc_load.0
+  # => [lat_hi, lat_lo]
+  exec.cos
+  # => [cos_lat_hi, cos_lat_lo]
+  # Duplicate for later reuse
+  dup.1 dup.1
+  # => [cos_lat_hi, cos_lat_lo, cos_lat_hi, cos_lat_lo]
+  loc_load.3 loc_load.2
+  # => [lon_hi, lon_lo, cos_lat_hi, cos_lat_lo, cos_lat_hi, cos_lat_lo]
+  exec.cos
+  # => [cos_lon_hi, cos_lon_lo, cos_lat_hi, cos_lat_lo, cos_lat_hi, cos_lat_lo]
+  exec.i64_mul
+  # Maintain correct fixed-point scaling by dividing once by scaling factor.
+  push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+  # => [x_hi, x_lo, cos_lat_hi, cos_lat_lo]
+
+  loc_store.4 loc_store.5
+  # => [cos_lat_hi, cos_lat_lo]
+
+  loc_load.3 loc_load.2
+  # => [lon_hi, lon_lo, cos_lat_hi, cos_lat_lo]
+  exec.sin
+  # => [sin_lon_hi, sin_lon_lo, cos_lat_hi, cos_lat_lo]
+  exec.i64_mul
+  # Maintain correct fixed-point scaling by dividing once by scaling factor.
+  push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+  # => [y_hi, y_lo]
+
+  loc_load.1 loc_load.0
+  # => [lat_hi, lat_lo, y_hi, y_lo]
+  exec.sin
+  # => [z_hi, z_lo, y_hi, y_lo]
+  exec.u64_swap
+  # => [y_hi, y_lo, z_hi, z_lo]
+  loc_load.5 loc_load.4
+  # => [x_hi, x_lo, y_hi, y_lo, z_hi, z_lo]
+end
+
+#! Computes the distance in kilometers between two GPS coordinates given in radians according to the scaling factor.
+#!
+#! Inputs: [a_lat_hi, a_lat_lo, a_lon_hi, a_lon_lo,
+#!          b_lat_hi, b_lat_lo, b_lon_hi, b_lon_lo]
+#! Outputs: [distance_in_kilometers]
+#!
+#! Locals:
+#! 0: a_x_hi
+#! 1: a_x_lo
+#! 2: a_y_hi
+#! 3: a_y_lo
+#! 4: a_z_hi
+#! 5: a_z_lo
+#! 6: b_x_hi
+#! 7: b_x_lo
+#! 8: b_y_hi
+#! 9: b_y_lo
+#! 10: b_z_hi
+#! 11: b_z_lo
+proc.distance_between_coords.12
+  exec.gps_to_cartesian
+  # => [a_x_hi, a_x_lo, a_y_hi, a_y_lo, a_z_hi, a_z_lo, b_*]
+  loc_store.0 loc_store.1 loc_store.2 loc_store.3 loc_store.4 loc_store.5
+  # => [b_lat_hi, b_lat_lo, b_lon_hi, b_lon_lo]
+
+  exec.gps_to_cartesian
+  # => [b_x_hi, b_x_lo, b_y_hi, b_y_lo, b_z_hi, b_z_lo]
+  loc_store.6 loc_store.7 loc_store.8 loc_store.9 loc_store.10 loc_store.11
+  # => [ ]
+
+  loc_load.7 loc_load.6 loc_load.1 loc_load.0
+  # => [a_x_hi, a_x_lo, b_x_hi, b_x_lo]
+  exec.u64_abs_difference
+  # [x_diff_abs_hi, x_diff_abs_lo]
+  push.2 exec.i64_exp
+  # => [x_diff_squared_hi, x_diff_squared_lo]
+
+  loc_load.9 loc_load.8 loc_load.3 loc_load.2
+  # => [a_y_hi, a_y_lo, b_y_hi, b_y_lo, x_diff_squared_hi, x_diff_squared_lo]
+  exec.u64_abs_difference
+  # [y_diff_abs_hi, y_diff_abs_lo, x_diff_squared_hi, x_diff_squared_lo]
+  push.2 exec.i64_exp
+  # => [y_diff_squared_hi, y_diff_squared_lo, x_diff_squared_hi, x_diff_squared_lo]
+
+  loc_load.11 loc_load.10 loc_load.5 loc_load.4
+  # => [a_z_hi, a_z_lo, b_z_hi, b_z_lo, y_diff_squared_hi, y_diff_squared_lo, x_diff_squared_hi, x_diff_squared_lo]
+  exec.u64_abs_difference
+  # [z_diff_abs_hi, z_diff_abs_lo, y_diff_squared_hi, y_diff_squared_lo, x_diff_squared_hi, x_diff_squared_lo]
+  push.2 exec.i64_exp
+  # => [z_diff_squared_hi, z_diff_squared_lo, y_diff_squared_hi, y_diff_squared_lo, x_diff_squared_hi, x_diff_squared_lo]
+
+  exec.u64::overflowing_add drop exec.u64::overflowing_add drop
+  # => [diff_hi, diff_lo]
+
+  exec.square_root
+  # => [sqrt_hi, sqrt_lo]
+
+  # Calculate 2 * earth_radius * arcsin(chord_length / 2)
+  push.2.0 exec.i64_div
+  # => [chord_length_half_hi, chord_length_half_lo]
+  exec.arcsin
+  # => [arcsin_hi, arcsin_lo]
+
+  push.DOUBLE_EARTH_RADIUS_LO.DOUBLE_EARTH_RADIUS_HI exec.i64_mul
+  # => [distance_hi, distance_hi]
+  # Convert to kilometers.
+  push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+  # => [distance_km_hi, distance_km_hi]
+end
+
+# INPUT CONVERSION
+# =================================================================================================
+
+#! Converts the input format to i64s.
+#!
+#! Inputs: [sign_lat, lat, sign_lon, lon]
+#! Outputs: [lat_hi, lat_lo, lon_hi, lon_lo]
+proc.convert_input_format.2
+  repeat.2
+    # Add the zero high bits.
+    push.0 swap
+    # => [sign_lat, lat_hi, lat_lo, sign_lon, lon] (first loop iteration)
+    if.true
+      # Negate if the sign bool is true.
+      exec.i64_neg
+    end
+    exec.u64_swap
+    # => [sign_lon, lon, lat_hi, lat_lo] (first loop iteration)
+  end
+end
+
+# TESTS
+# =================================================================================================
+
+proc.test_i64_neg
+  # negate(negate(5)) = 5
+  push.5.0
+  exec.i64_neg exec.i64_neg
+  push.5.0 exec.u64::eq assert.err=1
+
+  # negate(negate(5000000000)) = 5000000000
+  push.705032704.1
+  exec.i64_neg exec.i64_neg
+  push.705032704.1 exec.u64::eq assert.err=2
+end
+
+proc.test_i64_mul
+  # 5 * -4 = -20
+  push.5.0.0xfffffffc.0xffffffff
+  exec.i64_mul
+  push.0xffffffec.0xffffffff exec.u64::eq assert
+
+  # -5 * -4 = 20
+  push.0xfffffffb.0xffffffff.0xfffffffc.0xffffffff
+  exec.i64_mul
+  push.20.0 exec.u64::eq assert
+
+  # -5 * 4 = -20
+  push.0xfffffffb.0xffffffff.4.0
+  exec.i64_mul
+  push.0xffffffec.0xffffffff exec.u64::eq assert
+
+  # 5 * 4 = 20
+  push.5.0.4.0
+  exec.i64_mul
+  push.20.0 exec.u64::eq assert
+end
+
+proc.test_i64_div
+  # 20 / -4 = -5
+  push.20.0.0xfffffffc.0xffffffff
+  exec.i64_div
+  push.0xfffffffb.0xffffffff exec.u64::eq assert
+
+  # -20 / 4 = -5
+  push.0xffffffec.0xffffffff.4.0
+  exec.i64_div
+  push.0xfffffffb.0xffffffff exec.u64::eq assert
+
+  # -20 / -4 = 5
+  push.0xffffffec.0xffffffff.0xfffffffc.0xffffffff
+  exec.i64_div
+  push.5.0 exec.u64::eq assert
+
+  # 20 / 4 = 5
+  push.20.0.4.0
+  exec.i64_div
+  push.5.0 exec.u64::eq assert
+end
+
+begin
+  # Reverse coordinates from operand stack.
+  movdn.3 movdn.2 swap
+  exec.convert_input_format
+
+  # Load coordinates from advice stack and reverse.
+  padw adv_loadw movdn.3 movdn.2 swap
+  exec.convert_input_format
+
+  exec.distance_between_coords
+
+  # Prove that the location from the advice input is less than 300km from Berlin.
+  push.300.0 exec.u64::lt assert
+end
