@@ -1,6 +1,9 @@
 # Implements an example for "proof of location".
 # This can be used to show that a secret location given as GPS coordinates on the advice stack
-# is within a certain radius (here 300km) around another fixed location given as public input (or hardcoded).
+# is within a certain radius (here 15km) around another fixed location given as public input (or hardcoded).
+#
+# With the example inputs we prove that the "secret location" on the "Tempelhofer Feld" in Berlin is less than 15km from
+# the "Brandenburger Tor" in Berlin, which is arbitrarily defined as its center.
 #
 # ### Formula
 #
@@ -22,13 +25,14 @@
 #
 # ### Challenges
 #
-# 1) We use fixed-point arithmetic since we cannot use floating points. This means there is a scaling factor by which all floats are scaled, such that e.g. 0.5 would become 500 with a scaling factor of 1000.
-# 2) We implement i64 helper functions so that we can correctly multiply and divide i64s. For addition and subtraction we can simply use u64::overflowing_{add,sub} since an overflowed u64 can be interpreted as an i64.
+# 1) We use fixed-point arithmetic since we cannot use floating points. This means there is a scaling factor by which all floats are scaled,
+# such that e.g. 0.5 would become 500 with a scaling factor of 1000. The actual used scaling factor (1B) is chosen arbitrarily and works well
+# for some testing coordinates, but it wasn't asserted that it works for all possible coordinates. Moreover, using a 10^x scaling factor is
+# less efficient than a 2^x factor but it means it's easier to convert GPS coordinates to the required input format.
+# 2) We implement i64 helper functions so that we can correctly multiply and divide i64s. For addition and subtraction we can
+# simply use u64::overflowing_{add,sub} since an overflowed u64 can be interpreted as an i64.
 # 3) We approximate sin, cos and arcsin in fixed-point using their taylor series expansion.
 # 4) We approximate the square root using the Newton-Raphson method.
-#
-# Small distances of a few kilometers seem to not have enough precision to work correctly,
-# so the distance needs to be large enough for the calculations to work.
 #
 # ### Misc
 #
@@ -36,7 +40,7 @@
 
 use.std::math::u64
 
-# CONSTANTS
+# CONSTANTS
 # =================================================================================================
 
 # Berlin:
@@ -419,6 +423,9 @@ end
 # SQUARE ROOT
 # =================================================================================================
 
+#! Approximates the square root of a fixed point number using the Newton-Raphson method. It returns once abs(x - approximation^2)
+#! is less than 10^-7 (which is 10 in our fixed point format).
+#!
 #! Inputs: [x_hi, x_lo]
 #! Outputs: [sqrt_x_hi, sqrt_x_lo]
 #! Locals:
@@ -429,7 +436,8 @@ proc.square_root.2
   loc_load.1 loc_load.0
   # => [x_scaled_hi, x_scaled_lo]
 
-  repeat.7
+  push.1
+  while.true
     # Duplicate x.
     dup.1 dup.1
     # => [x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
@@ -437,8 +445,6 @@ proc.square_root.2
     # => [x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
     loc_load.1 loc_load.0
     # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
-    # push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
-    # => [approximation_downscaled_hi, approximation_downscaled_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
     exec.i64_div
     # => [intermediate_hi, intermediate_lo, x_scaled_hi, x_scaled_lo]
     loc_load.1 loc_load.0 exec.u64::overflowing_add drop
@@ -446,6 +452,18 @@ proc.square_root.2
     push.2.0 exec.i64_div
     # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo]
     loc_store.0 loc_store.1
+    # => [x_scaled_hi, x_scaled_lo]
+    dup.1 dup.1
+    # => [x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+
+    # Check if the solution matches our target precision.
+    # Only continues the loop if abs(x - approx^2) > 0.0000001.
+    loc_load.1 loc_load.0
+    # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
+    push.2 exec.i64_exp exec.u64_abs_difference
+    # => [approximation_diff_hi, approximation_diff_lo, x_scaled_hi, x_scaled_lo]
+    push.10.0 exec.u64::gt
+    # => [is_precision_reached, x_scaled_hi, x_scaled_lo]
   end
 
   # Drop x.
@@ -569,20 +587,30 @@ proc.distance_between_coords.12
   exec.u64::overflowing_add drop exec.u64::overflowing_add drop
   # => [diff_hi, diff_lo]
 
-  exec.square_root
-  # => [sqrt_hi, sqrt_lo]
+  # If the difference is too small (<0.0000005), return 0 immediately as the precision of our fixed point arithmetic
+  # gets worse the closer we get to 0.
+  dup.1 dup.1 push.50.0 exec.u64::lt
+  # => [is_too_small, diff_hi, diff_lo]
 
-  # Calculate 2 * earth_radius * arcsin(chord_length / 2)
-  push.2.0 exec.i64_div
-  # => [chord_length_half_hi, chord_length_half_lo]
-  exec.arcsin
-  # => [arcsin_hi, arcsin_lo]
+  if.true
+    push.0.0
+    # => [distance_km_hi, distance_km_lo]
+  else
+    exec.square_root
+    # => [sqrt_hi, sqrt_lo]
 
-  push.DOUBLE_EARTH_RADIUS_LO.DOUBLE_EARTH_RADIUS_HI exec.i64_mul
-  # => [distance_hi, distance_hi]
-  # Convert to kilometers.
-  push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
-  # => [distance_km_hi, distance_km_hi]
+    # Calculate 2 * earth_radius * arcsin(chord_length / 2)
+    push.2.0 exec.i64_div
+    # => [chord_length_half_hi, chord_length_half_lo]
+    exec.arcsin
+    # => [arcsin_hi, arcsin_lo]
+
+    push.DOUBLE_EARTH_RADIUS_LO.DOUBLE_EARTH_RADIUS_HI exec.i64_mul
+    # => [distance_hi, distance_hi]
+    # Convert to kilometers.
+    push.SCALING_FACTOR_LO.SCALING_FACTOR_HI exec.i64_div
+    # => [distance_km_hi, distance_km_lo]
+  end
 end
 
 # INPUT CONVERSION
@@ -669,13 +697,18 @@ begin
   # Reverse coordinates from operand stack.
   movdn.3 movdn.2 swap
   exec.convert_input_format
+  # => [berlin_lat_hi, berlin_lat_lo, berlin_lon_hi, berlin_lon_lo]
 
   # Load coordinates from advice stack and reverse.
   padw adv_loadw movdn.3 movdn.2 swap
   exec.convert_input_format
+  # => [berlin_lat_hi, berlin_lat_lo, berlin_lon_hi, berlin_lon_lo,
+  #     secret_location_lat_hi, secret_location_lat_lo, secret_location_lon_hi, secret_location_lon_lo]
 
   exec.distance_between_coords
+  # => [distance_km_hi, distance_km_lo]
 
-  # Prove that the location from the advice input is less than 300km from Berlin.
-  push.300.0 exec.u64::lt assert
+  # Prove that the "secret location" from the advice input is less than 15km from the Brandenburger Tor in Berlin.
+  # i.e. that the location is within the Berlin metropolitan area.
+  push.15.0 exec.u64::lt assert
 end
