@@ -294,7 +294,7 @@ export const assemblerInstructions = [
     "class": "Constant inputs",
     "instructions": [
       {
-        "instruction": "push.a \n - (1-2 cycles) \n push.a.b \n push.a.b.c...",
+        "instruction": "push.a \n - (1-2 cycles) \n\n push.a.b \n\n push.a.b.c...",
         "stackInput": "[ ... ]",
         "stackOutput": "[a, ... ] \n [b, a, ... ] \n [c, b, a, ... ]",
         "cycles": "",
@@ -372,14 +372,14 @@ export const assemblerInstructions = [
     "class": "Random access memory",
     "instructions": [
       {
-        "instruction": "adv.push_mapval \n adv.push_mapval.s",
+        "instruction": "adv.push_mapval \n\n  adv.push_mapval.s",
         "stackInput": "[K, ... ]",
         "stackOutput": "[K, ... ]",
         "cycles": "",
         "notes": "Pushes a list of field elements onto the advice stack. The list is looked up in the advice map using word $K$ as the key. If offset $s$ is provided, the key is taken starting from item $s$ on the stack."
       },
       {
-        "instruction": "adv.push_mapvaln \n adv.push_mapvaln.s",
+        "instruction": "adv.push_mapvaln \n\n adv.push_mapvaln.s",
         "stackInput": "[K, ... ]",
         "stackOutput": "[K, ... ]",
         "cycles": "",
@@ -428,7 +428,7 @@ export const assemblerInstructions = [
         "notes": "Reads words $data \\leftarrow mem[a] .. mem[b]$ from memory, and save the data into $advice_map[K] \\leftarrow data$."
       },
       {
-        "instruction": "adv.insert_hdword \n adv.insert_hdword.d",
+        "instruction": "adv.insert_hdword \n\n adv.insert_hdword.d",
         "stackInput": "[B, A, ... ]",
         "stackOutput": "[B, A, ... ]",
         "cycles": "",
@@ -696,14 +696,14 @@ export const assemblerInstructions = [
     "class": "Arithmetic operations",
     "instructions": [
       {
-        "instruction": "u32overflowing_add \n - (1 cycle) \n u32overflowing_add.b \n - (2-3 cycles)",
+        "instruction": "u32overflowing_add \n - (1 cycle) \n\n u32overflowing_add.b \n - (2-3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[d, c, ...]",
         "cycles": "1",
         "notes": "$c \\leftarrow (a + b) \\mod 2^{32}$ \n $d \\leftarrow \\begin{cases} 1, &amp; \\text{if}\\ (a + b) \\ge 2^{32} \\ 0, &amp; \\text{otherwise}\\ \\end{cases}$ \n Undefined if $max(a, b) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32wrapping_add \n - (2 cycles) \n u32wrapping_add.b \n - (3-4 cycles)",
+        "instruction": "u32wrapping_add \n - (2 cycles) \n\n u32wrapping_add.b \n - (3-4 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "2",
@@ -724,28 +724,28 @@ export const assemblerInstructions = [
         "notes": "$d \\leftarrow (a + b + c) \\mod 2^{32}$, \n Undefined if $max(a, b, c) \\ge 2^{32}$ \n"
       },
       {
-        "instruction": "u32overflowing_sub \n - (1 cycle) \n u32overflowing_sub.b \n - (2-3 cycles)",
+        "instruction": "u32overflowing_sub \n - (1 cycle) \n\n u32overflowing_sub.b \n - (2-3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[d, c, ...]",
         "cycles": "1",
         "notes": "$c \\leftarrow (a - b) \\mod 2^{32}$ \n $d \\leftarrow \\begin{cases} 1, &amp; \\text{if}\\ a &lt; b \\ 0, &amp; \\text{otherwise}\\ \\end{cases}$ \n Undefined if $max(a, b) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32wrapping_sub \n - (2 cycles) \n u32wrapping_sub.b \n - (3-4 cycles)",
+        "instruction": "u32wrapping_sub \n - (2 cycles) \n\n u32wrapping_sub.b \n - (3-4 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "2",
         "notes": "$c \\leftarrow (a - b) \\mod 2^{32}$ \n Undefined if $max(a, b) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32overflowing_mul \n - (1 cycle) \n u32overflowing_mul.b \n - (2-3 cycles)",
+        "instruction": "u32overflowing_mul \n - (1 cycle) \n\n u32overflowing_mul.b \n - (2-3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[d, c, ...]",
         "cycles": "1",
         "notes": "$c \\leftarrow (a \\cdot b) \\mod 2^{32}$ \n $d \\leftarrow \\lfloor(a \\cdot b) / 2^{32}\\rfloor$ \n Undefined if $max(a, b) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32wrapping_mul \n - (2 cycles) \n u32wrapping_mul.b \n - (3-4 cycles)",
+        "instruction": "u32wrapping_mul \n - (2 cycles) \n\n u32wrapping_mul.b \n - (3-4 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "2",
@@ -766,7 +766,7 @@ export const assemblerInstructions = [
         "notes": "$d \\leftarrow (a \\cdot b + c) \\mod 2^{32}$ \n Undefined if $max(a, b, c) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32div \n - (2 cycles) \n u32div.b \n - (3-4 cycles)",
+        "instruction": "u32div \n - (2 cycles) \n\n u32div.b \n - (3-4 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "2",
@@ -780,7 +780,7 @@ export const assemblerInstructions = [
         "notes": "$c \\leftarrow a \\mod b$ \n Fails if $b = 0$ \n Undefined if $max(a, b) \\ge 2^{32}$"
       },
       {
-        "instruction": "u32divmod \n - (1 cycle) \n u32divmod.b \n - (2-3 cycles)",
+        "instruction": "u32divmod \n - (1 cycle) \n\n u32divmod.b \n - (2-3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[d, c, ...]",
         "cycles": "1",
@@ -820,28 +820,28 @@ export const assemblerInstructions = [
         "notes": "Computes $b$ as a bitwise NOT of binary representation of $a$. \n Fails if $a \\ge 2^{32}$"
       },
       {
-        "instruction": "u32shl \n - (18 cycles) \n u32shl.b \n - (3 cycles)",
+        "instruction": "u32shl \n - (18 cycles) \n\n u32shl.b \n - (3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "18",
         "notes": "$c \\leftarrow (a \\cdot 2^b) \\mod 2^{32}$ \n Undefined if $a \\ge 2^{32}$ or $b > 31$"
       },
       {
-        "instruction": "u32shr \n - (18 cycles) \n u32shr.b \n - (3 cycles)",
+        "instruction": "u32shr \n - (18 cycles) \n\n u32shr.b \n - (3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "18",
         "notes": "$c \\leftarrow \\lfloor a/2^b \\rfloor$ \n Undefined if $a \\ge 2^{32}$ or $b > 31$"
       },
       {
-        "instruction": "u32rotl \n - (18 cycles) \n u32rotl.b \n - (3 cycles)",
+        "instruction": "u32rotl \n - (18 cycles) \n\n u32rotl.b \n - (3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "18",
         "notes": "Computes $c$ by rotating a 32-bit representation of $a$ to the left by $b$ bits. \n Undefined if $a \\ge 2^{32}$ or $b > 31$"
       },
       {
-        "instruction": "u32rotr \n - (22 cycles) \n u32rotr.b \n - (3 cycles)",
+        "instruction": "u32rotr \n - (22 cycles) \n\n u32rotr.b \n - (3 cycles)",
         "stackInput": "[b, a, ...]",
         "stackOutput": "[c, ...]",
         "cycles": "22",
