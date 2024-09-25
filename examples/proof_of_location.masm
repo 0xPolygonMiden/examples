@@ -30,7 +30,8 @@
 # for some testing coordinates, but it wasn't asserted that it works for all possible coordinates. Moreover, using a 10^x scaling factor is
 # less efficient than a 2^x factor but it means it's easier to convert GPS coordinates to the required input format.
 # 2) We implement i64 helper functions so that we can correctly multiply and divide i64s. For addition and subtraction we can
-# simply use u64::overflowing_{add,sub} since an overflowed u64 can be interpreted as an i64.
+# simply use u64::overflowing_{add,sub} since an overflowed u64 can be interpreted as an i64 (although there are the convenience
+# wrappers i64_sub and i64_add).
 # 3) We approximate sin, cos and arcsin in fixed-point using their taylor series expansion.
 # 4) We approximate the square root using the Newton-Raphson method.
 #
@@ -110,6 +111,24 @@ end
 
 # i64 MATH
 # =================================================================================================
+
+#! Computes x - y for the given i64s.
+#!
+#! Inputs: [y_hi, y_lo, x_hi, x_lo]
+#! Outputs: [result_hi, result_hi]
+proc.i64_sub
+  # We explicitly ignore the overflow flag of u64 calculation since we're dealing with signed integers.
+  exec.u64::overflowing_sub drop
+end
+
+#! Computes x + y for the given i64s.
+#!
+#! Inputs: [y_hi, y_lo, x_hi, x_lo]
+#! Outputs: [result_hi, result_hi]
+proc.i64_add
+  # We explicitly ignore the overflow flag of u64 calculation since we're dealing with signed integers.
+  exec.u64::overflowing_add drop
+end
 
 #! Negates an i64 by computing its bitwise NOT and adding 1 (according to two complements).
 #!
@@ -320,7 +339,7 @@ proc.arcsin.2
   # => [0, 6, x^3_hi, x^3_lo, x_hi, x_lo]
   exec.u64::div
   # => [x^3/6_hi, x^3/6_lo, x_hi, x_lo]
-  exec.u64::overflowing_add drop
+  exec.i64_add
   # => [arcsin_x_hi, arcsin_x_lo]
 
   # Third Taylor polynomial (3/40*x^5).
@@ -331,7 +350,7 @@ proc.arcsin.2
   push.3.0 exec.i64_mul
   push.40.0 exec.i64_div
   # => [term_hi, term_lo, arcsin_x_hi, arcsin_x_lo]
-  exec.u64::overflowing_add drop
+  exec.i64_add
   # => [arcsin_x_hi, arcsin_x_lo]
 
   # Fourth Taylor polynomial (5/112*x^7).
@@ -342,7 +361,7 @@ proc.arcsin.2
   push.5.0 exec.i64_mul
   push.112.0 exec.i64_div
   # => [term_hi, term_lo, arcsin_x_hi, arcsin_x_lo]
-  exec.u64::overflowing_add drop
+  exec.i64_add
   # => [arcsin_x_hi, arcsin_x_lo]
 end
 
@@ -371,7 +390,7 @@ proc.sin.2
   # => [0, 6, x^3_hi, x^3_lo, x_hi, x_lo]
   exec.i64_div
   # => [x^3/6_hi, x^3/6_lo, x_hi, x_lo]
-  exec.u64::overflowing_sub drop
+  exec.i64_sub
   # => [sin_x_hi, sin_x_lo]
 
   # Third Taylor polynomial (x^5/5!).
@@ -383,7 +402,7 @@ proc.sin.2
   # => [0, 120, x^5_hi, x^5_lo, sin_x_hi, sin_x_lo]
   exec.i64_div
   # => [x^5/120_hi, x^5/120_lo, sin_x_hi, sin_x_lo]
-  exec.u64::overflowing_add drop
+  exec.i64_add
   # => [sin_x_hi, sin_x_lo]
 end
 
@@ -414,7 +433,7 @@ proc.cos.2
   # => [0, 2, x^2_hi, x^2_lo, 0, 1]
   exec.i64_div
   # => [x^2/2_hi, x^2/2_lo, 0, 1]
-  exec.u64::overflowing_sub drop
+  exec.i64_sub
   # => [cos_x_hi, cos_x_lo]
 
   # Third Taylor polynomial (x^4/4!).
@@ -426,7 +445,7 @@ proc.cos.2
   # => [0, 24, x^4_hi, x^4_lo, cos_x_hi, cos_x_lo]
   exec.i64_div
   # => [x^4/24_hi, x^4/24_lo, cos_x_hi, cos_x_lo]
-  exec.u64::overflowing_add drop
+  exec.i64_add
   # => [cos_x_hi, cos_x_lo]
 end
 
@@ -457,7 +476,7 @@ proc.square_root.2
     # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo, x_scaled_hi, x_scaled_lo]
     exec.i64_div
     # => [intermediate_hi, intermediate_lo, x_scaled_hi, x_scaled_lo]
-    loc_load.1 loc_load.0 exec.u64::overflowing_add drop
+    loc_load.1 loc_load.0 exec.i64_add
     # => [intermediate_hi, intermediate_lo, x_scaled_hi, x_scaled_lo]
     push.2.0 exec.i64_div
     # => [approximation_hi, approximation_lo, x_scaled_hi, x_scaled_lo]
@@ -594,7 +613,7 @@ proc.distance_between_coords.12
   push.2 exec.i64_exp
   # => [z_diff_squared_hi, z_diff_squared_lo, y_diff_squared_hi, y_diff_squared_lo, x_diff_squared_hi, x_diff_squared_lo]
 
-  exec.u64::overflowing_add drop exec.u64::overflowing_add drop
+  exec.i64_add exec.i64_add
   # => [diff_hi, diff_lo]
 
   # If the difference is too small (<0.0000005), return 0 immediately as the precision of our fixed point arithmetic
@@ -725,6 +744,13 @@ proc.test_end_to_end
   exec.convert_input_format
   exec.distance_between_coords
   drop push.9185 assert_eq
+end
+
+proc.test_all
+  exec.test_i64_div
+  exec.test_i64_mul
+  exec.test_i64_neg
+  exec.test_end_to_end
 end
 
 begin
