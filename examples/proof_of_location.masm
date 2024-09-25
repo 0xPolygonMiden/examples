@@ -46,18 +46,18 @@ use.std::math::u64
 # Berlin:
 # Coordinates (degrees): 52.516153334050344, 13.37771249202354
 # Radians (scaled): 91657978.61613761, 23348512.937098645
-const.BERLIN_LAT=916579786
+const.BERLIN_LAT=91657978
 const.BERLIN_LAT_SIGNED=0
-const.BERLIN_LON=233485129
+const.BERLIN_LON=23348512
 const.BERLIN_LON_SIGNED=0
 
 # Dublin
 # Coordinates (degrees): 53.344962823862815, -6.263920652136714
 # Radians (scaled): 93104524.06303781, -10932603.946345603
 const.DUBLIN_LAT_SIGNED=0
-const.DUBLIN_LAT=931045240
+const.DUBLIN_LAT=93104524
 const.DUBLIN_LON_SIGNED=1
-const.DUBLIN_LON=109326039
+const.DUBLIN_LON=10932603
 
 # Rio de Janeiro
 # Coordinates (degrees): -22.95107162884021, -43.21186908425289
@@ -67,15 +67,7 @@ const.RIO_DE_JANEIRO_LAT=40057176
 const.RIO_DE_JANEIRO_LON_SIGNED=1
 const.RIO_DE_JANEIRO_LON=75418939
 
-# Melbourne
-# Coordinates (degrees): -37.810663237404874, 144.88590927245338
-# Radians (scaled): -65992056.58554934, 252873615.65500936
-const.MELBOURNE_LAT_SIGNED=1
-const.MELBOURNE_LAT=65992056
-const.MELBOURNE_LON_SIGNED=0
-const.MELBOURNE_LON=252873615
-
-const.SCALING_FACTOR_LO=1000000000
+const.SCALING_FACTOR_LO=100000000
 const.SCALING_FACTOR_HI=0
 
 # 2 * earth radius in kilometers.
@@ -109,7 +101,7 @@ proc.u64_abs_difference
   # Now we can safely subtract y from x without underflow.
   exec.u64::overflowing_sub
   # Assert no underflow happened.
-  not assert
+  not assert.err=10
 end
 
 # i64 MATH
@@ -122,7 +114,7 @@ end
 proc.i64_neg
   u32not swap u32not swap
   # => [x_inverted_hi, x_inverted_lo]
-  push.1.0 exec.u64::overflowing_add not assert
+  push.1.0 exec.u64::overflowing_add not assert.err=11
   # => [-x_hi, -x_lo]
 end
 
@@ -176,7 +168,7 @@ proc.i64_mul.3
   end
 
   # Run the multiplication of u64s. Assert we never overflow.
-  exec.u64::overflowing_mul eq.0 assert eq.0 assert
+  exec.u64::overflowing_mul eq.0 assert.err=12 eq.0 assert.err=13
   # => [xy_hi, xy_lo]
 
   loc_load.2
@@ -641,12 +633,12 @@ proc.test_i64_neg
   # negate(negate(5)) = 5
   push.5.0
   exec.i64_neg exec.i64_neg
-  push.5.0 exec.u64::eq assert.err=1
+  push.5.0 exec.u64::eq assert
 
   # negate(negate(5000000000)) = 5000000000
   push.705032704.1
   exec.i64_neg exec.i64_neg
-  push.705032704.1 exec.u64::eq assert.err=2
+  push.705032704.1 exec.u64::eq assert
 end
 
 proc.test_i64_mul
@@ -691,6 +683,24 @@ proc.test_i64_div
   push.20.0.4.0
   exec.i64_div
   push.5.0 exec.u64::eq assert
+end
+
+proc.test_end_to_end
+  # Berlin - Dublin: 1317 km
+  push.BERLIN_LON.BERLIN_LON_SIGNED.BERLIN_LAT.BERLIN_LAT_SIGNED
+  exec.convert_input_format
+  push.DUBLIN_LON.DUBLIN_LON_SIGNED.DUBLIN_LAT.DUBLIN_LAT_SIGNED
+  exec.convert_input_format
+  exec.distance_between_coords
+  drop push.1317 assert_eq
+
+  # Rio de Janeiro - Dublin: 9185 km
+  push.RIO_DE_JANEIRO_LON.RIO_DE_JANEIRO_LON_SIGNED.RIO_DE_JANEIRO_LAT.RIO_DE_JANEIRO_LAT_SIGNED
+  exec.convert_input_format
+  push.DUBLIN_LON.DUBLIN_LON_SIGNED.DUBLIN_LAT.DUBLIN_LAT_SIGNED
+  exec.convert_input_format
+  exec.distance_between_coords
+  drop push.9185 assert_eq
 end
 
 begin
