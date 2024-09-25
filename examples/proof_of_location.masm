@@ -131,9 +131,11 @@ end
 
 #! Returns 1 if the given number is signed (its most significant bit is set)
 #! without consuming its inputs, 0 otherwise.
+#!
 #! Inputs: [x_hi, x_lo]
 #! Outputs: [is_x_signed, x_hi, x_lo]
 proc.i64_is_signed
+  # 0x80000000 is a u32 bitmask with highest bit set to 1 and all others to 0.
   dup push.0x80000000 u32and u32shr.31
   # => [is_signed, x_hi, x_lo]
 end
@@ -147,7 +149,7 @@ end
 #! 1: is_y_signed
 #! 2: is_result_signed
 proc.i64_mul.3
-  # Initialize result sign to 0.
+  # Initialize result sign to 0 (i.e. positive).
   push.0 loc_store.2
   # => [x_hi, x_lo, y_hi, y_lo]
 
@@ -163,8 +165,8 @@ proc.i64_mul.3
   # => [is_y_signed, y_hi, y_lo, x_hi, x_lo]
   if.true
     exec.i64_neg
-    # Set the sign of the result.
-    loc_load.2 push.1 u32xor loc_store.2
+    # If this factor is negative, then so will be the result (depending on the other factor).
+    push.1 loc_store.2
   end
 
   exec.u64_swap
@@ -175,10 +177,15 @@ proc.i64_mul.3
   if.true
     exec.i64_neg
     # Set the sign of the result.
+    # If the other factor is also negative, then the result will be positive.
+    # If the other factor is positive, then the result will be negative.
     loc_load.2 push.1 u32xor loc_store.2
   end
 
-  # Run the multiplication of u64s. Assert we never overflow.
+  # Run the multiplication of u64s. This returns 4 field elements.
+  # The two most significant of those indicate whether the multiplication has overflowed the u64 space.
+  # That should only happen if the scaling factor is too large.
+  # Since that would be an error, we need to panic in such a case.
   exec.u64::overflowing_mul eq.0 assert.err=12 eq.0 assert.err=13
   # => [xy_hi, xy_lo]
 
