@@ -89,32 +89,43 @@ end
 #! Inputs: [x_hi, x_lo, y_hi, y_lo]
 #! Outputs: [diff_abs_hi, diff_abs_lo]
 proc.u64_abs_difference
-  dup.3 dup.3 dup.3 dup.3
+  dupw
   # => [x_hi, x_lo, y_hi, y_lo, x_hi, x_lo, y_hi, y_lo]
   exec.u64::lt
   # => [is_y_lt_x, x_hi, x_lo, y_hi, y_lo]
   if.true
     # If y < x we cannot compute y - x without underflow, so we swap them.
     exec.u64_swap
+    # => [y_hi, y_lo, x_hi, x_lo]
   end
 
-  # Now we can safely subtract y from x without underflow.
+  # Now we can safely subtract the smaller value from the larger one without underflow.
   exec.u64::overflowing_sub
+  # => [overflow_flag, diff_abs_hi, diff_abs_lo]
+
   # Assert no underflow happened.
   not assert.err=10
+  # => [diff_abs_hi, diff_abs_lo]
 end
 
 # i64 MATH
 # =================================================================================================
 
-#! Negates an i64 by computing its bitwise NOT and adding 1.
+#! Negates an i64 by computing its bitwise NOT and adding 1 (according to two complements).
+#!
 #! Inputs: [x_hi, x_lo]
 #! Outputs: [x_hi, x_lo]
+#!
 #! NOTE: Does not handle the case of inverting the largest negative number.
 proc.i64_neg
   u32not swap u32not swap
   # => [x_inverted_hi, x_inverted_lo]
-  push.1.0 exec.u64::overflowing_add not assert.err=11
+  # Add 1 to get negative x.
+  # This should never overflow except when negating zero.
+  # (Consider this 8-bit example: 0000_0000 would become 1111_1111
+  # and adding 1 would overflow the byte resulting in 0000_0000 again).
+  # This is why we ignore the overflow flag.
+  push.1.0 exec.u64::overflowing_add drop
   # => [-x_hi, -x_lo]
 end
 
@@ -630,6 +641,12 @@ end
 # =================================================================================================
 
 proc.test_i64_neg
+  # negate(0) = 0
+  # See i64_neg doc comment for why this is an interesting example.
+  push.0.0
+  exec.i64_neg
+  push.0.0 exec.u64::eq assert
+
   # negate(negate(5)) = 5
   push.5.0
   exec.i64_neg exec.i64_neg
