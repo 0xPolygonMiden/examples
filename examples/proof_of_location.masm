@@ -205,7 +205,7 @@ proc.i64_mul.3
   # The two most significant of those indicate whether the multiplication has overflowed the u64 space.
   # That should only happen if the scaling factor is too large.
   # Since that would be an error, we need to panic in such a case.
-  exec.u64::overflowing_mul eq.0 assert.err=12 eq.0 assert.err=13
+  exec.u64::overflowing_mul eq.0 assert.err=11 eq.0 assert.err=12
   # => [xy_hi, xy_lo]
 
   loc_load.2
@@ -770,5 +770,5 @@ begin
 
   # Prove that the "secret location" from the advice input is less than 15km from the Brandenburger Tor in Berlin.
   # i.e. that the location is within the Berlin metropolitan area.
-  push.15.0 exec.u64::lt assert
+  push.15.0 exec.u64::lt assert.err=100
 end
