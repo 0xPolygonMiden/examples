@@ -7,9 +7,12 @@ export const exampleCode = `# This is a basic program that pushes 1 and 2 onto t
 # The result is then pushed onto the stack.
 
 begin
+  
   push.1
   push.2
   add
+
+  swap drop
 end`;
 
 export const emptyOutput = '\n \n \n \n \n \n \n \n';

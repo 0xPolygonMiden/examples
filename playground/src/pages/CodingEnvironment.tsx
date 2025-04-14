@@ -20,12 +20,13 @@ import Joyride, {
 
 import init, {
   DebugExecutor,
-  Outputs,
   run_program,
   verify_program,
   DebugCommand,
-  DebugOutput
+  DebugOutput,
+  WasmOutputs
 } from 'miden-wasm';
+
 import toast, { Toaster } from 'react-hot-toast';
 import {
   getExample,
@@ -488,7 +489,7 @@ export default function CodingEnvironment(): JSX.Element {
         try {
           const start = Date.now();
 
-          const { program_hash, stack_output, cycles, trace_len }: Outputs =
+          const { program_hash, stack_output, cycles, trace_len }: WasmOutputs =
             run_program(code, inputs);
 
           hideAllRightSideLayout();

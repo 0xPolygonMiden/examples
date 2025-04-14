@@ -232,7 +232,7 @@ impl Inputs {
         Self {
             stack_inputs: StackInputs::new(vec![ZERO]).unwrap(),
             advice_provider: MemAdviceProvider::default(),
-            stack_outputs: StackOutputs::new(vec![], vec![]).unwrap(),
+            stack_outputs: StackOutputs::new(vec![]).unwrap(),
         }
     }
 
@@ -253,7 +253,6 @@ impl Inputs {
 
         let outputs = StackOutputs::try_from_ints(
             outputs_as_json.stack_output,
-            outputs_as_json.overflow_addrs.unwrap_or(vec![]),
         ).unwrap();
 
         self.stack_outputs = outputs;
@@ -266,8 +265,7 @@ impl Inputs {
 fn test_parse_output() {
     let output_str: &str = r#"
     {
-        "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "overflow_addrs": [0, 1],
+        "stack_output": [3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "trace_len": 1024
     }"#;
 
@@ -277,8 +275,7 @@ fn test_parse_output() {
     let output: StackOutputs = inputs.stack_outputs;
 
     assert_eq!(
-        output.stack(),
-        vec![Felt::new(3), ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]
+        output.stack_truncated(16),
+        vec![Felt::new(3), ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]
     );
-    assert_eq!(output.overflow_addrs(), vec![ZERO, Felt::new(1)]);
 }

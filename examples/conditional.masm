@@ -9,10 +9,13 @@ begin
 
     # Add the secret input to the stack - is it 1 or 0?
     adv_push.1
-    
+
     if.true
         add
     else
         mul
     end
+
+    # truncate stack to end with less than 16 elements
+    swapw dropw
 end

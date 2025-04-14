@@ -8,15 +8,15 @@ const examples = [
   'conditional',
   'fibonacci',
   'standard_library',
-  'game_of_life_4x4',
+  //'game_of_life_4x4',
   'catalan',
   'dft',
   'shamir_secret_share',
   'provable_compliance',
   'collatz',
   'comparison',
-  'nprime',
-  'matrix_multiplication'
+  //'nprime',
+  //'matrix_multiplication'
   //'advice_provider',
   //'bsearch',
 ];
