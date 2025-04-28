@@ -13,4 +13,7 @@ begin
 
   # 3.1 is bigger than 0.1
   exec.u64::max
+
+  # truncate stack to end with less than 16 elements
+  swapw dropw
 end

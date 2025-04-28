@@ -19,4 +19,7 @@ begin
         dup push.1 neq
     end
     swap
+
+    # clean up stack to end with less than 16 elements
+    swapw dropw
 end

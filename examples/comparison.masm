@@ -27,4 +27,7 @@ begin
     # Check if final result mod 2 is 0 or 1 (numer is either even or odd)
     push.2
     u32assert2 u32mod
+
+    # clean up stack to end with less than 16 elements
+    swap drop
 end

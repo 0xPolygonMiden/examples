@@ -297,4 +297,7 @@ end
 
 begin
     exec.main
+    
+    # truncate stack to end with less than 16 elements
+    swapw dropw
 end

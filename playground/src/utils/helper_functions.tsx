@@ -245,9 +245,9 @@ Memory (Addr, Mem): ${formatMemory(debugOutput.memory)}
  */
 export function formatMemory(memory: BigUint64Array): string[] {
   const output: string[] = [];
-  for (let i = 0; i < memory.length; i += 5) {
-    const memorySlice = memory.slice(i, i + 5);
-    const formattedString = `[${memorySlice[0]}]: [${memorySlice[1]}, ${memorySlice[2]}, ${memorySlice[3]}, ${memorySlice[4]}]`;
+  for (let i = 0; i < memory.length; i += 2) {
+    const memorySlice = memory.slice(i, i + 2);
+    const formattedString = `[${memorySlice[0]}]: [${memorySlice[1]}]`;
     output.push(formattedString);
   }
   return output;

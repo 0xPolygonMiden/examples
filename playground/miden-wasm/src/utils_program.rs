@@ -32,7 +32,8 @@ impl MidenProgram {
 
         self.program = Some(
             self.assembler
-                .compile(&self.masm_code)
+                .clone()
+                .assemble_program(&self.masm_code)
                 .map_err(|err| format!("Failed to compile program - {}", err))?,
         );
 

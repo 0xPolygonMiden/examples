@@ -1,6 +1,6 @@
 use crate::utils_input::Inputs;
 use crate::utils_program::{MidenProgram, DEBUG_ON};
-use miden_vm::{VmState, VmStateIterator, Word, DefaultHost, MemAdviceProvider};
+use miden_vm::{VmState, VmStateIterator, DefaultHost, MemAdviceProvider};
 use wasm_bindgen::prelude::*;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -51,12 +51,12 @@ impl DebugExecutor {
         let mut inputs = Inputs::new();
         inputs.deserialize_inputs(inputs_frontend).unwrap();
 
-        let host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
+        let mut host = DefaultHost::new(MemAdviceProvider::from(inputs.advice_provider));
 
         let mut vm_state_iter = miden_vm::execute_iter(
             &program.program.unwrap(),
             inputs.stack_inputs,
-            host,
+            &mut host,
         );
 
         let vm_state = vm_state_iter
@@ -151,15 +151,14 @@ impl DebugExecutor {
 
     /// print general VM state information.
     fn vm_state_to_output(&self) -> DebugOutput {
-        let memory: Vec<(u64, [u64; 4])> = self
-            .vm_state
-            .memory
-            .iter()
-            .map(|x| (x.0, word_to_ints(&x.1)))
-            .collect();
+        let mut memory: Vec<(u64, u64)> = Vec::new();
+        for &(address, mem) in self.vm_state.memory.iter() {
+            memory.push((address, mem.as_int()))
+        };
+        println!("mem_interal: {:?}", memory);
 
         let output = DebugOutput {
-            clk: self.vm_state.clk,
+            clk: self.vm_state.clk.into(),
             op: self.vm_state.op.map(|v| format!("{:?}", v)),
             instruction: self.vm_state.asmop.clone().map(|v| format!("{:?}", v.op())),
             num_of_operations: self.vm_state.asmop.clone().map(|v| v.num_cycles()),
@@ -182,26 +181,18 @@ impl DebugExecutor {
 }
 
 // Helper functions
-
-/// This converts a word to a tuple of 4 u64s.
-fn word_to_ints(word: &Word) -> [u64; 4] {
-    [
-        word[0].as_int(),
-        word[1].as_int(),
-        word[2].as_int(),
-        word[3].as_int(),
-    ]
-}
+// --------------------------------------------------------------------------------------------
 
 /// This converts the memory tuple Vec<(u64, [u64; 4])> to a single Vec<u64>.
 /// This is necessary because wasm_bindgen does not support arrays of arrays.
-fn transform_2d_to_1d(input: Vec<(u64, [u64; 4])>) -> Vec<u64> {
+fn transform_2d_to_1d(input: Vec<(u64, u64)>) -> Vec<u64> {
     let mut output = Vec::new();
 
-    for (num, arr) in input {
-        output.push(num);
-        output.extend(arr.iter().cloned());
+    for (num1, num2) in input {
+        output.push(num1);
+        output.push(num2);
     }
+    println!("mem:{:?}", output);
 
     output
 }

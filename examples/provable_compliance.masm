@@ -33,4 +33,7 @@ begin
     # list of sanctioned addresses. Thus, we can proceed with the transaction
     exec.transaction
     # => [1, 2, 3, 4, ...]
+
+    # clean up stack to end with less than 16 elements
+    swapw dropw
 end
