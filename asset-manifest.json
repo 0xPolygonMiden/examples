@@ -1,9 +1,9 @@
 {
   "files": {
     "main.css": "/examples/static/css/main.5112c18a.css",
-    "main.js": "/examples/static/js/main.7aceb315.js",
-    "static/js/723.1b69e1c5.chunk.js": "/examples/static/js/723.1b69e1c5.chunk.js",
-    "static/media/miden_wasm_bg.wasm": "/examples/static/media/miden_wasm_bg.cc4e296179bb9e4f1bed.wasm",
+    "main.js": "/examples/static/js/main.36c80f92.js",
+    "static/js/723.9daaa09e.chunk.js": "/examples/static/js/723.9daaa09e.chunk.js",
+    "static/media/miden_wasm_bg.wasm": "/examples/static/media/miden_wasm_bg.4eaf904e68fcc4cd8cac.wasm",
     "static/media/KaTeX_AMS-Regular.ttf": "/examples/static/media/KaTeX_AMS-Regular.853be92419a6c3766b9a.ttf",
     "static/media/KaTeX_Main-Regular.ttf": "/examples/static/media/KaTeX_Main-Regular.9eba1d77abcf2aa6e94e.ttf",
     "static/media/GeistMono-Regular.woff": "/examples/static/media/GeistMono-Regular.af996326ba34a9dc0fcb.woff",
@@ -74,11 +74,11 @@
     "static/media/KaTeX_Size3-Regular.woff2": "/examples/static/media/KaTeX_Size3-Regular.e1951519f6f0596f7356.woff2",
     "index.html": "/examples/index.html",
     "main.5112c18a.css.map": "/examples/static/css/main.5112c18a.css.map",
-    "main.7aceb315.js.map": "/examples/static/js/main.7aceb315.js.map",
-    "723.1b69e1c5.chunk.js.map": "/examples/static/js/723.1b69e1c5.chunk.js.map"
+    "main.36c80f92.js.map": "/examples/static/js/main.36c80f92.js.map",
+    "723.9daaa09e.chunk.js.map": "/examples/static/js/723.9daaa09e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5112c18a.css",
-    "static/js/main.7aceb315.js"
+    "static/js/main.36c80f92.js"
   ]
 }
