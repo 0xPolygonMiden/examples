@@ -90,11 +90,11 @@ const Header = () => {
                 href="https://miden.xyz/"
                 className="flex -m-1.5 px-1.5"
               >
-                <span className="sr-only">Polygon Miden</span>
+                <span className="sr-only">Miden</span>
                 <MidenLogo className="fill-white h-10 w-auto" />
 
                 <h1 className="flex text-sm items-center font-semibold leading-6 text-white">
-                  Polygon Miden
+                  Miden
                 </h1>
               </a>
 
