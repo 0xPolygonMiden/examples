@@ -6,11 +6,11 @@ This is a Builder's Playground for the Miden Virtual Machine. You can create any
 
 The Miden VM is a zero-knowledge virtual machine. A regular virtual machine consumes an initial state and a program and produces a final state.
 
-![](https://github.com/0xPolygonMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64)
+![](https://github.com/0xMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64)
 
 The Miden VM works like a regular virtual machine. Only that you can provide secret inputs (Witness) and together with the final state the Miden VM creates a proof for it. A zero-knowledge virtual machines proves that a given set of inputs and program code results in the final state.
 
-![](https://github.com/0xPolygonMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3)
+![](https://github.com/0xMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3)
 
 ## Inputs of the Miden VM
 
@@ -58,11 +58,11 @@ External inputs can be provided to the Miden VM in the Playground in two ways:
     - `sparse_merkle_tree` - is supplied an an array of tuples of (number, 64 character hex string). The number represents the leaf index and the hex string
       represents the leaf value (4 elements).
 
-_Check out the [comparison example](https://github.com/0xPolygonMiden/examples/blob/main/examples/comparison.masm) to see how the secret input works_
+_Check out the [comparison example](https://github.com/0xMiden/examples/blob/main/examples/comparison.masm) to see how the secret input works_
 
 After a program finishes executing, up to 16 elements can remain on the stack. These elements then become the outputs of the program.
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/intro/overview#inputs-and-outputs).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/intro/overview.html#inputs-and-outputs).
 
 ## Program Code
 
@@ -74,11 +74,11 @@ begin
 end
 ```
 
-Our goal is to make Miden VM an easy compilation target for high-level blockchain-centric languages such as Move and Solidity. However, compilers to help with this have not been developed yet. Thus, for now, the primary way to write programs for Miden VM is to use [Miden assembly](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Our goal is to make Miden VM an easy compilation target for high-level blockchain-centric languages such as Move and Solidity. However, compilers to help with this have not been developed yet. Thus, for now, the primary way to write programs for Miden VM is to use [Miden assembly](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html#miden-assembly).
 
 To get to know the language, check out our examples. It's better than writing in Circuits ...
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html).
 
 ## Outputs of the Miden VM
 
@@ -98,7 +98,7 @@ The Outputs must also be a valid JSON (if you want to verify) and it can only co
 
 You can also test the VM by proving a program and tampering with the Outputs. See if you can still verify the set of (`operand_stack`, `code`, `stack_output` and `overflow_addrs`)
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html).
 
 ## OK, but what can I do now?
 
@@ -142,7 +142,7 @@ Memory (Addr, Mem): [0]: [2, 0, 0, 0]
 - Rel. Operation Index: current operation count.
 - VM Operation: current Miden VM operation, every operation takes 1 cycle.
 
-Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xpolygonmiden.github.io/miden-vm/design/programs.html)
+Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xmiden.github.io/miden-vm/design/programs.html)
 
 Remember: Miden programs lenghts are expressed in cycles. The Miden VM will round the cycles always to the next power of 2 and has a minimum at 2^10.
 
