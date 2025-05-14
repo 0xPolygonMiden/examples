@@ -11,15 +11,15 @@ import {
 const navigation = [
   {
     name: 'HOME',
-    href: 'https://polygon.technology/solutions/polygon-miden/'
+    href: 'https://miden.xyz/'
   },
   {
     name: 'DOCUMENTATION',
-    href: 'https://docs.polygon.technology/miden/'
+    href: 'https://0xmiden.github.io/miden-docs/'
   },
   {
     name: 'DEVELOPER TOOLS',
-    href: 'https://0xpolygonmiden.github.io/miden-vm/tools/main.html'
+    href: 'https://0xmiden.github.io/miden-vm/tools/main.html'
   }
 ];
 
@@ -34,14 +34,14 @@ const Header = () => {
       >
         <div className="flex items-center">
           <a
-            href="https://polygon.technology/solutions/polygon-miden/"
+            href="https://miden.xyz/"
             className="flex -m-1.5 px-1.5"
           >
-            <span className="sr-only">Polygon Miden</span>
+            <span className="sr-only">Miden</span>
             <MidenLogo className="fill-white h-10 w-auto" />
 
             <h1 className="flex text-xl items-center font-semibold leading-6 text-white">
-              Polygon Miden
+              Miden
             </h1>
           </a>
 
@@ -53,7 +53,7 @@ const Header = () => {
         <div className="hidden sm:flex lg:gap-x-8">
           <a
             key="Documentation"
-            href="https://docs.polygon.technology/miden/"
+            href="https://0xmiden.github.io/miden-docs/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-base font-semibold leading-6 text-secondary-2 hover:text-[#787580]"
@@ -87,7 +87,7 @@ const Header = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <a
-                href="https://polygon.technology/solutions/polygon-miden/"
+                href="https://miden.xyz/"
                 className="flex -m-1.5 px-1.5"
               >
                 <span className="sr-only">Polygon Miden</span>

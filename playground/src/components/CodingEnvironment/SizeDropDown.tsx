@@ -32,7 +32,7 @@ export default function SizeDropDown({
     >
       {({ open }) => (
         <div className="relative flex-grow sm:flex-grow-0 sm:mb-0 mr-3">
-          <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500 sm:text-sm">
+          <Listbox.Button className="relative hover:bg-secondary-8 cursor-pointer rounded-md border text-white border-secondary-4 bg-primary py-2 pl-3 pr-10 text-left shadow-sm focus:border-deeporange-200 focus:outline-none focus:ring-1 focus:ring-deeporange-200 sm:text-sm">
             <span className="block truncate max-w-xs text-accent-1 text-xm sm:max-w-none capitalize">
               A
             </span>
