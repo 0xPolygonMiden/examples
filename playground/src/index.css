@@ -40,7 +40,7 @@ code {
 
 @layer components {
   .heading {
-    @apply mb-2 pt-3 pb-0 text-center leading-none tracking-tight text-blue-700 md:text-4xl lg:text-3xl dark:text-blue-700;
+    @apply mb-2 pt-3 pb-0 text-center leading-none tracking-tight text-deeporange-500 md:text-4xl lg:text-3xl dark:text-deeporange-500;
   }
   .column {
     @apply px-3 py-3.5 text-left text-sm font-semibold text-gray-900;
@@ -55,7 +55,7 @@ code {
   font-size: medium;
 }
 .popover.bottom .arrow::after {
-  border-bottom-color: blueviolet;
+  border-bottom-color: orangered;
 }
 .popover-content {
   background-color: white;

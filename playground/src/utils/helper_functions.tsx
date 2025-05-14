@@ -7,10 +7,10 @@ import type { DebugOutput } from 'miden-wasm';
  */
 export async function getExample(example: string) {
   const inputs = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.inputs`
+    `https://raw.githubusercontent.com/0xMiden/examples/main/examples/${example}.inputs`
   );
   const masm = fetch(
-    `https://raw.githubusercontent.com/0xPolygonMiden/examples/main/examples/${example}.masm`
+    `https://raw.githubusercontent.com/0xMiden/examples/main/examples/${example}.masm`
   );
   return [(await inputs).text(), (await masm).text()];
 }

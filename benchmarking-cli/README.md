@@ -1,6 +1,6 @@
 # Benchmarking CLI for Miden Examples
 
-This is a simple CLI that enables users to benchmark the Miden examples. You can run any example in https://github.com/0xPolygonMiden/examples/tree/main/examples.
+This is a simple CLI that enables users to benchmark the Miden examples. You can run any example in https://github.com/0xMiden/examples/tree/main/examples.
 
 ## Usage
 

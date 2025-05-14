@@ -8,7 +8,7 @@ use std::time::Instant;
 
 #[derive(Parser)]
 #[clap(
-    author = "Polygon Miden",
+    author = "Miden",
     version,
     about = "A very simple benchmarking CLI for Miden examples"
 )]

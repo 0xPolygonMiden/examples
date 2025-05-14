@@ -26,7 +26,7 @@ const ActionButton = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const buttonClasses = `bg-violet-600 hover:bg-violet-700 text-white font-bold py-2 px-4 rounded disabled:opacity-25 ${
+  const buttonClasses = `bg-deeporange-300 hover:bg-deeporange-500 text-white font-bold py-2 px-4 rounded disabled:opacity-25 ${
     fixedWidth ? 'w-72' : 'flex-grow'
   }`;
 
