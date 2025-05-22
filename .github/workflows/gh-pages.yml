@@ -1,9 +1,13 @@
 name: Deploy Miden Assembly Playground
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
