@@ -2,7 +2,7 @@
 
 Playground for example programs for the [Miden VM](https://github.com/0xPolygonMiden/miden-vm) in Miden assembly.
 
-[Use the playground!](https://0xpolygonmiden.github.io/examples/)
+[Use the playground!](https://0xmiden.github.io/examples/)
 
 The goal of this playground is for developers to see how easy it is to write and execute code in Miden assembly. The examples come from the community and the team. If you come up with an example of your own, we are happy to include it in the list below. You can simply open a PR with your example adding the `.masm` and `.inputs` files.
 
