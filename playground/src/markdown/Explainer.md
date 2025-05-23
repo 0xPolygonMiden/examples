@@ -62,7 +62,7 @@ _Check out the [comparison example](https://github.com/0xMiden/examples/blob/mai
 
 After a program finishes executing, up to 16 elements can remain on the stack. These elements then become the outputs of the program.
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/intro/overview#inputs-and-outputs).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/intro/overview.html#inputs-and-outputs).
 
 ## Program Code
 
@@ -74,11 +74,11 @@ begin
 end
 ```
 
-Our goal is to make Miden VM an easy compilation target for high-level blockchain-centric languages such as Move and Solidity. However, compilers to help with this have not been developed yet. Thus, for now, the primary way to write programs for Miden VM is to use [Miden assembly](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Our goal is to make Miden VM an easy compilation target for high-level blockchain-centric languages such as Move and Solidity. However, compilers to help with this have not been developed yet. Thus, for now, the primary way to write programs for Miden VM is to use [Miden assembly](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html#miden-assembly).
 
 To get to know the language, check out our examples. It's better than writing in Circuits ...
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html).
 
 ## Outputs of the Miden VM
 
@@ -98,7 +98,7 @@ The Outputs must also be a valid JSON (if you want to verify) and it can only co
 
 You can also test the VM by proving a program and tampering with the Outputs. See if you can still verify the set of (`operand_stack`, `code`, `stack_output` and `overflow_addrs`)
 
-Want to know more? [Here](https://wiki.polygon.technology/docs/miden/user_docs/assembly/main).
+Want to know more? [Here](https://0xmiden.github.io/miden-vm/user_docs/assembly/main.html).
 
 ## OK, but what can I do now?
 
