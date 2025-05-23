@@ -27,7 +27,7 @@ jobs:
           cd playground
           npm install
           npm run build:miden
-          npx webpack --config webpack.config.js
+          npx webpack --mode production --config webpack.config.js
 
       - name: Add 404 fallback for SPA
         run: cp playground/dist/index.html playground/dist/404.html
