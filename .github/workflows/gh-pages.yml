@@ -38,4 +38,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: playground/dist
+          force_orphan: true
           cname: playground.miden.io
