@@ -6,11 +6,11 @@ This is a Builder's Playground for the Miden Virtual Machine. You can create any
 
 The Miden VM is a zero-knowledge virtual machine. A regular virtual machine consumes an initial state and a program and produces a final state.
 
-![](https://github.com/0xPolygonMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64)
+![](https://github.com/0xMiden/examples/assets/7201911/e8f519de-f14d-40ea-bc0b-095d2ca92c64)
 
 The Miden VM works like a regular virtual machine. Only that you can provide secret inputs (Witness) and together with the final state the Miden VM creates a proof for it. A zero-knowledge virtual machines proves that a given set of inputs and program code results in the final state.
 
-![](https://github.com/0xPolygonMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3)
+![](https://github.com/0xMiden/examples/assets/7201911/3fd30890-26e5-4ae8-84c7-85426d7107b3)
 
 ## Inputs of the Miden VM
 
@@ -58,7 +58,7 @@ External inputs can be provided to the Miden VM in the Playground in two ways:
     - `sparse_merkle_tree` - is supplied an an array of tuples of (number, 64 character hex string). The number represents the leaf index and the hex string
       represents the leaf value (4 elements).
 
-_Check out the [comparison example](https://github.com/0xPolygonMiden/examples/blob/main/examples/comparison.masm) to see how the secret input works_
+_Check out the [comparison example](https://github.com/0xMiden/examples/blob/main/examples/comparison.masm) to see how the secret input works_
 
 After a program finishes executing, up to 16 elements can remain on the stack. These elements then become the outputs of the program.
 
@@ -142,7 +142,7 @@ Memory (Addr, Mem): [0]: [2, 0, 0, 0]
 - Rel. Operation Index: current operation count.
 - VM Operation: current Miden VM operation, every operation takes 1 cycle.
 
-Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xpolygonmiden.github.io/miden-vm/design/programs.html)
+Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xMiden.github.io/miden-vm/design/programs.html)
 
 Remember: Miden programs lenghts are expressed in cycles. The Miden VM will round the cycles always to the next power of 2 and has a minimum at 2^10.
 
@@ -171,5 +171,5 @@ You need to prove before you can verify.
 *On desktop, the option appears in the proof info box on the right side which becomes available once you click the "prove" button.*
 ![](https://github.com/gubloon/examples/assets/7201911/da4cbff7-aa43-44fa-b8ad-158debf77e58)
 *On mobile, the option appears on top of the code editor, next to the "prove" option.*
-  
+
 Here you can verify that the given `operand_stack` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.

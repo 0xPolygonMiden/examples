@@ -5,7 +5,7 @@ const { JSDOM } = require('jsdom');
 const { marked } = require('marked'); // Correct import for marked
 
 const REPO_URL =
-  'https://api.github.com/repos/0xPolygonMiden/miden-vm/contents/docs/src/user_docs';
+  'https://api.github.com/repos/0xMiden/miden-vm/contents/docs/src/user_docs';
 
 async function fetchFileList(url) {
   try {

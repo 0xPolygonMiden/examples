@@ -1,6 +1,6 @@
 # Miden Assembly Playground
 
-Playground for example programs for the [Miden VM](https://github.com/0xPolygonMiden/miden-vm) in Miden assembly.
+Playground for example programs for the [Miden VM](https://github.com/0xMiden/miden-vm) in Miden assembly.
 
 [Use the playground!](https://0xmiden.github.io/examples/)
 
