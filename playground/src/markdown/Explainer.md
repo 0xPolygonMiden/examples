@@ -142,7 +142,7 @@ Memory (Addr, Mem): [0]: [2, 0, 0, 0]
 - Rel. Operation Index: current operation count.
 - VM Operation: current Miden VM operation, every operation takes 1 cycle.
 
-Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xmiden.github.io/miden-vm/design/programs.html)
+Additional documentation on how the VM executes its operations can be foound at the [Miden VM documentation page](https://0xMiden.github.io/miden-vm/design/programs.html)
 
 Remember: Miden programs lenghts are expressed in cycles. The Miden VM will round the cycles always to the next power of 2 and has a minimum at 2^10.
 
@@ -171,5 +171,5 @@ You need to prove before you can verify.
 *On desktop, the option appears in the proof info box on the right side which becomes available once you click the "prove" button.*
 ![](https://github.com/gubloon/examples/assets/7201911/da4cbff7-aa43-44fa-b8ad-158debf77e58)
 *On mobile, the option appears on top of the code editor, next to the "prove" option.*
-  
+
 Here you can verify that the given `operand_stack` and `code` produce indeed the given `stack_output` and `overflow_addrs`. Verify will verify a previously generated proof of execution for a given program. For the verification the proof is needed.

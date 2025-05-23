@@ -19,7 +19,7 @@ const navigation = [
   },
   {
     name: 'DEVELOPER TOOLS',
-    href: 'https://0xmiden.github.io/miden-vm/tools/main.html'
+    href: 'https://0xMiden.github.io/miden-vm/tools/main.html'
   }
 ];
 

@@ -1,9 +1,13 @@
 name: Deploy Miden Assembly Playground
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -30,3 +34,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./playground/build/
+          cname: playground.miden.io
