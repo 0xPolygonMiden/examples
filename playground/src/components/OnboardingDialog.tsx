@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRightIcon } from '@heroicons/react/24/solid';
+import onboardingImage from '../resources/onboarding.png';
 
 interface OnboardingDialogProps {
   isOpen: boolean;
@@ -18,11 +19,10 @@ const OnboardingDialog: React.FC<OnboardingDialogProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[#1A1A1A] p-3 rounded-lg shadow-lg max-w-md w-full">
         <div className="mb-4">
-          <img
-            src={require('../../src/resources/onboarding.png')}
-            alt="Welcome"
-            className="rounded-lg w-full"
-          />
+          <img 
+            src={onboardingImage} 
+            alt="Welcome" 
+            className="rounded-lg w-full"/>
         </div>
 
         <h2 className="text-sm font-semibold text-[#C0BEC6]">Welcome to the</h2>

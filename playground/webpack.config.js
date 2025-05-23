@@ -5,15 +5,13 @@ module.exports = {
   entry: './src/index.tsx',
   output: {
     filename: 'bundle.js',
+    chunkFilename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // ensures correct asset paths
+    publicPath: './',
   },
   module: {
     rules: [
-      {
-        test: /\.json$/,
-        use: 'json-loader'
-      },
+      { test: /\.json$/, use: 'json-loader' },
       {
         test: /\.(js)x?$/,
         exclude: /node_modules/,
@@ -24,15 +22,15 @@ module.exports = {
         exclude: /node_modules|\.d\.ts$/,
         use: {
           loader: 'ts-loader',
-          options: {
-            compilerOptions: {
-              noEmit: false
-            }
-          }
+          options: { compilerOptions: { noEmit: false } }
         }
       },
       {
         test: /\.css$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader']
+      },
+      {
+        test: /\.s[ac]ss$/i,
         use: ['style-loader', 'css-loader', 'sass-loader']
       },
       {
@@ -40,27 +38,21 @@ module.exports = {
         use: 'raw-loader'
       },
       {
-        test: /\.(png|jpe?g|gif|svg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[path][name].[ext]',
-              outputPath: 'images/',
-              publicPath: 'images/'
-            }
-          }
-        ]
+        test: /\.(png|jpe?g|gif|svg|woff2?|ttf|eot|otf)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]',
+        },
       }
-    ]
+    ],
   },
   resolve: {
     extensions: ['.css', '.tsx', '.ts', '.js']
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'public/index.html', // assumes you have a playground/index.html
-      filename: 'index.html', // this will go to dist/
+      template: path.resolve(__dirname, 'public/index.html'),
+      filename: 'index.html',
     }),
   ],
 };
