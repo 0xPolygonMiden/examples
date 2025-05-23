@@ -3,6 +3,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.tsx',
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '/', // ensures correct asset paths
+  },
   module: {
     rules: [
       {
@@ -16,12 +21,12 @@ module.exports = {
       },
       {
         test: /\.(ts)x?$/,
-        exclude: /node_modules|\.d\.ts$/, // this line as well
+        exclude: /node_modules|\.d\.ts$/,
         use: {
           loader: 'ts-loader',
           options: {
             compilerOptions: {
-              noEmit: false // this option will solve the issue
+              noEmit: false
             }
           }
         }
@@ -49,17 +54,13 @@ module.exports = {
       }
     ]
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './index.html', // or wherever your base HTML file is
-    }),
-  ],
   resolve: {
     extensions: ['.css', '.tsx', '.ts', '.js']
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    publicPath: '/', // <- important for correct asset loading on playground.miden.io
-  }
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: 'public/index.html', // assumes you have a playground/index.html
+      filename: 'index.html', // this will go to dist/
+    }),
+  ],
 };
