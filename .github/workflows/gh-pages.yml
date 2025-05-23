@@ -17,7 +17,7 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
 
-      - name: Install WASM
+      - name: Install WASM toolchain 🛠️
         uses: jetli/wasm-pack-action@v0.4.0
         with:
           version: "latest"
@@ -25,14 +25,17 @@ jobs:
       - name: Install and Build 🔧
         run: |
           cd playground
-          npm run build:miden
           npm install
-          npm run build
+          npm run build:miden
+          npx webpack --config webpack.config.js
 
-      - name: Deploy to GitHub Pages
+      - name: Add 404 fallback for SPA
+        run: cp playground/dist/index.html playground/dist/404.html
+
+      - name: Deploy to GitHub Pages 🚀
         if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: playground/dist  # no leading `./`
+          publish_dir: playground/dist
           cname: playground.miden.io
