@@ -111,20 +111,20 @@
     "typescript": "^4.9.4",
     "url-loader": "^4.1.1"
   },
-  "description": "Playground for example programs for the [Miden VM](https://github.com/0xPolygonMiden/miden-vm) in Miden assembly.",
+  "description": "Playground for example programs for the [Miden VM](https://github.com/0xMiden/miden-vm) in Miden assembly.",
   "main": "webpack.config.js",
   "directories": {
     "example": "examples"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xPolygonMiden/examples.git"
+    "url": "git+https://github.com/0xMiden/examples.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/0xPolygonMiden/examples/issues"
+    "url": "https://github.com/0xMiden/examples/issues"
   },
   "pre-commit": [
     "test",
